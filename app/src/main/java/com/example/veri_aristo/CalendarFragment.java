@@ -226,7 +226,7 @@ public class CalendarFragment extends Fragment {
                                            int baseline, int bottom, CharSequence text, int start, int end, int lineNum) {
                     int cx = (left + right) / 2;
                     int cy = (top + bottom) / 2;
-                    int radius = Math.min(right - left, bottom - top) / 2 + 55; // slightly bigger than background
+                    int radius = Math.min(right - left, bottom - top) / 2 + 40; // slightly bigger than background
                     paint.setStyle(Paint.Style.STROKE);
                     paint.setStrokeWidth(5);
                     paint.setColor(Color.LTGRAY);

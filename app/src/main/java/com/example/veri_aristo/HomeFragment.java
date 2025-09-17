@@ -188,12 +188,18 @@ public class HomeFragment extends Fragment {
             tvDaysLabel.setText(labelText);
             bottomTextDate += " um " + String.format("%02d:%02d", hour, minute) + " Uhr";
             tvRemovalDate.setText(bottomTextDate);
-            if (now.before(reinsertionDate)) {
+
+            long cycleStartMillis = startDate.getTimeInMillis();
+            String notificationKey = "notified_" + cycleStartMillis;
+            boolean alreadyNotified = prefs.getBoolean(notificationKey, false);
+
+            if (!alreadyNotified && now.before(reinsertionDate)) {
                 scheduleRingCycleNotifications(
                         (Calendar) startDate.clone(),
                         (Calendar) removalDate.clone(),
                         (Calendar) reinsertionDate.clone()
                 );
+                prefs.edit().putBoolean(notificationKey, true).apply();
             }
         };
 
@@ -303,7 +309,6 @@ public class HomeFragment extends Fragment {
         // ---- Mark this cycle as notified ----
         long cycleStart = startDate.getTimeInMillis();
         String notificationKey = "notified_" + cycleStart;
-        prefs.edit().putBoolean(notificationKey, true).apply();
     }
 
     // Schedule a single notification with a unique ID
