@@ -37,17 +37,27 @@
 📥 Installation
 ---------------
 
-1. Clone or download the repository from GitHub:
+1. **Build from source**:
     
-    ```bash
-    git clone https://github.com/yourusername/veri-aristo.git
-    ```
+    * Clone or download the repository from GitHub:
+        
+        ```bash
+        git clone https://github.com/Darexsh/Veri_Aristo_App.git
+        ```
+        
+    * Open the project in **Android Studio**.
+        
+    * Sync Gradle and build the project.
+        
+    * Run the app on an Android device or emulator (Android 8+ recommended).
+        
+2. **Install via the provided APK**:
     
-2. Open the project in **Android Studio**.
-    
-3. Sync Gradle and build the project.
-    
-4. Run the app on an Android device or emulator (Android 8+ recommended).
+    * Download the APK from the repository (`veri_aristo_app.apk`).
+        
+    * 🔒 Enable installation from unknown sources if prompted (required on Android 8+).
+        
+    * 📂 Open the APK on your device and follow the installation steps.
     
 
 * * *
