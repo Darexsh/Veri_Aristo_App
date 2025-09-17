@@ -1,0 +1,18 @@
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+    <item
+        android:id="@+id/nav_home"
+        android:icon="@android:drawable/ic_menu_info_details"
+        android:title="Home" />
+    <item
+        android:id="@+id/nav_calendar"
+        android:icon="@android:drawable/ic_menu_month"
+        android:title="Kalender" />
+    <item
+        android:id="@+id/nav_cycles"
+        android:icon="@android:drawable/ic_menu_recent_history"
+        android:title="Zyklen" />
+    <item
+        android:id="@+id/nav_settings"
+        android:icon="@android:drawable/ic_menu_preferences"
+        android:title="Einstellungen" />
+</menu>

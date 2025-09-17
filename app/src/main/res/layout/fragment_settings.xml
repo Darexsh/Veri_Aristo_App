@@ -1,0 +1,70 @@
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:orientation="vertical"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:padding="16dp">
+
+    <TextView
+        android:text="Einstellungen"
+        android:textSize="26sp"
+        android:textStyle="bold"
+        android:layout_marginBottom="16dp"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"/>
+
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/btn_set_start_date"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Einlege-Datum einstellen"
+        android:textAllCaps="false"
+        android:textSize="16sp"
+        app:cornerRadius="12dp"
+        app:backgroundTint="#6200EE"
+        android:textColor="#FFFFFF"
+        app:elevation="6dp"
+        android:layout_marginBottom="16dp" />
+
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/btn_set_time"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Einlege-Zeit einstellen"
+        android:textAllCaps="false"
+        android:textSize="16sp"
+        app:cornerRadius="12dp"
+        app:backgroundTint="#6200EE"
+        android:textColor="#FFFFFF"
+        app:elevation="6dp"
+        android:layout_marginBottom="16dp" />
+
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/btn_set_cycle_length"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Zykluslänge ändern"
+        android:textAllCaps="false"
+        android:textSize="16sp"
+        app:cornerRadius="12dp"
+        app:backgroundTint="#6200EE"
+        android:textColor="#FFFFFF"
+        app:elevation="6dp"
+        android:layout_marginBottom="16dp" />
+
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/btn_set_background"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Hintergrundbild auswählen"
+        android:textAllCaps="false"
+        android:textSize="16sp"
+        app:cornerRadius="12dp"
+        app:backgroundTint="#6200EE"
+        android:textColor="#FFFFFF"
+        app:elevation="6dp"
+        android:layout_marginBottom="16dp" />
+
+
+</LinearLayout>
