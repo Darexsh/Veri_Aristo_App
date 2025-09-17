@@ -256,68 +256,102 @@ public class HomeFragment extends Fragment {
         return reinsertionDate;
     }
 
-    // Schedule a notification for a specific date and time
-    private void scheduleNotification(Calendar calendar, String title, String message) {
+    // Schedule notifications for the ring cycle events
+    private void scheduleRingCycleNotifications(Calendar startDate, Calendar removalDate, Calendar reinsertionDate) {
+        SharedPreferences prefs = requireContext().getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE);
+        int hour = startDate.get(Calendar.HOUR_OF_DAY);
+        int minute = startDate.get(Calendar.MINUTE);
+
+        // Cancel previous notifications for this cycle to prevent duplicates
+        cancelNotificationsForCycle(startDate);
+
+        // ---- Cycle Progress Notifications ----
+        Calendar week1 = (Calendar) startDate.clone();
+        week1.add(Calendar.DAY_OF_MONTH, 7);
+        week1.set(Calendar.HOUR_OF_DAY, hour);
+        week1.set(Calendar.MINUTE, minute);
+        scheduleNotification(week1, "Zyklusdauer", "Zwei Wochen mit Ring verbleibend.", 0);
+
+        Calendar week2 = (Calendar) startDate.clone();
+        week2.add(Calendar.DAY_OF_MONTH, 14);
+        week2.set(Calendar.HOUR_OF_DAY, hour);
+        week2.set(Calendar.MINUTE, minute);
+        scheduleNotification(week2, "Zyklusdauer", "Eine Woche mit Ring verbleibend.", 1);
+
+        // ---- Ring Removal Notifications ----
+        Calendar removalReminder = (Calendar) removalDate.clone();
+        removalReminder.add(Calendar.HOUR_OF_DAY, -6); // 6 hours before
+        scheduleNotification(removalReminder, "Ring entfernen", "Ring in 6 Stunden entfernen!", 2);
+
+        Calendar removalExact = (Calendar) removalDate.clone();
+        removalExact.set(Calendar.HOUR_OF_DAY, hour);
+        removalExact.set(Calendar.MINUTE, minute);
+        String removalTimeText = String.format("%02d:%02d", hour, minute);
+        scheduleNotification(removalExact, "Ring entfernen", "Entferne den Ring jetzt um " + removalTimeText + "!", 3);
+
+        // ---- Ring Insertion Notifications ----
+        Calendar reinsertionReminder = (Calendar) reinsertionDate.clone();
+        reinsertionReminder.add(Calendar.HOUR_OF_DAY, -6); // 6 hours before
+        scheduleNotification(reinsertionReminder, "Ring einsetzen", "Ring in 6 Stunden einsetzen!", 4);
+
+        Calendar reinsertionExact = (Calendar) reinsertionDate.clone();
+        reinsertionExact.set(Calendar.HOUR_OF_DAY, hour);
+        reinsertionExact.set(Calendar.MINUTE, minute);
+        String reinsertionTimeText = String.format("%02d:%02d", hour, minute);
+        scheduleNotification(reinsertionExact, "Ring einsetzen", "Einsetzen des Rings jetzt um " + reinsertionTimeText + "!", 5);
+
+        // ---- Mark this cycle as notified ----
+        long cycleStart = startDate.getTimeInMillis();
+        String notificationKey = "notified_" + cycleStart;
+        prefs.edit().putBoolean(notificationKey, true).apply();
+    }
+
+    // Schedule a single notification with a unique ID
+    private void scheduleNotification(Calendar calendar, String title, String message, int uniqueIdOffset) {
         Intent intent = new Intent(requireContext(), NotificationReceiver.class);
         intent.putExtra("title", title);
         intent.putExtra("message", message);
 
+        // Generate a unique request code using milliseconds and an offset
+        int requestCode = (int) ((calendar.getTimeInMillis() / 1000) % Integer.MAX_VALUE) + uniqueIdOffset;
+
         PendingIntent pendingIntent = PendingIntent.getBroadcast(
                 requireContext(),
-                (int) calendar.getTimeInMillis(), // unique ID
+                requestCode,
                 intent,
                 PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE
         );
 
+        // Schedule exact alarm with AlarmManager
         AlarmManager alarmManager = (AlarmManager) requireContext().getSystemService(Context.ALARM_SERVICE);
         alarmManager.setExactAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, calendar.getTimeInMillis(), pendingIntent);
     }
 
-    // Schedule notifications for the ring cycle events
-    private void scheduleRingCycleNotifications(Calendar startDate, Calendar removalDate, Calendar reinsertionDate) {
-        SharedPreferences prefs = requireContext().getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE);
+    // Cancel all notifications for a specific cycle to avoid duplicates
+    private void cancelNotificationsForCycle(Calendar startDate) {
+        Intent intent = new Intent(requireContext(), NotificationReceiver.class);
         long cycleStart = startDate.getTimeInMillis();
 
-        // Check if notifications for this cycle have already been set
-        String notificationKey = "notified_" + cycleStart;
-        if (prefs.getBoolean(notificationKey, false)) {
-            return;
+        // Define day offsets (7, 14, 0, 0, 0, 0) and hour offsets (-6 for reminders)
+        long[] dayOffsets = {7, 14, 0, 0, 0, 0};
+        long[] hourOffsets = {0, 0, -6, 0, -6, 0};
+
+        for (int i = 0; i < dayOffsets.length; i++) {
+            long triggerTime = cycleStart + dayOffsets[i] * 24L * 60 * 60 * 1000 + hourOffsets[i] * 60L * 60 * 1000;
+            int requestCode = (int) ((triggerTime / 1000) % Integer.MAX_VALUE) + i;
+
+            PendingIntent pendingIntent = PendingIntent.getBroadcast(
+                    requireContext(),
+                    requestCode,
+                    intent,
+                    PendingIntent.FLAG_NO_CREATE | PendingIntent.FLAG_IMMUTABLE
+            );
+
+            if (pendingIntent != null) {
+                AlarmManager alarmManager = (AlarmManager) requireContext().getSystemService(Context.ALARM_SERVICE);
+                alarmManager.cancel(pendingIntent);
+                pendingIntent.cancel();
+            }
         }
-
-        // Schedule notifications for the cycle events
-        Calendar week1 = (Calendar) startDate.clone();
-        week1.add(Calendar.DAY_OF_MONTH, 7);
-        week1.set(Calendar.HOUR_OF_DAY, 18);
-        week1.set(Calendar.MINUTE, 0);
-        scheduleNotification(week1, "Zyklusfortschritt", "Noch zwei Wochen Tragezeit.");
-
-        Calendar week2 = (Calendar) startDate.clone();
-        week2.add(Calendar.DAY_OF_MONTH, 14);
-        week2.set(Calendar.HOUR_OF_DAY, 18);
-        week2.set(Calendar.MINUTE, 0);
-        scheduleNotification(week2, "Zyklusfortschritt", "Noch eine Woche Tragezeit.");
-
-        Calendar reinsertion10 = (Calendar) reinsertionDate.clone();
-        reinsertion10.set(Calendar.HOUR_OF_DAY, 10);
-        reinsertion10.set(Calendar.MINUTE, 0);
-        scheduleNotification(reinsertion10, "Ring einsetzen", "Heute um 18 Uhr wieder einsetzen!");
-
-        Calendar reinsertion18 = (Calendar) reinsertionDate.clone();
-        reinsertion18.set(Calendar.HOUR_OF_DAY, 18);
-        reinsertion18.set(Calendar.MINUTE, 0);
-        scheduleNotification(reinsertion18, "Ring einsetzen", "Ring wieder einsetzen!");
-
-        Calendar removal10 = (Calendar) removalDate.clone();
-        removal10.set(Calendar.HOUR_OF_DAY, 10);
-        removal10.set(Calendar.MINUTE, 0);
-        scheduleNotification(removal10, "Ring entfernen", "Heute um 18 Uhr Ring entfernen!");
-
-        Calendar removal18 = (Calendar) removalDate.clone();
-        removal18.set(Calendar.HOUR_OF_DAY, 18);
-        removal18.set(Calendar.MINUTE, 0);
-        scheduleNotification(removal18, "Ring entfernen", "Ring wieder entfernen!");
-
-        // Mark this cycle as notified
-        prefs.edit().putBoolean(notificationKey, true).apply();
     }
 }

@@ -8,30 +8,32 @@ import androidx.core.app.ActivityCompat;
 import androidx.core.app.NotificationCompat;
 import androidx.core.app.NotificationManagerCompat;
 
-// NotificationReceiver handles incoming notifications and displays them
 public class NotificationReceiver extends BroadcastReceiver {
+
     @Override
     public void onReceive(Context context, Intent intent) {
+        // Retrieve notification title and message from the intent
         String title = intent.getStringExtra("title");
         String message = intent.getStringExtra("message");
 
-        // Create a notification with the provided title and message
+        // Build the notification
         NotificationCompat.Builder builder = new NotificationCompat.Builder(context, "reminder_channel")
-                .setSmallIcon(R.drawable.ic_notification) // dein Icon
-                .setContentTitle(title)
-                .setContentText(message)
-                .setPriority(NotificationCompat.PRIORITY_HIGH)
-                .setAutoCancel(true);
+                .setSmallIcon(R.drawable.ic_notification) // Notification icon
+                .setContentTitle(title)                  // Title
+                .setContentText(message)                 // Message
+                .setPriority(NotificationCompat.PRIORITY_HIGH) // High priority
+                .setAutoCancel(true)                     // Remove notification on click
+                .setDefaults(NotificationCompat.DEFAULT_SOUND | NotificationCompat.DEFAULT_VIBRATE); // Sound & vibration
 
-        // Create a notification channel for Android O and above
         NotificationManagerCompat manager = NotificationManagerCompat.from(context);
 
-        // Check if the app has permission to post notifications
+        // Check if the app has permission to post notifications (Android 13+)
         if (ActivityCompat.checkSelfPermission(context, android.Manifest.permission.POST_NOTIFICATIONS) != PackageManager.PERMISSION_GRANTED) {
-            // Permission not granted, do not show notification
             return;
         }
 
-        manager.notify((int) System.currentTimeMillis(), builder.build());
+        // Use a unique ID for each notification based on timestamp to avoid overwriting
+        int notificationId = (int) (System.currentTimeMillis() % Integer.MAX_VALUE);
+        manager.notify(notificationId, builder.build());
     }
 }
