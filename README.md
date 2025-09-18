@@ -2,11 +2,11 @@
 
 <div align="center">
 
-🌈 Veri Aristo App
+📱 Veri Aristo App
 ============================
 
 **An Android app for tracking and managing contraceptive ring cycles**  
-🖥️🎨🌌✨🌈
+📅⏰📝🎨📊
 
 ![Projekt-Status](https://img.shields.io/badge/Status-Aktiv-brightgreen) ![Lizenz](https://img.shields.io/badge/Lizenz-MIT-blue) ![Version](https://img.shields.io/badge/Version-1.0-orange)
 
