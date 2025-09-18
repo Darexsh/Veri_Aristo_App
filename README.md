@@ -1,6 +1,30 @@
 * * *
 
-🚀 Veri Aristo
+<div align="center">
+
+🌈 Veri Aristo App
+============================
+
+**An Android app for tracking and managing contraceptive ring cycles**  
+🖥️🎨🌌✨🌈
+
+![Projekt-Status](https://img.shields.io/badge/Status-Aktiv-brightgreen) ![Lizenz](https://img.shields.io/badge/Lizenz-MIT-blue) ![Version](https://img.shields.io/badge/Version-1.0-orange)
+
+</div>
+
+
+* * *
+
+✨ Authors
+---------
+
+| Name | GitHub | Role | Contact | Contributions |
+| --- | --- | --- | --- | --- |
+| **[Daniel Sichler aka Darexsh](https://github.com/Darexsh)** | [Link](https://github.com/Darexsh?tab=repositories) | Hardware & Firmware Development 🖥️🛠️, Display Integration 🎨 | 📧 [E-Mail](mailto:sichler.daniel@gmail.com) | Concept, Firmware, Display UI, Sensor Integration |
+
+* * *
+
+🚀 About the Project
 ==============
 
 **Veri Aristo** is an Android application designed to help users track and manage contraceptive ring cycles. The app provides a calendar-based visualization of insertion, removal, and ring-free days, along with reminders, personal notes, and customizable settings.
@@ -128,16 +152,18 @@
 
 * * *
 
-📝 License
+📜 License
 ----------
 
-This project is provided as-is under the MIT License.
+This project is licensed under the **MIT License** and was developed as an educational project. You are free to use, modify, and distribute the code and schematics as long as you credit the author:
+
+**Copyright (c) 2025 Daniel Sichler aka Darexsh**
+
+Please include the following notice with any use or distribution:
+
+> Developed by Daniel Sichler aka Darexsh. Licensed under the MIT License. See `LICENSE` for details.
+
+The full license is available in the [LICENSE](LICENSE) file.
 
 * * *
-
-📞 Contact / Support
---------------------
-
-For issues, feature requests, or contributions, please refer to the [GitHub repository](https://github.com/Darexsh/Veri_Aristo_App).
-
-* * *
+<div align="center"> <sub>Created with ❤️ by Daniel Sichler</sub> </div>
