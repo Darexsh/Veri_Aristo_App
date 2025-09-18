@@ -50,11 +50,15 @@
 📸 Screenshots
 --------------
 
-| Home Screen | Calendar | Notes | Cycles | Settings |
-| --- | --- | --- | --- | --- |
-|![Home](Screenshots/Home.jpg)|![Calendar](Screenshots/Calendar.jpg)|![Notes](Screenshots/Notes.jpg)|![Home](Screenshots/Cycles.jpg)|![Home](Screenshots/Settings.jpg)|
-
-> _Screenshots are placeholders; replace with actual images before publishing._
+<table>
+  <tr>
+    <td align="center"><b>Home Screen</b><br><img src="Screenshots/Home.jpg" width="200" height="450"></td>
+    <td align="center"><b>Calendar</b><br><img src="Screenshots/Calendar.jpg" width="200" height="450"></td>
+    <td align="center"><b>Notes</b><br><img src="Screenshots/Notes.jpg" width="200" height="450"></td>
+    <td align="center"><b>Cycles</b><br><img src="Screenshots/Cycles.jpg" width="200" height="450"></td>
+    <td align="center"><b>Settings</b><br><img src="Screenshots/Settings.jpg" width="200" height="450"></td>
+  </tr>
+</table>
 
 * * *
 
