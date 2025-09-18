@@ -52,7 +52,7 @@
 
 | Home Screen | Calendar | Notes | Cycles | Settings |
 | --- | --- | --- | --- | --- |
-|  |  |  |  |  |
+|![Home](Screenshots/Home.jpg)|![Calendar](Screenshots/Calendar.jpg)|![Notes](Screenshots/Notes.jpg)|![Home](Screenshots/Cycles.jpg)|![Home](Screenshots/Settings.jpg)|
 
 > _Screenshots are placeholders; replace with actual images before publishing._
 
