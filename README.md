@@ -8,7 +8,7 @@
 **An Android app for tracking and managing contraceptive ring cycles**  
 📅⏰📝🎨📊
 
-![Projekt-Status](https://img.shields.io/badge/Status-Aktiv-brightgreen) ![Lizenz](https://img.shields.io/badge/Lizenz-MIT-blue) ![Version](https://img.shields.io/badge/Version-1.0.1-orange)
+![Projekt-Status](https://img.shields.io/badge/Status-Aktiv-brightgreen) ![Lizenz](https://img.shields.io/badge/Lizenz-NonCommercial%20MIT-blue) ![Version](https://img.shields.io/badge/Version-1.0.1-orange)
 
 </div>
 
@@ -159,13 +159,13 @@
 📜 License
 ----------
 
-This project is licensed under the **MIT License** and was developed as an educational project. You are free to use, modify, and distribute the code and schematics as long as you credit the author:
+This project is licensed under the **Non-Commercial MIT License** and was developed as an educational project. You are free to use, modify, and distribute the code for **non-commercial purposes only**, and must credit the author:
 
 **Copyright (c) 2025 Daniel Sichler aka Darexsh**
 
 Please include the following notice with any use or distribution:
 
-> Developed by Daniel Sichler aka Darexsh. Licensed under the MIT License. See `LICENSE` for details.
+> Developed by Daniel Sichler aka Darexsh. Licensed under the Non-Commercial MIT License. See `LICENSE` for details.
 
 The full license is available in the [LICENSE](LICENSE) file.
 
