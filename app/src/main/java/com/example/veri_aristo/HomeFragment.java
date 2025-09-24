@@ -5,6 +5,8 @@ import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.content.UriPermission;
+import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.Bundle;
 import androidx.fragment.app.Fragment;
@@ -17,6 +19,9 @@ import android.widget.TextView;
 import com.google.android.material.progressindicator.CircularProgressIndicator;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
+
+import java.io.IOException;
+import java.io.InputStream;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -64,9 +69,46 @@ public class HomeFragment extends Fragment {
         SharedViewModel viewModel = new ViewModelProvider(requireActivity()).get(SharedViewModel.class);
 
         // Set background image if available
-        if (backgroundImageUri != null) {
-            backgroundImageView.setImageURI(Uri.parse(backgroundImageUri));
-        }
+        Runnable loadBackgroundImage = () -> {
+            String uriStr = viewModel.getBackgroundImageUri().getValue() != null
+                    ? viewModel.getBackgroundImageUri().getValue()
+                    : backgroundImageUri;
+
+            if (uriStr != null) {
+                try {
+                    Uri uri = Uri.parse(uriStr);
+                    boolean hasPermission = false;
+                    for (UriPermission perm : requireContext().getContentResolver().getPersistedUriPermissions()) {
+                        if (perm.getUri().equals(uri) && perm.isReadPermission()) {
+                            hasPermission = true;
+                            break;
+                        }
+                    }
+
+                    if (hasPermission) {
+                        InputStream inputStream = requireContext().getContentResolver().openInputStream(uri);
+                        Drawable drawable = Drawable.createFromStream(inputStream, uri.toString());
+                        backgroundImageView.setImageDrawable(drawable);
+                        if (inputStream != null) inputStream.close();
+                    } else {
+                        backgroundImageView.setImageDrawable(null);
+                        prefs.edit().remove(KEY_BACKGROUND_IMAGE_URI).apply();
+                    }
+
+                } catch (SecurityException | IOException e) {
+                    e.printStackTrace();
+                    backgroundImageView.setImageDrawable(null);
+                    prefs.edit().remove(KEY_BACKGROUND_IMAGE_URI).apply();
+                }
+            } else {
+                backgroundImageView.setImageDrawable(null);
+            }
+        };
+
+        loadBackgroundImage.run(); // initiales Laden
+
+        // Beobachte Änderungen im ViewModel
+        viewModel.getBackgroundImageUri().observe(getViewLifecycleOwner(), uri -> loadBackgroundImage.run());
 
         // Observe changes in the ViewModel and update the UI accordingly
         Runnable updateUi = () -> {
@@ -76,45 +118,33 @@ public class HomeFragment extends Fragment {
             int cycleLength = viewModel.getCycleLength().getValue() != null ? viewModel.getCycleLength().getValue() : defaultCycleLength;
             int hour = viewModel.getHour().getValue() != null ? viewModel.getHour().getValue() : defaultHour;
             int minute = viewModel.getMinute().getValue() != null ? viewModel.getMinute().getValue() : defaultMinute;
-            String bgUri = viewModel.getBackgroundImageUri().getValue() != null ? viewModel.getBackgroundImageUri().getValue() : backgroundImageUri;
 
-            // Update background image if available
-            if (bgUri != null) {
-                backgroundImageView.setImageURI(Uri.parse(bgUri));
-            } else {
-                backgroundImageView.setImageDrawable(null);
-            }
-
-            // Calculate the cycle dates based on the selected start date and cycle length
+            // Initialize calendar instances for cycle calculations
             Calendar now = Calendar.getInstance();
             Calendar startDate = Calendar.getInstance();
             startDate.set(year, month, day, hour, minute, 0);
             startDate.set(Calendar.MILLISECOND, 0);
 
-            // If the start date is in the future, set it to today
             Calendar removalDate = (Calendar) startDate.clone();
             removalDate.add(Calendar.DAY_OF_MONTH, cycleLength);
 
-            // Calculate the reinsertion date after the removal date
             Calendar reinsertionDate = (Calendar) removalDate.clone();
             reinsertionDate.add(Calendar.DAY_OF_MONTH, RING_FREE_DAYS);
 
-            // If the start date is in the future, adjust it to today
+            // Retrieve cycle history from preferences
             List<Cycle> cycleHistory = getCycleHistory(prefs);
             Calendar tempStartDate = (Calendar) startDate.clone();
             Calendar tempRemovalDate = (Calendar) removalDate.clone();
             Calendar tempReinsertionDate = (Calendar) reinsertionDate.clone();
 
-            // Check if the start date is in the future
             Calendar lastSavedReinsertionDate = getLastSavedReinsertionDate(cycleHistory);
             long lastSavedReinsertionMillis = lastSavedReinsertionDate != null ? lastSavedReinsertionDate.getTimeInMillis() : 0;
 
-            // If the last saved reinsertion date is in the future, calculate cycles until today
-            int maxZyklen = 100;
+            int maxCycles = 100;
             int count = 0;
 
-            // Calculate cycles until today if the last saved reinsertion date is in the future
-            while (tempReinsertionDate.getTimeInMillis() <= now.getTimeInMillis() && count < maxZyklen) {
+            // Calculate cycles until today if last reinsertion date is in the past
+            while (tempReinsertionDate.getTimeInMillis() <= now.getTimeInMillis() && count < maxCycles) {
                 if (tempReinsertionDate.getTimeInMillis() > lastSavedReinsertionMillis) {
                     saveCycleToHistory(prefs, tempStartDate.getTimeInMillis(), tempRemovalDate.getTimeInMillis(), "insertion");
                     saveCycleToHistory(prefs, tempRemovalDate.getTimeInMillis(), tempReinsertionDate.getTimeInMillis(), "removal");
@@ -128,7 +158,7 @@ public class HomeFragment extends Fragment {
                 count++;
             }
 
-            // If the start date is in the future, adjust it to today
+            // Adjust start date if it's in the future
             while (now.after(reinsertionDate)) {
                 startDate.add(Calendar.DAY_OF_MONTH, cycleLength + RING_FREE_DAYS);
                 removalDate = (Calendar) startDate.clone();

@@ -1,8 +1,13 @@
 package com.example.veri_aristo;
 
 import android.Manifest;
+import android.app.AlarmManager;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
+import android.app.PendingIntent;
+import android.content.Context;
+import android.content.Intent;
+import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.os.Build;
 import android.os.Bundle;
@@ -23,6 +28,8 @@ import android.widget.ImageButton;
 public class MainActivity extends AppCompatActivity {
 
     private static final int REQUEST_NOTIFICATION_PERMISSION = 1;
+    private static final String PREFS_NAME = "app_prefs";
+    private static final String KEY_LAST_VERSION = "last_version";
 
     private FragmentManager fragmentManager;
     private ImageButton btnNotes;
@@ -32,6 +39,21 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         AndroidThreeTen.init(this);
         setContentView(R.layout.activity_main);
+
+        SharedPreferences prefs = getSharedPreferences(PREFS_NAME, MODE_PRIVATE);
+        int lastVersion = prefs.getInt(KEY_LAST_VERSION, -1);
+
+        try {
+            int currentVersion = getPackageManager()
+                    .getPackageInfo(getPackageName(), 0).versionCode;
+
+            if (currentVersion > lastVersion) {
+                clearAllScheduledNotifications();
+                prefs.edit().putInt(KEY_LAST_VERSION, currentVersion).apply();
+            }
+        } catch (PackageManager.NameNotFoundException e) {
+            e.printStackTrace();
+        }
 
         fragmentManager = getSupportFragmentManager();
         btnNotes = findViewById(R.id.btn_notes);
@@ -150,6 +172,31 @@ public class MainActivity extends AppCompatActivity {
                 // Permission granted → proceed with notification scheduling
             } else {
                 // Permission denied → handle accordingly
+            }
+        }
+    }
+
+    private void clearAllScheduledNotifications() {
+        Intent intent = new Intent(this, NotificationReceiver.class);
+        AlarmManager alarmManager = (AlarmManager) getSystemService(Context.ALARM_SERVICE);
+
+        int daysRange = 365;
+        for (int d = -daysRange; d < daysRange; d++) {
+            for (int offset = 0; offset < 6; offset++) {
+                long triggerTime = System.currentTimeMillis() + d * 24L * 60 * 60 * 1000;
+                int requestCode = (int) ((triggerTime / 1000) % Integer.MAX_VALUE) + offset;
+
+                PendingIntent pendingIntent = PendingIntent.getBroadcast(
+                        this,
+                        requestCode,
+                        intent,
+                        PendingIntent.FLAG_NO_CREATE | PendingIntent.FLAG_IMMUTABLE
+                );
+
+                if (pendingIntent != null) {
+                    alarmManager.cancel(pendingIntent);
+                    pendingIntent.cancel();
+                }
             }
         }
     }
