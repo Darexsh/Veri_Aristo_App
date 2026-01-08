@@ -8,7 +8,7 @@
 **An Android app for tracking and managing contraceptive ring cycles**  
 📅⏰📝🎨📊
 
-![Projekt-Status](https://img.shields.io/badge/Status-Aktiv-brightgreen) ![Lizenz](https://img.shields.io/badge/Lizenz-NonCommercial%20MIT-blue) ![Version](https://img.shields.io/badge/Version-1.0.1-orange)
+![Projekt-Status](https://img.shields.io/badge/Status-Aktiv-brightgreen) ![Lizenz](https://img.shields.io/badge/Lizenz-NonCommercial%20MIT-blue) ![Version](https://img.shields.io/badge/Version-1.2.0-orange)
 
 </div>
 
@@ -20,7 +20,7 @@
 
 | Name | GitHub | Role | Contact | Contributions |
 | --- | --- | --- | --- | --- |
-| **[Daniel Sichler aka Darexsh](https://github.com/Darexsh)** | [Link](https://github.com/Darexsh?tab=repositories) | Android App Development 📱🛠️, UI/UX Design 🎨 | 📧 [E-Mail](mailto:sichler.daniel@gmail.com) | Concept, Feature Implementation, Calendar & Reminder Logic, Notes Management, UI Design |
+| **[Darexsh by Daniel Sichler](https://github.com/Darexsh)** | [Link](https://github.com/Darexsh?tab=repositories) | Android App Development 📱🛠️, UI/UX Design 🎨 | 📧 [E-Mail](mailto:sichler.daniel@gmail.com) | Concept, Feature Implementation, Calendar & Reminder Logic, Notes Management, UI Design |
 
 * * *
 
@@ -36,13 +36,21 @@
 
 * 📅 **Cycle Tracking**: Visualize insertion, removal, ring-free, and active days with color-coded calendar highlights.
     
-* 🔔 **Reminders**: Receive notifications for ring insertion and removal at your preferred time.
+* 🔔 **Reminders**: Custom reminder lead times for insertion/removal, with automatic rescheduling.
     
-* 📝 **Notes**: Add and save personal notes securely using SharedPreferences.
+* 📝 **Notes**: Notebook-style notes with autosave, character counter, and quick delete.
     
-* 🎨 **Customization**: Set cycle length, start date, reminder time, and choose a custom background image.
+* 🎨 **Customization**: Set cycle length, insertion date/time, calendar range, language, and background image.
     
 * 📊 **Cycle History**: Review past and upcoming cycles to track patterns and durations.
+
+* ⏩ **Wear Ring Longer**: Extend the current cycle once and keep history intact.
+
+* 🧩 **Home Screen Widgets**: Small widget shows days left; large widget shows days left plus next dates.
+
+* 💾 **Backup / Restore**: One‑tap export and import of all settings and notes.
+
+* 🛠️ **Debug View**: Long‑press settings title for detailed diagnostic information.
     
 
 * * *
@@ -52,11 +60,18 @@
 
 <table>
   <tr>
-    <td align="center"><b>Home Screen</b><br><img src="Screenshots/Home.jpg" width="200" height="450"></td>
-    <td align="center"><b>Calendar</b><br><img src="Screenshots/Calendar.jpg" width="200" height="450"></td>
-    <td align="center"><b>Notes</b><br><img src="Screenshots/Notes.jpg" width="200" height="450"></td>
-    <td align="center"><b>Cycles</b><br><img src="Screenshots/Cycles.jpg" width="200" height="450"></td>
-    <td align="center"><b>Settings</b><br><img src="Screenshots/Settings.jpg" width="200" height="450"></td>
+    <td align="center"><b>Home Screen</b><br><img src="Screenshots/Home.png" width="200" height="450"></td>
+    <td align="center"><b>Calendar</b><br><img src="Screenshots/Calendar.png" width="200" height="450"></td>
+    <td align="center"><b>Notes</b><br><img src="Screenshots/Notes.png" width="200" height="450"></td>
+    <td align="center"><b>Cycles</b><br><img src="Screenshots/Cycles.png" width="200" height="450"></td>
+    <td align="center"><b>Settings</b><br><img src="Screenshots/Settings.png" width="200" height="450"></td>
+  </tr>
+</table>
+
+<table>
+  <tr>
+    <td align="center"><b>Widgets</b><br><img src="Screenshots/Widgets.png" width="200" height="450"></td>
+    <td align="center"><b>About</b><br><img src="Screenshots/About.png" width="200" height="450"></td>
   </tr>
 </table>
 
@@ -97,9 +112,11 @@
     
     * Go to **Settings**.
         
-    * Select the start date, cycle length, and reminder time.
+    * Select the insertion date, cycle length, and reminder lead times.
         
     * Optionally choose a background image.
+
+    * Switch the app language (German/English).
         
 2. **View Calendar**:
     
@@ -117,13 +134,21 @@
     
     * Receive reminders for insertion and removal at your selected times.
         
-4. **Take Notes**:
+4. **Use Widgets**:
+    
+    * Add the small or large widget to your home screen for quick status.
+        
+5. **Take Notes**:
     
     * Use the **Notes** tab to store private notes, automatically saved locally.
         
-5. **Track History**:
+6. **Track History**:
     
     * Check the **Cycles** tab for past and upcoming cycles.
+
+7. **Backup / Restore**:
+
+    * Use **Settings → Advanced** to export or import all settings and notes.
         
 
 * * *
@@ -131,11 +156,11 @@
 🔑 Permissions
 --------------
 
-* 🌐 **Internet**: Optional, for future online features.
-    
 * 💾 **Storage / Media Access**: Required to select a custom background image.
     
 * 🔔 **Notifications**: Required to receive cycle reminders.
+
+* ⏰ **Exact Alarms**: Used to schedule precise reminder notifications.
     
 
 * * *
@@ -145,13 +170,15 @@
 
 * 📦 Built with **Java** and **Android MVVM** architecture.
     
-* 🗓️ Uses **MaterialCalendarView** for the calendar interface.
+* 🗓️ Calendar rendering and cycle logic are computed locally (no backend).
     
 * 🛠️ Stores user settings and notes in **SharedPreferences**.
     
 * 🔔 Notifications implemented via **BroadcastReceiver** and **NotificationManagerCompat**.
     
 * 📊 State sharing between fragments is managed via **SharedViewModel** and **LiveData**.
+
+* 🧩 Home‑screen widgets implemented via **AppWidgetProvider**.
     
 
 * * *

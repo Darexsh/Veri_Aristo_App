@@ -1,3 +1,166 @@
 <resources>
-    <string name="app_name">Veri_Aristo</string>
+    <string name="app_name">Veri Aristo</string>
+
+    <string name="settings_title">Settings</string>
+    <string name="settings_subtitle">All in one place.</string>
+    <string name="section_cycle">Cycle</string>
+    <string name="section_calendar">Calendar</string>
+    <string name="section_notifications">Notifications</string>
+    <string name="section_design">Design</string>
+    <string name="section_advanced">Advanced</string>
+
+    <string name="btn_set_start_date">Set insertion date</string>
+    <string name="btn_set_time">Set insertion time</string>
+    <string name="btn_set_cycle_length">Change cycle length</string>
+    <string name="btn_set_calendar_range">Set calendar range</string>
+    <string name="btn_set_background">Choose background image</string>
+    <string name="btn_set_notification_times">Set reminders</string>
+    <string name="btn_backup">Backup</string>
+    <string name="btn_reset_app">Reset app</string>
+    <string name="btn_delay_cycle">Wear ring longer</string>
+
+    <string name="home_days_left">Days left</string>
+    <string name="home_days_until_insertion">Days until insertion</string>
+    <string name="home_removal_on_placeholder">Removal on --</string>
+    <string name="home_removal_on">Removal on %1$s</string>
+    <string name="home_insertion_on_placeholder">Insertion on --</string>
+    <string name="home_insertion_on">Insertion on %1$s</string>
+    <string name="home_at_time">at %1$s</string>
+    <string name="home_background_desc">Background image</string>
+
+    <string name="notes_open_desc">Open notes</string>
+    <string name="notes_title">Notebook</string>
+    <string name="notes_close_desc">Close notes</string>
+    <string name="notes_today">Today</string>
+    <string name="notes_hint">Write your notes here...</string>
+    <string name="notes_char_count_default">0 characters</string>
+    <string name="notes_char_count">%1$d characters</string>
+    <string name="notes_not_saved">Not saved</string>
+    <string name="notes_save">Save</string>
+    <string name="notes_delete">Delete</string>
+    <string name="notes_saved_toast">Notes saved</string>
+    <string name="notes_delete_title">Delete notes?</string>
+    <string name="notes_delete_message">Your current notes will be removed.</string>
+    <string name="notes_last_saved">Saved: %1$s</string>
+
+    <string name="calendar_title">Calendar</string>
+    <string name="legend_wear_time">Wear time</string>
+    <string name="legend_ring_free">Ring-free</string>
+    <string name="legend_removal">Removal</string>
+    <string name="legend_insertion">Insertion</string>
+
+    <string name="cycles_title">Cycle history</string>
+    <string name="cycles_clear_history">Clear history</string>
+    <string name="cycles_status_inserted">Ring inserted</string>
+    <string name="cycles_status_removed">Ring removed</string>
+
+    <string name="settings_info_desc">App info</string>
+    <string name="app_info_title">App info</string>
+    <string name="app_info_version_label">Version</string>
+    <string name="app_info_name">Veri Aristo Ring Reminder</string>
+    <string name="app_info_version">Version %1$s</string>
+    <string name="app_info_description">Veri Aristo is an Android app for tracking contraceptive ring cycles. It provides a calendar view for insertion, removal, and ring-free days, customizable reminders, personal notes, and cycle history. The app is built with Java using MVVM, stores data locally, and supports notifications.</string>
+    <string name="app_info_developer">Developer: %1$s</string>
+    <string name="app_info_email">Email: %1$s</string>
+    <string name="app_info_github">GitHub: %1$s</string>
+    <string name="app_info_open_email">Write email</string>
+    <string name="app_info_open_github">Open GitHub</string>
+
+    <string name="dialog_ok">OK</string>
+    <string name="dialog_cancel">Cancel</string>
+
+    <string name="settings_permission_title">Permission required</string>
+    <string name="settings_permission_message">Permission to access images is required to select a background image.</string>
+
+    <string name="settings_time_button_format">Set insertion time: %1$02d:%2$02d</string>
+    <string name="settings_date_button_format">Set insertion date: %1$02d.%2$02d.%3$d</string>
+    <string name="settings_cycle_length_button">Set cycle length: %1$d days</string>
+    <string name="settings_calendar_range_button">Calendar range: %1$d %2$s back, %3$d %4$s ahead</string>
+    <string name="settings_notification_times_button">Reminders: %1$dh before removal, %2$dh before insertion</string>
+
+    <string name="settings_cycle_length_title">Set cycle length</string>
+    <string name="settings_cycle_length_message">Choose cycle length in days:</string>
+    <string name="settings_calendar_range_title">Set calendar range</string>
+    <string name="settings_calendar_range_message">Choose how far the calendar is displayed.</string>
+    <string name="settings_calendar_range_back">Back</string>
+    <string name="settings_calendar_range_forward">Ahead</string>
+
+    <string name="settings_notification_times_title">Set reminders</string>
+    <string name="settings_notification_times_message">Choose lead time in hours (0 = no reminder).</string>
+    <string name="settings_notification_before_removal">Before removal (hours)</string>
+    <string name="settings_notification_before_insertion">Before insertion (hours)</string>
+
+    <string name="settings_unit_year">Year</string>
+    <string name="settings_unit_month">Month</string>
+    <string name="settings_unit_year_short">yr</string>
+    <string name="settings_unit_month_short">mo</string>
+
+    <string name="settings_reset_title">Reset app?</string>
+    <string name="settings_reset_message">All saved data, settings, and notes will be deleted.</string>
+    <string name="settings_reset_confirm">Reset</string>
+    <string name="settings_reset_done">App reset</string>
+
+    <string name="backup_title">Backup</string>
+    <string name="backup_create">Create backup</string>
+    <string name="backup_restore">Restore backup</string>
+    <string name="backup_created_toast">Backup created</string>
+    <string name="backup_failed_toast">Backup failed</string>
+    <string name="backup_read_failed_toast">Backup could not be read</string>
+    <string name="backup_invalid_toast">Invalid backup</string>
+    <string name="backup_restored_toast">Backup restored</string>
+
+    <string name="notifications_channel_name">Reminders</string>
+    <string name="notifications_channel_description">Notifications for ring cycles</string>
+
+    <string name="notif_cycle_duration_title">Cycle length</string>
+    <string name="notif_two_weeks_remaining">Two weeks with ring remaining.</string>
+    <string name="notif_one_week_remaining">One week with ring remaining.</string>
+    <string name="notif_remove_title">Remove ring</string>
+    <string name="notif_remove_in_hours">Remove the ring in %1$d hours!</string>
+    <string name="notif_remove_now">Remove the ring now at %1$s!</string>
+    <string name="notif_insert_title">Insert ring</string>
+    <string name="notif_insert_in_hours">Insert the ring in %1$d hours!</string>
+    <string name="notif_insert_now">Insert the ring now at %1$s!</string>
+
+    <string name="home_delay_title">Ring worn longer</string>
+    <string name="home_delay_message">How many days longer was the ring worn?</string>
+    <string name="home_delay_confirm">Update</string>
+
+    <string name="main_double_back_exit">Press back twice to close the app</string>
+
+    <string name="debug_dialog_title">Debug: Notifications</string>
+    <string name="debug_now">Now</string>
+    <string name="debug_base_start">Start date (base)</string>
+    <string name="debug_cycle_length">Cycle length: %1$d days</string>
+    <string name="debug_ring_free">Ring-free: %1$d days</string>
+    <string name="debug_removal_reminder">Removal reminder: %1$dh before</string>
+    <string name="debug_insertion_reminder">Insertion reminder: %1$dh before</string>
+    <string name="debug_current_start">Current start</string>
+    <string name="debug_removal">Removal</string>
+    <string name="debug_insertion">Insertion</string>
+    <string name="debug_notified_for_cycle">Notification scheduled for cycle</string>
+    <string name="debug_calendar_range">Calendar range</string>
+    <string name="debug_calendar_limits">Calendar bounds</string>
+    <string name="debug_scheduled_notifications">Scheduled notifications</string>
+    <string name="debug_two_weeks_remaining">2 weeks remaining</string>
+    <string name="debug_one_week_remaining">1 week remaining</string>
+    <string name="debug_removal_reminder_line">Removal (-%1$dh)</string>
+    <string name="debug_insertion_reminder_line">Insertion (-%1$dh)</string>
+    <string name="debug_disabled_suffix"> (off)</string>
+    <string name="debug_past_suffix"> [past]</string>
+    <string name="debug_future_suffix"> [future]</string>
+
+    <string name="language_button">Language: %1$s</string>
+    <string name="language_title">App language</string>
+    <string name="language_german">Deutsch</string>
+    <string name="language_english">English</string>
+
+    <string name="widget_small_name">Ring widget (small)</string>
+    <string name="widget_large_name">Ring widget (large)</string>
+    <string name="widget_title">Next ring dates</string>
+
+    <string name="nav_home">Home</string>
+    <string name="nav_calendar">Calendar</string>
+    <string name="nav_cycles">Cycles</string>
+    <string name="nav_settings">Settings</string>
 </resources>

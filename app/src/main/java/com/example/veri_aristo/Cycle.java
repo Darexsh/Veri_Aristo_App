@@ -4,10 +4,10 @@ package com.example.veri_aristo;
 public class Cycle {
     private final long dateMillis;
     private final long endDateMillis; // Only used for insertion events
-    private final String type; // "insertion" or "removal"
+    private final CycleType type;
 
     // Constructor to initialize the cycle with date, end date, and type
-    public Cycle(long dateMillis, long endDateMillis, String type) {
+    public Cycle(long dateMillis, long endDateMillis, CycleType type) {
         this.dateMillis = dateMillis;
         this.endDateMillis = endDateMillis;
         this.type = type;
@@ -24,7 +24,7 @@ public class Cycle {
     }
 
     // Get the type of the cycle
-    public String getType() {
+    public CycleType getType() {
         return type;
     }
 }

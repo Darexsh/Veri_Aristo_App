@@ -1,25 +1,44 @@
 package com.example.veri_aristo;
 
+import android.app.AlertDialog;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Looper;
 import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.EditText;
+import android.widget.ImageButton;
+import android.widget.TextView;
 import android.widget.Toast;
 import com.google.android.material.button.MaterialButton;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.Locale;
 
 // NotesFragment allows users to create and save personal notes
 public class NotesFragment extends Fragment {
 
     private EditText editTextNotes;
     private MaterialButton btnSave;
+    private MaterialButton btnClear;
+    private TextView tvCharCount;
+    private TextView tvLastSaved;
+    private TextView tvNoteDate;
+
+    private final Handler autoSaveHandler = new Handler(Looper.getMainLooper());
+    private Runnable autoSaveRunnable;
 
     private static final String PREF_NAME = "notes_prefs";
     private static final String NOTES_KEY = "user_notes";
+    private static final String NOTES_LAST_SAVED_KEY = "notes_last_saved";
+    private static final long AUTOSAVE_DELAY_MS = 800;
 
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container,
@@ -28,14 +47,56 @@ public class NotesFragment extends Fragment {
 
         editTextNotes = view.findViewById(R.id.editText_notes);
         btnSave = view.findViewById(R.id.btn_save_notes);
+        btnClear = view.findViewById(R.id.btn_clear_notes);
+        tvCharCount = view.findViewById(R.id.tv_char_count);
+        tvLastSaved = view.findViewById(R.id.tv_last_saved);
+        tvNoteDate = view.findViewById(R.id.tv_notes_date);
+        ImageButton btnClose = view.findViewById(R.id.btn_close_notes);
 
         // Load saved notes when the fragment is created
         loadNotes();
+        updateNoteDate();
+
+        autoSaveRunnable = () -> saveNotes(false);
+
+        editTextNotes.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+            }
+
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+            }
+
+            @Override
+            public void afterTextChanged(Editable s) {
+                updateCharCount(s.length());
+                scheduleAutoSave();
+            }
+        });
 
         // Set up the save button to store notes in SharedPreferences
-        btnSave.setOnClickListener(v -> saveNotes());
+        btnSave.setOnClickListener(v -> saveNotes(true));
+
+        btnClear.setOnClickListener(v -> new AlertDialog.Builder(requireContext())
+                .setTitle(R.string.notes_delete_title)
+                .setMessage(R.string.notes_delete_message)
+                .setPositiveButton(R.string.notes_delete, (dialog, which) -> {
+                    editTextNotes.setText("");
+                    saveNotes(true);
+                })
+                .setNegativeButton(R.string.dialog_cancel, null)
+                .show());
+
+        btnClose.setOnClickListener(v -> requireActivity().getOnBackPressedDispatcher().onBackPressed());
 
         return view;
+    }
+
+    @Override
+    public void onDestroyView() {
+        super.onDestroyView();
+        autoSaveHandler.removeCallbacksAndMessages(null);
     }
 
     // Load saved notes from SharedPreferences
@@ -43,18 +104,46 @@ public class NotesFragment extends Fragment {
         SharedPreferences prefs = requireContext().getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE);
         String savedNotes = prefs.getString(NOTES_KEY, "");
         editTextNotes.setText(savedNotes);
+        updateCharCount(savedNotes.length());
+        updateLastSavedText(prefs.getLong(NOTES_LAST_SAVED_KEY, 0));
     }
 
     // Save notes to SharedPreferences
-    private void saveNotes() {
-        String notes = editTextNotes.getText().toString().trim();
+    private void saveNotes(boolean showToast) {
+        String notes = editTextNotes.getText().toString();
         SharedPreferences prefs = requireContext().getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE);
-        prefs.edit().putString(NOTES_KEY, notes).apply();
+        long now = System.currentTimeMillis();
+        prefs.edit()
+                .putString(NOTES_KEY, notes)
+                .putLong(NOTES_LAST_SAVED_KEY, now)
+                .apply();
+        updateLastSavedText(now);
 
-        Toast toast = Toast.makeText(requireContext(), "Notizen gespeichert", Toast.LENGTH_SHORT);
-        toast.show();
+        if (showToast) {
+            Toast.makeText(requireContext(), R.string.notes_saved_toast, Toast.LENGTH_SHORT).show();
+        }
+    }
 
-        // Automatically dismiss the toast after a short duration
-        new android.os.Handler().postDelayed(toast::cancel, 1000);
+    private void scheduleAutoSave() {
+        autoSaveHandler.removeCallbacks(autoSaveRunnable);
+        autoSaveHandler.postDelayed(autoSaveRunnable, AUTOSAVE_DELAY_MS);
+    }
+
+    private void updateCharCount(int count) {
+        tvCharCount.setText(getString(R.string.notes_char_count, count));
+    }
+
+    private void updateLastSavedText(long timestamp) {
+        if (timestamp <= 0) {
+            tvLastSaved.setText(R.string.notes_not_saved);
+            return;
+        }
+        SimpleDateFormat format = new SimpleDateFormat("HH:mm, dd.MM.yyyy", Locale.getDefault());
+        tvLastSaved.setText(getString(R.string.notes_last_saved, format.format(new Date(timestamp))));
+    }
+
+    private void updateNoteDate() {
+        SimpleDateFormat format = new SimpleDateFormat("EEEE, dd.MM.yyyy", Locale.getDefault());
+        tvNoteDate.setText(format.format(new Date()));
     }
 }

@@ -3,86 +3,113 @@ package com.example.veri_aristo;
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.ViewModel;
+import java.util.Calendar;
 
 // SharedViewModel is used to share data between fragments in the app
 public class SharedViewModel extends ViewModel {
 
+    private final SettingsRepository repository;
+
     // LiveData objects to hold the state of the cycle length, start date, and time
     private final MutableLiveData<Integer> cycleLength = new MutableLiveData<>();
-    private final MutableLiveData<Integer> startDay = new MutableLiveData<>();
-    private final MutableLiveData<Integer> startMonth = new MutableLiveData<>();
-    private final MutableLiveData<Integer> startYear = new MutableLiveData<>();
-    private final MutableLiveData<Integer> hour = new MutableLiveData<>();
-    private final MutableLiveData<Integer> minute = new MutableLiveData<>();
+    private final MutableLiveData<Calendar> startDate = new MutableLiveData<>();
     private final MutableLiveData<String> backgroundImageUri = new MutableLiveData<>();
+    private final MutableLiveData<Integer> calendarPastAmount = new MutableLiveData<>();
+    private final MutableLiveData<String> calendarPastUnit = new MutableLiveData<>();
+    private final MutableLiveData<Integer> calendarFutureAmount = new MutableLiveData<>();
+    private final MutableLiveData<String> calendarFutureUnit = new MutableLiveData<>();
+    private final MutableLiveData<Integer> removalReminderHours = new MutableLiveData<>();
+    private final MutableLiveData<Integer> insertionReminderHours = new MutableLiveData<>();
 
-    // Getters and setters for cycle length
+    public SharedViewModel(SettingsRepository repository) {
+        this.repository = repository;
+        cycleLength.setValue(repository.getCycleLength());
+        startDate.setValue(repository.getStartDate());
+        backgroundImageUri.setValue(repository.getBackgroundImageUri());
+        calendarPastAmount.setValue(repository.getCalendarPastAmount());
+        calendarPastUnit.setValue(repository.getCalendarPastUnit());
+        calendarFutureAmount.setValue(repository.getCalendarFutureAmount());
+        calendarFutureUnit.setValue(repository.getCalendarFutureUnit());
+        removalReminderHours.setValue(repository.getRemovalReminderHours());
+        insertionReminderHours.setValue(repository.getInsertionReminderHours());
+    }
+
+    // Getters for LiveData
     public LiveData<Integer> getCycleLength() {
         return cycleLength;
     }
 
-    // Set the cycle length and notify observers
+    public LiveData<Calendar> getStartDate() {
+        return startDate;
+    }
+
+    public LiveData<String> getBackgroundImageUri() {
+        return backgroundImageUri;
+    }
+
+    public LiveData<Integer> getCalendarPastAmount() {
+        return calendarPastAmount;
+    }
+
+    public LiveData<String> getCalendarPastUnit() {
+        return calendarPastUnit;
+    }
+
+    public LiveData<Integer> getCalendarFutureAmount() {
+        return calendarFutureAmount;
+    }
+
+    public LiveData<String> getCalendarFutureUnit() {
+        return calendarFutureUnit;
+    }
+
+    public LiveData<Integer> getRemovalReminderHours() {
+        return removalReminderHours;
+    }
+
+    public LiveData<Integer> getInsertionReminderHours() {
+        return insertionReminderHours;
+    }
+
+    public SettingsRepository getRepository() {
+        return repository;
+    }
+
+    // Setters that save to repository and update LiveData
     public void setCycleLength(int length) {
+        repository.saveCycleLength(length);
         cycleLength.setValue(length);
     }
 
-    // Getters and setters for start date and time
-    public LiveData<Integer> getStartDay() {
-        return startDay;
+    public void setStartDate(Calendar date) {
+        repository.saveStartDate(date);
+        startDate.setValue(date);
     }
 
-    // Set the start day and notify observers
-    public void setStartDay(int day) {
-        startDay.setValue(day);
+    public void setBackgroundImageUri(String uri) {
+        repository.saveBackgroundImageUri(uri);
+        this.backgroundImageUri.setValue(uri);
     }
 
-    // Getters and setters for start month and year
-    public LiveData<Integer> getStartMonth() {
-        return startMonth;
+    public void setCalendarPastRange(int amount, String unit) {
+        repository.saveCalendarPastRange(amount, unit);
+        calendarPastAmount.setValue(amount);
+        calendarPastUnit.setValue(unit);
     }
 
-    // Set the start month and notify observers
-    public void setStartMonth(int month) {
-        startMonth.setValue(month);
+    public void setCalendarFutureRange(int amount, String unit) {
+        repository.saveCalendarFutureRange(amount, unit);
+        calendarFutureAmount.setValue(amount);
+        calendarFutureUnit.setValue(unit);
     }
 
-    // Getters and setters for start year
-    public LiveData<Integer> getStartYear() {
-        return startYear;
+    public void setRemovalReminderHours(int hours) {
+        repository.setRemovalReminderHours(hours);
+        removalReminderHours.setValue(hours);
     }
 
-    // Set the start year and notify observers
-    public void setStartYear(int year) {
-        startYear.setValue(year);
-    }
-
-    // Getters and setters for hour and minute
-    public LiveData<Integer> getHour() {
-        return hour;
-    }
-
-    // Set the hour and notify observers
-    public void setHour(int h) {
-        hour.setValue(h);
-    }
-
-    // Getters and setters for minute
-    public LiveData<Integer> getMinute() {
-        return minute;
-    }
-
-    // Set the minute and notify observers
-    public void setMinute(int m) {
-        minute.setValue(m);
-    }
-
-    // Getters and setters for background image URI
-    public MutableLiveData<String> getBackgroundImageUri() { 
-        return backgroundImageUri; 
-    }
-
-    // Set the background image URI and notify observers
-    public void setBackgroundImageUri(String uri) { 
-        this.backgroundImageUri.setValue(uri); 
+    public void setInsertionReminderHours(int hours) {
+        repository.setInsertionReminderHours(hours);
+        insertionReminderHours.setValue(hours);
     }
 }

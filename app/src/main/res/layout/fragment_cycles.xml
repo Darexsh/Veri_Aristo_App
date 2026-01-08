@@ -7,7 +7,7 @@
 
     <TextView
         android:id="@+id/tv_history_title"
-        android:text="Zyklus-Historie"
+        android:text="@string/cycles_title"
         android:textSize="26sp"
         android:textStyle="bold"
         android:layout_width="wrap_content"
@@ -21,7 +21,7 @@
         android:id="@+id/btn_clear_history"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Historie löschen"
+        android:text="@string/cycles_clear_history"
         android:textAllCaps="false"
         android:textSize="16sp"
         app:cornerRadius="12dp"

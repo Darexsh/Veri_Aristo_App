@@ -1,0 +1,24 @@
+{
+  "name": "AI CLI DevContainer",
+  "image": "python:3.11",
+
+  "features": {
+    "ghcr.io/devcontainers/features/node:1": {
+      "version": "20"
+    }
+  },
+
+  "containerEnv": {
+    "OPENAI_API_KEY": "${localEnv:OPENAI_API_KEY}",
+    "GEMINI_API_KEY": "${localEnv:GEMINI_API_KEY}",
+    "GROK_API_KEY": "${localEnv:GROK_API_KEY}"
+  },
+
+ "postCreateCommand": "apt-get update && apt-get install -y nodejs npm && npm install -g @google/gemini-cli && pip install openai && npm install -g @openai/codex && npm install -g @vibe-kit/grok-cli ",
+
+  "customizations": {
+    "vscode": {
+      "extensions": ["ms-python.python"]
+    }
+  }
+}

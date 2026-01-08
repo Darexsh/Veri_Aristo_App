@@ -1,6 +1,5 @@
 package com.example.veri_aristo;
 
-import android.content.SharedPreferences;
 import android.os.Bundle;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -12,9 +11,7 @@ import android.widget.Button;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 import androidx.cardview.widget.CardView;
-import com.google.gson.Gson;
-import com.google.gson.reflect.TypeToken;
-import java.lang.reflect.Type;
+import androidx.lifecycle.ViewModelProvider;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -24,8 +21,8 @@ import java.util.Locale;
 // CyclesFragment displays a history of cycle events (insertions/removals) in a card format
 public class CyclesFragment extends Fragment {
 
-    private static final String PREFS_NAME = "app_prefs";
-    private static final String KEY_CYCLE_HISTORY = "cycle_history";
+    private SharedViewModel viewModel;
+    private LinearLayout cycleContainer;
 
     public CyclesFragment() {
         // Required empty public constructor
@@ -39,15 +36,18 @@ public class CyclesFragment extends Fragment {
         View view = inflater.inflate(R.layout.fragment_cycles, container, false);
 
         // Initialize UI components
-        LinearLayout cycleContainer = view.findViewById(R.id.cycle_container);
+        cycleContainer = view.findViewById(R.id.cycle_container);
         Button clearHistoryButton = view.findViewById(R.id.btn_clear_history);
+
+        SharedViewModelFactory factory = new SharedViewModelFactory(requireActivity().getApplication());
+        viewModel = new ViewModelProvider(requireActivity(), factory).get(SharedViewModel.class);
 
         // Load and display cycle history
         displayCycleHistory(cycleContainer);
 
         // Set up clear history button
         clearHistoryButton.setOnClickListener(v -> {
-            clearCycleHistory();                    // Clear the cycle history from SharedPreferences
+            viewModel.getRepository().saveCycleHistory(new ArrayList<>()); // Clear the cycle history from repository
             cycleContainer.removeAllViews();        // Clear the UI
             displayCycleHistory(cycleContainer);    // Reload empty history
         });
@@ -58,24 +58,25 @@ public class CyclesFragment extends Fragment {
     // Display the cycle history in the provided LinearLayout
     private void displayCycleHistory(LinearLayout cycleContainer) {
         cycleContainer.removeAllViews(); // Clear existing views
-        List<Cycle> cycleHistory = getCycleHistory();
+        List<Cycle> cycleHistory = viewModel.getRepository().getCycleHistory();
         SimpleDateFormat dateFormat = new SimpleDateFormat("dd.MM.yyyy", Locale.getDefault());
 
-        // Filter out invalid cycles
+        // Filter out invalid cycles and dedupe by date+endDate+type
         List<Cycle> validCycles = new ArrayList<>();
+        java.util.HashSet<String> seen = new java.util.HashSet<>();
         for (Cycle cycle : cycleHistory) {
-            if (cycle.getType() != null) {
+            if (cycle.getType() == null) {
+                continue;
+            }
+            String key = cycle.getDateMillis() + ":" + cycle.getEndDateMillis() + ":" + cycle.getType().name();
+            if (seen.add(key)) {
                 validCycles.add(cycle);
             }
         }
 
-        // Update SharedPreferences if invalid cycles were removed
+        // Update repository if invalid or duplicate cycles were removed
         if (validCycles.size() < cycleHistory.size()) {
-            SharedPreferences prefs = requireContext().getSharedPreferences(PREFS_NAME, requireContext().MODE_PRIVATE);
-            SharedPreferences.Editor editor = prefs.edit();
-            Gson gson = new Gson();
-            editor.putString(KEY_CYCLE_HISTORY, gson.toJson(validCycles));
-            editor.apply();
+            viewModel.getRepository().saveCycleHistory(validCycles);
         }
 
         // Sort cycles by date in descending order (newest first)
@@ -111,7 +112,7 @@ public class CyclesFragment extends Fragment {
             String dateText;
 
             // Format the date based on the cycle type
-            if ("insertion".equals(cycle.getType()) || "removal".equals(cycle.getType())) {
+            if (CycleType.INSERTION == cycle.getType() || CycleType.REMOVAL == cycle.getType()) {
                 Calendar endCal = Calendar.getInstance();
                 endCal.setTimeInMillis(cycle.getEndDateMillis());
 
@@ -133,11 +134,11 @@ public class CyclesFragment extends Fragment {
             TextView statusTextView = new TextView(requireContext());
             statusTextView.setTextSize(14);
             statusTextView.setPadding(0, 12, 0, 0); // 4dp top margin
-            if ("insertion".equals(cycle.getType())) {
-                statusTextView.setText("Ring eingelegt");
+            if (CycleType.INSERTION == cycle.getType()) {
+                statusTextView.setText(R.string.cycles_status_inserted);
                 statusTextView.setTextColor(0xFF4CAF50); // Green
             } else {
-                statusTextView.setText("Ring entfernt");
+                statusTextView.setText(R.string.cycles_status_removed);
                 statusTextView.setTextColor(0xFFF44336); // Red
             }
             cardContent.addView(statusTextView);
@@ -145,23 +146,5 @@ public class CyclesFragment extends Fragment {
             cardView.addView(cardContent);
             cycleContainer.addView(cardView);
         }
-    }
-
-    // Clear the cycle history from SharedPreferences
-    private void clearCycleHistory() {
-        SharedPreferences prefs = requireContext().getSharedPreferences(PREFS_NAME, requireContext().MODE_PRIVATE);
-        SharedPreferences.Editor editor = prefs.edit();
-        editor.remove(KEY_CYCLE_HISTORY);
-        editor.apply();
-    }
-
-    // Retrieve the cycle history from SharedPreferences
-    private List<Cycle> getCycleHistory() {
-        SharedPreferences prefs = requireContext().getSharedPreferences(PREFS_NAME, requireContext().MODE_PRIVATE);
-        Gson gson = new Gson();
-        String json = prefs.getString(KEY_CYCLE_HISTORY, null);
-        Type type = new TypeToken<List<Cycle>>(){}.getType();
-        List<Cycle> cycleHistory = gson.fromJson(json, type);
-        return cycleHistory != null ? cycleHistory : new ArrayList<>();
     }
 }

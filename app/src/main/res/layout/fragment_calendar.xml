@@ -7,7 +7,7 @@
 
     <TextView
         android:id="@+id/title_text"
-        android:text="Kalender"
+        android:text="@string/calendar_title"
         android:textSize="26sp"
         android:textStyle="bold"
         android:layout_marginBottom="16dp"
@@ -50,7 +50,7 @@
                 android:background="@drawable/circle_green" />
 
             <TextView
-                android:text="Tragezeit"
+                android:text="@string/legend_wear_time"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:textSize="14sp"
@@ -71,7 +71,7 @@
                 android:background="@drawable/circle_red" />
 
             <TextView
-                android:text="Ringfrei"
+                android:text="@string/legend_ring_free"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:textSize="14sp"
@@ -92,7 +92,7 @@
                 android:background="@drawable/circle_yellow" />
 
             <TextView
-                android:text="Entfernen"
+                android:text="@string/legend_removal"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:textSize="14sp"
@@ -113,7 +113,7 @@
                 android:background="@drawable/circle_cyan" />
 
             <TextView
-                android:text="Einsetzen"
+                android:text="@string/legend_insertion"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:textSize="14sp"

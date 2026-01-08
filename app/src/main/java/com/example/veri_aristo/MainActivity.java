@@ -11,6 +11,7 @@ import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.os.Build;
 import android.os.Bundle;
+import android.widget.Toast;
 import androidx.activity.OnBackPressedCallback;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
@@ -20,6 +21,7 @@ import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.jakewharton.threetenabp.AndroidThreeTen;
+
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.ImageButton;
@@ -30,9 +32,12 @@ public class MainActivity extends AppCompatActivity {
     private static final int REQUEST_NOTIFICATION_PERMISSION = 1;
     private static final String PREFS_NAME = "app_prefs";
     private static final String KEY_LAST_VERSION = "last_version";
+    private static final long BACK_PRESS_WINDOW_MS = 2000;
 
     private FragmentManager fragmentManager;
     private ImageButton btnNotes;
+    private BottomNavigationView bottomNavigationView;
+    private long lastBackPressedAt = 0L;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -57,19 +62,19 @@ public class MainActivity extends AppCompatActivity {
 
         fragmentManager = getSupportFragmentManager();
         btnNotes = findViewById(R.id.btn_notes);
+        bottomNavigationView = findViewById(R.id.bottom_navigation);
 
         // Standardmäßig Home-Fragment laden
         if (savedInstanceState == null) {
-            loadFragment(new HomeFragment());
+            loadFragment(new HomeFragment(), false);
             btnNotes.setVisibility(View.VISIBLE);
         }
 
         btnNotes.setOnClickListener(v -> {
-            loadFragment(new NotesFragment());
+            loadFragment(new NotesFragment(), true);
             btnNotes.setVisibility(View.GONE);
         });
 
-        BottomNavigationView bottomNavigationView = findViewById(R.id.bottom_navigation);
         bottomNavigationView.setOnNavigationItemSelectedListener(item -> {
             Fragment selectedFragment = null;
             int id = item.getItemId();
@@ -92,7 +97,7 @@ public class MainActivity extends AppCompatActivity {
 
             // If a valid fragment is selected, load it
             if (selectedFragment != null) {
-                loadFragment(selectedFragment);
+                loadFragment(selectedFragment, true);
                 return true;
             }
 
@@ -113,25 +118,61 @@ public class MainActivity extends AppCompatActivity {
         getOnBackPressedDispatcher().addCallback(this, new OnBackPressedCallback(true) {
             @Override
             public void handleOnBackPressed() {
-                if (fragmentManager.getBackStackEntryCount() > 1) {
-                    fragmentManager.popBackStack();
-                } else {
+                Fragment currentFragment = fragmentManager.findFragmentById(R.id.fragment_container);
+                if (!(currentFragment instanceof HomeFragment)) {
+                    fragmentManager.popBackStack(null, FragmentManager.POP_BACK_STACK_INCLUSIVE);
+                    loadFragment(new HomeFragment(), false);
+                    bottomNavigationView.setSelectedItemId(R.id.nav_home);
+                    btnNotes.setVisibility(View.VISIBLE);
+                    lastBackPressedAt = 0L;
+                    return;
+                }
+
+                long now = System.currentTimeMillis();
+                if (now - lastBackPressedAt < BACK_PRESS_WINDOW_MS) {
                     finish();
+                } else {
+                    lastBackPressedAt = now;
+                    Toast.makeText(MainActivity.this, R.string.main_double_back_exit, Toast.LENGTH_SHORT).show();
                 }
             }
         });
+
+        handleOpenHomeIntent(getIntent());
 
         // Create notification channel and request permission
         createNotificationChannel();
         requestNotificationPermission();
     }
 
+    @Override
+    protected void onNewIntent(Intent intent) {
+        super.onNewIntent(intent);
+        handleOpenHomeIntent(intent);
+    }
+
+    private void handleOpenHomeIntent(Intent intent) {
+        if (intent == null || !intent.getBooleanExtra("open_home", false)) {
+            return;
+        }
+        fragmentManager.popBackStack(null, FragmentManager.POP_BACK_STACK_INCLUSIVE);
+        loadFragment(new HomeFragment(), false);
+        bottomNavigationView.setSelectedItemId(R.id.nav_home);
+        btnNotes.setVisibility(View.VISIBLE);
+    }
+
     // Load the specified fragment and add it to the back stack
     private void loadFragment(Fragment fragment) {
-        fragmentManager.beginTransaction()
-                .replace(R.id.fragment_container, fragment)
-                .addToBackStack(null)
-                .commit();
+        loadFragment(fragment, true);
+    }
+
+    private void loadFragment(Fragment fragment, boolean addToBackStack) {
+        androidx.fragment.app.FragmentTransaction transaction = fragmentManager.beginTransaction()
+                .replace(R.id.fragment_container, fragment);
+        if (addToBackStack) {
+            transaction.addToBackStack(null);
+        }
+        transaction.commit();
     }
 
     // Create a notification channel for Android O and above
@@ -139,10 +180,10 @@ public class MainActivity extends AppCompatActivity {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             NotificationChannel channel = new NotificationChannel(
                     "reminder_channel",
-                    "Erinnerungen",
+                    getString(R.string.notifications_channel_name),
                     NotificationManager.IMPORTANCE_HIGH
             );
-            channel.setDescription("Benachrichtigungen für Ringzyklen");
+            channel.setDescription(getString(R.string.notifications_channel_description));
             NotificationManager manager = getSystemService(NotificationManager.class);
             manager.createNotificationChannel(channel);
         }

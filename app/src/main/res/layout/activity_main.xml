@@ -14,7 +14,7 @@
         android:id="@+id/btn_notes"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:contentDescription=" "
+        android:contentDescription="@string/notes_open_desc"
         android:src="@android:drawable/ic_menu_edit"
         android:layout_alignParentTop="true"
         android:layout_alignParentEnd="true"

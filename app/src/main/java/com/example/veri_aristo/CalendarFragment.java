@@ -1,7 +1,5 @@
 package com.example.veri_aristo;
 
-import android.content.Context;
-import android.content.SharedPreferences;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
@@ -22,11 +20,12 @@ import com.prolificinteractive.materialcalendarview.DayViewFacade;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
+import com.example.veri_aristo.Constants;
 
 public class CalendarFragment extends Fragment {
 
     private MaterialCalendarView calendarView;
-    private final int ringFreeDays = 7; // 6 days ring-free + 1 insertion day
+    private final int ringFreeDays = Constants.RING_FREE_DAYS; // 6 days ring-free + 1 insertion day
     private SharedViewModel viewModel;
 
     @Nullable
@@ -40,7 +39,8 @@ public class CalendarFragment extends Fragment {
         calendarView.setDateTextAppearance(R.style.Theme_Veri_Aristo);
 
         // Initialize shared ViewModel
-        viewModel = new ViewModelProvider(requireActivity()).get(SharedViewModel.class);
+        SharedViewModelFactory factory = new SharedViewModelFactory(requireActivity().getApplication());
+        viewModel = new ViewModelProvider(requireActivity(), factory).get(SharedViewModel.class);
 
         // Set up calendar view properties
         updateCalendar();
@@ -52,90 +52,93 @@ public class CalendarFragment extends Fragment {
     // Observe cycle data changes and update calendar
     private void setupObservers() {
         viewModel.getCycleLength().observe(getViewLifecycleOwner(), value -> updateCalendar());
-        viewModel.getStartDay().observe(getViewLifecycleOwner(), value -> updateCalendar());
-        viewModel.getStartMonth().observe(getViewLifecycleOwner(), value -> updateCalendar());
-        viewModel.getStartYear().observe(getViewLifecycleOwner(), value -> updateCalendar());
+        viewModel.getStartDate().observe(getViewLifecycleOwner(), value -> updateCalendar());
+        viewModel.getCalendarPastAmount().observe(getViewLifecycleOwner(), value -> updateCalendar());
+        viewModel.getCalendarPastUnit().observe(getViewLifecycleOwner(), value -> updateCalendar());
+        viewModel.getCalendarFutureAmount().observe(getViewLifecycleOwner(), value -> updateCalendar());
+        viewModel.getCalendarFutureUnit().observe(getViewLifecycleOwner(), value -> updateCalendar());
     }
 
     // Refresh calendar with updated cycle data
     private void updateCalendar() {
         Calendar startDate = getStartDate();
         int cycleLength = getCycleLength();
+        int pastMonths = getCalendarPastMonths();
+        int futureMonths = getCalendarFutureMonths();
         calendarView.removeDecorators();
-        setupCalendarDecorators(startDate, cycleLength);
+        setupCalendarDecorators(startDate, cycleLength, pastMonths, futureMonths);
         calendarView.addDecorator(new TodayBorderDecorator()); // Add today border decorator
     }
 
     // Retrieve start date
     private Calendar getStartDate() {
-        int day, month, year;
-        if (viewModel.getStartDay().getValue() != null &&
-                viewModel.getStartMonth().getValue() != null &&
-                viewModel.getStartYear().getValue() != null) {
-            day = viewModel.getStartDay().getValue();
-            month = viewModel.getStartMonth().getValue();
-            year = viewModel.getStartYear().getValue();
-        } else {
-            SharedPreferences prefs = requireContext().getSharedPreferences("app_prefs", Context.MODE_PRIVATE);
-            day = prefs.getInt("start_day", Calendar.getInstance().get(Calendar.DAY_OF_MONTH));
-            month = prefs.getInt("start_month", Calendar.getInstance().get(Calendar.MONTH));
-            year = prefs.getInt("start_year", Calendar.getInstance().get(Calendar.YEAR));
+        if (viewModel.getStartDate().getValue() != null) {
+            return viewModel.getStartDate().getValue();
         }
-        Calendar calendar = Calendar.getInstance();
-        calendar.set(year, month, day);
-        return calendar;
+        return Calendar.getInstance();
     }
 
     // Retrieve cycle length
     private int getCycleLength() {
         if (viewModel.getCycleLength().getValue() != null) {
             return viewModel.getCycleLength().getValue();
-        } else {
-            SharedPreferences prefs = requireContext().getSharedPreferences("app_prefs", Context.MODE_PRIVATE);
-            return prefs.getInt("cycle_length", 21);
         }
+        return 21;
+    }
+
+    private int getCalendarPastMonths() {
+        Integer amount = viewModel.getCalendarPastAmount().getValue();
+        String unit = viewModel.getCalendarPastUnit().getValue();
+        if (amount != null && unit != null) {
+            return "years".equals(unit) ? amount * 12 : amount;
+        }
+        return 12;
+    }
+
+    private int getCalendarFutureMonths() {
+        Integer amount = viewModel.getCalendarFutureAmount().getValue();
+        String unit = viewModel.getCalendarFutureUnit().getValue();
+        if (amount != null && unit != null) {
+            return "years".equals(unit) ? amount * 12 : amount;
+        }
+        return 24;
     }
 
     // Setup calendar decorators
-    private void setupCalendarDecorators(Calendar startDate, int cycleLength) {
+    private void setupCalendarDecorators(Calendar startDate, int cycleLength, int pastMonths, int futureMonths) {
         List<DayViewDecorator> decorators = new ArrayList<>();
 
-        Calendar pastLimit = (Calendar) startDate.clone();
-        pastLimit.add(Calendar.YEAR, -1);
-        Calendar futureLimit = (Calendar) startDate.clone();
-        futureLimit.add(Calendar.YEAR, 2);
+        Calendar today = Calendar.getInstance();
+        Calendar pastLimit = (Calendar) today.clone();
+        pastLimit.add(Calendar.MONTH, -Math.max(pastMonths, 0));
+        Calendar futureLimit = (Calendar) today.clone();
+        futureLimit.add(Calendar.MONTH, Math.max(futureMonths, 0));
 
-        Calendar currentPastStart = (Calendar) startDate.clone();
-        while (true) {
-            currentPastStart.add(Calendar.DAY_OF_MONTH, -(cycleLength + ringFreeDays));
-            if (currentPastStart.before(pastLimit)) break;
-
-            Calendar removalDate = (Calendar) currentPastStart.clone();
-            removalDate.add(Calendar.DAY_OF_MONTH, cycleLength);
-            Calendar newInsertionDate = (Calendar) removalDate.clone();
-            newInsertionDate.add(Calendar.DAY_OF_MONTH, ringFreeDays);
-
-            Calendar greenStart = (Calendar) currentPastStart.clone();
-            greenStart.add(Calendar.DAY_OF_MONTH, 1);
-            Calendar greenEnd = (Calendar) removalDate.clone();
-            greenEnd.add(Calendar.DAY_OF_MONTH, -1);
-
-            Calendar redStart = (Calendar) removalDate.clone();
-            redStart.add(Calendar.DAY_OF_MONTH, 1);
-            Calendar redEnd = (Calendar) removalDate.clone();
-            redEnd.add(Calendar.DAY_OF_MONTH, 6);
-
-            decorators.add(new SingleDayDecorator(Color.argb(127, 0, 255, 255), toCalendarDay(currentPastStart)));
-            decorators.add(new SingleDayDecorator(Color.argb(127, 255, 255, 0), toCalendarDay(removalDate)));
-            decorators.add(new SingleDayDecorator(Color.argb(127, 0, 255, 255), toCalendarDay(newInsertionDate)));
-            decorators.add(new RangeDayDecorator(Color.argb(127, 0, 255, 0), toCalendarDay(greenStart), toCalendarDay(greenEnd)));
-            decorators.add(new RangeDayDecorator(Color.argb(127, 255, 0, 0), toCalendarDay(redStart), toCalendarDay(redEnd)));
+        int baseStepDays = cycleLength + ringFreeDays;
+        if (baseStepDays <= 0) {
+            return;
         }
 
         Calendar currentStartDate = (Calendar) startDate.clone();
-        while (currentStartDate.before(futureLimit)) {
+        currentStartDate.set(Calendar.SECOND, 0);
+        currentStartDate.set(Calendar.MILLISECOND, 0);
+        if (currentStartDate.after(pastLimit)) {
+            while (currentStartDate.after(pastLimit)) {
+                currentStartDate.add(Calendar.DAY_OF_MONTH, -baseStepDays);
+            }
+        } else {
+            while (currentStartDate.before(pastLimit)) {
+                int delayDays = getDelayDaysForStart(currentStartDate);
+                currentStartDate.add(Calendar.DAY_OF_MONTH, baseStepDays + delayDays);
+            }
+        }
+
+        int guard = 0;
+        while (!currentStartDate.after(futureLimit) && guard < 2000) {
+            int delayDays = getDelayDaysForStart(currentStartDate);
+            int stepDays = cycleLength + ringFreeDays + delayDays;
             Calendar removalDate = (Calendar) currentStartDate.clone();
-            removalDate.add(Calendar.DAY_OF_MONTH, cycleLength);
+            removalDate.add(Calendar.DAY_OF_MONTH, cycleLength + delayDays);
             Calendar newInsertionDate = (Calendar) removalDate.clone();
             newInsertionDate.add(Calendar.DAY_OF_MONTH, ringFreeDays);
 
@@ -149,13 +152,24 @@ public class CalendarFragment extends Fragment {
             Calendar redEnd = (Calendar) removalDate.clone();
             redEnd.add(Calendar.DAY_OF_MONTH, 6);
 
-            decorators.add(new SingleDayDecorator(Color.argb(127, 0, 255, 255), toCalendarDay(currentStartDate)));
-            decorators.add(new SingleDayDecorator(Color.argb(127, 255, 255, 0), toCalendarDay(removalDate)));
-            decorators.add(new SingleDayDecorator(Color.argb(127, 0, 255, 255), toCalendarDay(newInsertionDate)));
-            decorators.add(new RangeDayDecorator(Color.argb(127, 0, 255, 0), toCalendarDay(greenStart), toCalendarDay(greenEnd)));
-            decorators.add(new RangeDayDecorator(Color.argb(127, 255, 0, 0), toCalendarDay(redStart), toCalendarDay(redEnd)));
+            if (isWithinRange(currentStartDate, pastLimit, futureLimit)) {
+                decorators.add(new SingleDayDecorator(Color.argb(127, 0, 255, 255), toCalendarDay(currentStartDate)));
+            }
+            if (isWithinRange(removalDate, pastLimit, futureLimit)) {
+                decorators.add(new SingleDayDecorator(Color.argb(127, 255, 255, 0), toCalendarDay(removalDate)));
+            }
+            if (isWithinRange(newInsertionDate, pastLimit, futureLimit)) {
+                decorators.add(new SingleDayDecorator(Color.argb(127, 0, 255, 255), toCalendarDay(newInsertionDate)));
+            }
+            if (isOverlappingRange(greenStart, greenEnd, pastLimit, futureLimit)) {
+                decorators.add(new RangeDayDecorator(Color.argb(127, 0, 255, 0), toCalendarDay(greenStart), toCalendarDay(greenEnd)));
+            }
+            if (isOverlappingRange(redStart, redEnd, pastLimit, futureLimit)) {
+                decorators.add(new RangeDayDecorator(Color.argb(127, 255, 0, 0), toCalendarDay(redStart), toCalendarDay(redEnd)));
+            }
 
-            currentStartDate = (Calendar) newInsertionDate.clone();
+            currentStartDate.add(Calendar.DAY_OF_MONTH, stepDays);
+            guard++;
         }
 
         for (DayViewDecorator d : decorators) {
@@ -250,5 +264,20 @@ public class CalendarFragment extends Fragment {
                 calendar.get(Calendar.MONTH) + 1,
                 calendar.get(Calendar.DAY_OF_MONTH)
         );
+    }
+
+    private int getDelayDaysForStart(Calendar startDate) {
+        Calendar normalized = (Calendar) startDate.clone();
+        normalized.set(Calendar.MILLISECOND, 0);
+        normalized.set(Calendar.SECOND, 0);
+        return viewModel.getRepository().getCycleDelayDays(normalized.getTimeInMillis());
+    }
+
+    private boolean isWithinRange(Calendar date, Calendar start, Calendar end) {
+        return !date.before(start) && !date.after(end);
+    }
+
+    private boolean isOverlappingRange(Calendar rangeStart, Calendar rangeEnd, Calendar windowStart, Calendar windowEnd) {
+        return !rangeEnd.before(windowStart) && !rangeStart.after(windowEnd);
     }
 }
