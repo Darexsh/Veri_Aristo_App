@@ -64,12 +64,12 @@
     <td align="center"><b>Calendar</b><br><img src="Screenshots/Calendar.png" width="200" height="450"></td>
     <td align="center"><b>Notes</b><br><img src="Screenshots/Notes.png" width="200" height="450"></td>
     <td align="center"><b>Cycles</b><br><img src="Screenshots/Cycles.png" width="200" height="450"></td>
-    <td align="center"><b>Settings</b><br><img src="Screenshots/Settings.png" width="200" height="450"></td>
   </tr>
 </table>
 
 <table>
   <tr>
+    <td align="center"><b>Settings</b><br><img src="Screenshots/Settings.png" width="200" height="450"></td>
     <td align="center"><b>Widgets</b><br><img src="Screenshots/Widgets.png" width="200" height="450"></td>
     <td align="center"><b>About</b><br><img src="Screenshots/About.png" width="200" height="450"></td>
   </tr>
