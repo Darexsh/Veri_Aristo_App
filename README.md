@@ -8,7 +8,7 @@
 **An Android app for tracking and managing contraceptive ring cycles**  
 📅⏰📝🎨📊
 
-![Projekt-Status](https://img.shields.io/badge/Status-Aktiv-brightgreen) ![Lizenz](https://img.shields.io/badge/Lizenz-NonCommercial%20MIT-blue) ![Version](https://img.shields.io/badge/Version-1.2.0-orange)
+![Projekt-Status](https://img.shields.io/badge/Status-Aktiv-brightgreen) ![Lizenz](https://img.shields.io/badge/Lizenz-NonCommercial%20MIT-blue) ![Version](https://img.shields.io/badge/Version-1.2.1-orange)
 
 </div>
 
@@ -34,19 +34,19 @@
 ✨ Features
 ----------
 
-* 📅 **Cycle Tracking**: Visualize insertion, removal, ring-free, and active days with color-coded calendar highlights.
+* 📅 **Cycle Tracking**: Visualize insertion, removal, ring-free, and active days with color-coded calendar highlights; tap legend dots to recolor.
     
 * 🔔 **Reminders**: Custom reminder lead times for insertion/removal, with automatic rescheduling.
     
 * 📝 **Notes**: Notebook-style notes with autosave, character counter, and quick delete.
     
-* 🎨 **Customization**: Set cycle length, insertion date/time, calendar range, language, and background image.
+* 🎨 **Customization**: Set cycle length, insertion date/time, calendar range, language, and background image. Customize button color, home ring color, and widget colors.
     
 * 📊 **Cycle History**: Review past and upcoming cycles to track patterns and durations.
 
-* ⏩ **Wear Ring Longer**: Extend the current cycle once and keep history intact.
+* ⏩ **Wear Ring Longer**: Extend the current cycle once and keep history intact, with built‑in info guidance.
 
-* 🧩 **Home Screen Widgets**: Small widget shows days left; large widget shows days left plus next dates.
+* 🧩 **Home Screen Widgets**: Small widget shows days left; large widget shows days left plus next dates, both color‑synced with app settings and resizable.
 
 * 💾 **Backup / Restore**: One‑tap export and import of all settings and notes.
 
@@ -129,6 +129,8 @@
         * 🔴 Red: Ring-free days
             
         * 🟩 Green: Active cycle days
+
+    * Tap legend dots to change the colors.
             
 3. **Get Notifications**:
     
@@ -137,6 +139,7 @@
 4. **Use Widgets**:
     
     * Add the small or large widget to your home screen for quick status.
+    * Widgets are resizable from the launcher.
         
 5. **Take Notes**:
     
@@ -149,6 +152,10 @@
 7. **Backup / Restore**:
 
     * Use **Settings → Advanced** to export or import all settings and notes.
+
+8. **Wear Ring Longer Info**:
+
+    * Tap the **info** icon next to “Wear ring longer” for guidance.
         
 
 * * *
