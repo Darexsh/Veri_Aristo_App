@@ -1,4 +1,4 @@
-package com.example.veri_aristo;
+package com.darexsh.veri_aristo;
 
 import android.content.Context;
 
@@ -21,6 +21,6 @@ public class ExampleInstrumentedTest {
     public void useAppContext() {
         // Context of the app under test.
         Context appContext = InstrumentationRegistry.getInstrumentation().getTargetContext();
-        assertEquals("com.example.veri_aristo", appContext.getPackageName());
+        assertEquals("com.darexsh.veri_aristo", appContext.getPackageName());
     }
 }

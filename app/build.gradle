@@ -3,11 +3,11 @@ plugins {
 }
 
 android {
-    namespace 'com.example.veri_aristo'
+    namespace 'com.darexsh.veri_aristo'
     compileSdk 35
 
     defaultConfig {
-        applicationId "com.example.veri_aristo"
+        applicationId "com.darexsh.veri_aristo"
         minSdk 26
         targetSdk 35
         versionCode 1

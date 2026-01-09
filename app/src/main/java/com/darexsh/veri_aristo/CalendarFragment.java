@@ -1,4 +1,4 @@
-package com.example.veri_aristo;
+package com.darexsh.veri_aristo;
 
 import android.app.AlertDialog;
 import android.graphics.Canvas;
@@ -27,7 +27,7 @@ import com.prolificinteractive.materialcalendarview.DayViewFacade;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
-import com.example.veri_aristo.Constants;
+import com.darexsh.veri_aristo.Constants;
 
 public class CalendarFragment extends Fragment {
 

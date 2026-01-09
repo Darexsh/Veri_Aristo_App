@@ -1,4 +1,4 @@
-package com.example.veri_aristo;
+package com.darexsh.veri_aristo;
 
 import android.Manifest;
 import android.app.AlarmManager;

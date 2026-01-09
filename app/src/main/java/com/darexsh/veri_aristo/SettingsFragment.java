@@ -1,4 +1,4 @@
-package com.example.veri_aristo;
+package com.darexsh.veri_aristo;
 
 import android.app.AlertDialog;
 import android.app.DatePickerDialog;
@@ -35,7 +35,7 @@ import com.google.android.material.button.MaterialButton;
 import java.util.Calendar;
 import java.text.SimpleDateFormat;
 import java.util.Locale;
-import com.example.veri_aristo.Constants;
+import com.darexsh.veri_aristo.Constants;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;

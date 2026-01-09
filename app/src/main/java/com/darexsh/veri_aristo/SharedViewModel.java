@@ -1,4 +1,4 @@
-package com.example.veri_aristo;
+package com.darexsh.veri_aristo;
 
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;

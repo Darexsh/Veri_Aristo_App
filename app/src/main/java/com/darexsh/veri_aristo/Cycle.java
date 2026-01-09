@@ -1,4 +1,4 @@
-package com.example.veri_aristo;
+package com.darexsh.veri_aristo;
 
 // Represents a cycle event with a start date, end date, and type
 public class Cycle {
