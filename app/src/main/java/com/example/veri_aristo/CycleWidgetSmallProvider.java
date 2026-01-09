@@ -25,6 +25,8 @@ public class CycleWidgetSmallProvider extends AppWidgetProvider {
     public static void updateAppWidget(Context context, AppWidgetManager appWidgetManager, int appWidgetId) {
         RemoteViews views = new RemoteViews(context.getPackageName(), R.layout.widget_ring_small);
         CycleWidgetUtils.State state = CycleWidgetUtils.calculateState(context);
+        SettingsRepository repository = new SettingsRepository(context);
+        views.setInt(R.id.widget_bg_image, "setColorFilter", repository.getButtonColor());
 
         views.setTextViewText(R.id.tv_widget_days_number, String.valueOf(state.daysLeft));
         views.setTextViewText(R.id.tv_widget_days_label, state.label);

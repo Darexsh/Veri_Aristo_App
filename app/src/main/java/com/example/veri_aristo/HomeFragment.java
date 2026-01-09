@@ -10,6 +10,8 @@ import android.content.UriPermission;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.Bundle;
+import android.text.Html;
+import android.text.Spanned;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
 import android.view.LayoutInflater;
@@ -47,9 +49,23 @@ public class HomeFragment extends Fragment {
         final TextView tvDaysLabel = view.findViewById(R.id.tv_days_left_label);    // TextView to display the label for days left
         final ImageView backgroundImageView = view.findViewById(R.id.background_image); // ImageView for the background image
         final MaterialButton btnDelayCycle = view.findViewById(R.id.btn_delay_cycle);
+        final android.widget.ImageButton btnDelayInfo = view.findViewById(R.id.btn_delay_info);
 
         SharedViewModelFactory factory = new SharedViewModelFactory(requireActivity().getApplication());
         viewModel = new ViewModelProvider(requireActivity(), factory).get(SharedViewModel.class);
+
+        viewModel.getButtonColor().observe(getViewLifecycleOwner(), color -> {
+            if (color != null) {
+                ButtonColorHelper.applyPrimaryColor(btnDelayCycle, color);
+                btnDelayInfo.setColorFilter(color);
+            }
+        });
+        btnDelayInfo.setOnClickListener(v -> showDelayInfoDialog());
+        viewModel.getHomeCircleColor().observe(getViewLifecycleOwner(), color -> {
+            if (color != null) {
+                circularProgress.setIndicatorColor(color);
+            }
+        });
 
         // Set background image if available
         Runnable loadBackgroundImage = () -> {
@@ -260,6 +276,18 @@ public class HomeFragment extends Fragment {
 
         updateUi.run();
         return view;
+    }
+
+    private void showDelayInfoDialog() {
+        Spanned message = Html.fromHtml(
+                getString(R.string.home_delay_info_message),
+                Html.FROM_HTML_MODE_LEGACY
+        );
+        new AlertDialog.Builder(requireContext())
+                .setTitle(R.string.home_delay_info_title)
+                .setMessage(message)
+                .setPositiveButton(R.string.dialog_ok, null)
+                .show();
     }
 
     // Save a cycle event to the history

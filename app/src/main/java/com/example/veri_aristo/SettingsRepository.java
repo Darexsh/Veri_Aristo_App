@@ -29,6 +29,18 @@ public class SettingsRepository {
     private static final String KEY_CALENDAR_FUTURE_UNIT = "calendar_future_unit";
     private static final String KEY_REMOVAL_REMINDER_HOURS = "removal_reminder_hours";
     private static final String KEY_INSERTION_REMINDER_HOURS = "insertion_reminder_hours";
+    private static final String KEY_BUTTON_COLOR = "button_color";
+    private static final String KEY_HOME_CIRCLE_COLOR = "home_circle_color";
+    private static final String KEY_CALENDAR_WEAR_COLOR = "calendar_wear_color";
+    private static final String KEY_CALENDAR_RING_FREE_COLOR = "calendar_ring_free_color";
+    private static final String KEY_CALENDAR_REMOVAL_COLOR = "calendar_removal_color";
+    private static final String KEY_CALENDAR_INSERTION_COLOR = "calendar_insertion_color";
+    public static final int DEFAULT_BUTTON_COLOR = 0xFF6200EE;
+    public static final int DEFAULT_HOME_CIRCLE_COLOR = 0xFFBB86FC;
+    public static final int DEFAULT_CALENDAR_WEAR_COLOR = 0xFF00FF00;
+    public static final int DEFAULT_CALENDAR_RING_FREE_COLOR = 0xFFFF0000;
+    public static final int DEFAULT_CALENDAR_REMOVAL_COLOR = 0xFFFFFF00;
+    public static final int DEFAULT_CALENDAR_INSERTION_COLOR = 0xFF00FFFF;
 
     private final SharedPreferences sharedPreferences;
 
@@ -161,6 +173,54 @@ public class SettingsRepository {
 
     public void setInsertionReminderHours(int hours) {
         sharedPreferences.edit().putInt(KEY_INSERTION_REMINDER_HOURS, hours).apply();
+    }
+
+    public int getButtonColor() {
+        return sharedPreferences.getInt(KEY_BUTTON_COLOR, DEFAULT_BUTTON_COLOR);
+    }
+
+    public void saveButtonColor(int color) {
+        sharedPreferences.edit().putInt(KEY_BUTTON_COLOR, color).apply();
+    }
+
+    public int getHomeCircleColor() {
+        return sharedPreferences.getInt(KEY_HOME_CIRCLE_COLOR, DEFAULT_HOME_CIRCLE_COLOR);
+    }
+
+    public void saveHomeCircleColor(int color) {
+        sharedPreferences.edit().putInt(KEY_HOME_CIRCLE_COLOR, color).apply();
+    }
+
+    public int getCalendarWearColor() {
+        return sharedPreferences.getInt(KEY_CALENDAR_WEAR_COLOR, DEFAULT_CALENDAR_WEAR_COLOR);
+    }
+
+    public void saveCalendarWearColor(int color) {
+        sharedPreferences.edit().putInt(KEY_CALENDAR_WEAR_COLOR, color).apply();
+    }
+
+    public int getCalendarRingFreeColor() {
+        return sharedPreferences.getInt(KEY_CALENDAR_RING_FREE_COLOR, DEFAULT_CALENDAR_RING_FREE_COLOR);
+    }
+
+    public void saveCalendarRingFreeColor(int color) {
+        sharedPreferences.edit().putInt(KEY_CALENDAR_RING_FREE_COLOR, color).apply();
+    }
+
+    public int getCalendarRemovalColor() {
+        return sharedPreferences.getInt(KEY_CALENDAR_REMOVAL_COLOR, DEFAULT_CALENDAR_REMOVAL_COLOR);
+    }
+
+    public void saveCalendarRemovalColor(int color) {
+        sharedPreferences.edit().putInt(KEY_CALENDAR_REMOVAL_COLOR, color).apply();
+    }
+
+    public int getCalendarInsertionColor() {
+        return sharedPreferences.getInt(KEY_CALENDAR_INSERTION_COLOR, DEFAULT_CALENDAR_INSERTION_COLOR);
+    }
+
+    public void saveCalendarInsertionColor(int color) {
+        sharedPreferences.edit().putInt(KEY_CALENDAR_INSERTION_COLOR, color).apply();
     }
 
     public int getNotificationSettingsHash() {

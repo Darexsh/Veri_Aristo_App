@@ -56,11 +56,21 @@ public class SettingsFragment extends Fragment {
     private MaterialButton btnBackupManage;
     private MaterialButton btnSetNotificationTimes;
     private MaterialButton btnSetLanguage;
+    private MaterialButton btnSetButtonColor;
+    private MaterialButton btnSetCircleColor;
+    private android.widget.ImageButton btnSettingsInfo;
     private SharedViewModel viewModel;
     private ActivityResultLauncher<String> requestPermissionLauncher;
     private ActivityResultLauncher<String> pickImageLauncher;
     private ActivityResultLauncher<String> createBackupLauncher;
     private ActivityResultLauncher<String[]> restoreBackupLauncher;
+    private int[] buttonColorValues;
+    private String[] buttonColorLabels;
+
+    private interface ColorConsumer {
+        void accept(int color);
+    }
+
 
     public SettingsFragment() {
         // Required empty public constructor
@@ -115,7 +125,7 @@ public class SettingsFragment extends Fragment {
         View view = inflater.inflate(R.layout.fragment_settings, container, false);
 
         TextView settingsTitle = view.findViewById(R.id.tv_settings_title);
-        android.widget.ImageButton infoButton = view.findViewById(R.id.btn_settings_info);
+        btnSettingsInfo = view.findViewById(R.id.btn_settings_info);
         btnSetTime = view.findViewById(R.id.btn_set_time);
         btnSetStartDate = view.findViewById(R.id.btn_set_start_date);
         btnSetCycleLength = view.findViewById(R.id.btn_set_cycle_length);
@@ -125,6 +135,8 @@ public class SettingsFragment extends Fragment {
         btnBackupManage = view.findViewById(R.id.btn_backup_manage);
         btnSetNotificationTimes = view.findViewById(R.id.btn_set_notification_times);
         btnSetLanguage = view.findViewById(R.id.btn_set_language);
+        btnSetButtonColor = view.findViewById(R.id.btn_set_button_color);
+        btnSetCircleColor = view.findViewById(R.id.btn_set_circle_color);
 
         SharedViewModelFactory factory = new SharedViewModelFactory(requireActivity().getApplication());
         viewModel = new ViewModelProvider(requireActivity(), factory).get(SharedViewModel.class);
@@ -190,6 +202,21 @@ public class SettingsFragment extends Fragment {
             updateNotificationTimesButtonText(removalHours, hours);
         });
 
+        viewModel.getButtonColor().observe(getViewLifecycleOwner(), color -> {
+            if (color != null) {
+                applyPrimaryButtonColor(color);
+                updateButtonColorButtonText(color);
+                btnSettingsInfo.setColorFilter(color);
+            }
+        });
+
+        viewModel.getHomeCircleColor().observe(getViewLifecycleOwner(), color -> {
+            if (color != null) {
+                updateCircleColorButtonText(color);
+            }
+        });
+
+
         // Set up button click listeners
         btnSetTime.setOnClickListener(v -> showTimePicker());
         btnSetStartDate.setOnClickListener(v -> showDatePicker());
@@ -200,7 +227,9 @@ public class SettingsFragment extends Fragment {
         btnBackupManage.setOnClickListener(v -> showBackupDialog());
         btnSetNotificationTimes.setOnClickListener(v -> showNotificationTimesDialog());
         btnSetLanguage.setOnClickListener(v -> showLanguageDialog());
-        infoButton.setOnClickListener(v -> showAppInfoDialog());
+        btnSetButtonColor.setOnClickListener(v -> showButtonColorDialog());
+        btnSetCircleColor.setOnClickListener(v -> showCircleColorDialog());
+        btnSettingsInfo.setOnClickListener(v -> showAppInfoDialog());
         settingsTitle.setOnLongClickListener(v -> {
             showDebugDialog();
             return true;
@@ -433,6 +462,161 @@ public class SettingsFragment extends Fragment {
         btnSetLanguage.setText(getString(R.string.language_button, label));
     }
 
+    private void showButtonColorDialog() {
+        Integer currentColor = viewModel.getButtonColor().getValue();
+        int selectedColor = currentColor != null ? currentColor : SettingsRepository.DEFAULT_BUTTON_COLOR;
+        showColorDialog(
+                R.string.settings_button_color_dialog_title,
+                selectedColor,
+                R.string.settings_button_color_custom_title,
+                R.string.settings_button_color_widget_note,
+                color -> {
+                    viewModel.setButtonColor(color);
+                    WidgetUpdater.updateAllWidgets(requireContext());
+                }
+        );
+    }
+
+    private void showCircleColorDialog() {
+        Integer currentColor = viewModel.getHomeCircleColor().getValue();
+        int selectedColor = currentColor != null ? currentColor : SettingsRepository.DEFAULT_HOME_CIRCLE_COLOR;
+        showColorDialog(
+                R.string.settings_circle_color_dialog_title,
+                selectedColor,
+                R.string.settings_circle_color_custom_title,
+                R.string.settings_circle_color_widget_note,
+                color -> {
+                    viewModel.setHomeCircleColor(color);
+                    WidgetUpdater.updateAllWidgets(requireContext());
+                }
+        );
+    }
+
+    private void showColorDialog(int titleResId, int selectedColor, int customTitleResId, int noteResId, ColorConsumer onSelect) {
+        ensureButtonColorOptionsLoaded();
+        int selectedIndex = getButtonColorIndex(selectedColor);
+        final int[] pendingColor = new int[]{selectedColor};
+
+        View content = LayoutInflater.from(requireContext())
+                .inflate(R.layout.dialog_button_color_list, null);
+        android.widget.ListView listView = content.findViewById(R.id.list_button_colors);
+        MaterialButton customButton = content.findViewById(R.id.btn_custom_color);
+        MaterialButton cancelButton = content.findViewById(R.id.btn_cancel_color);
+        android.widget.TextView widgetNote = content.findViewById(R.id.tv_color_dialog_note);
+        if (widgetNote != null) {
+            widgetNote.setText(noteResId);
+            widgetNote.setVisibility(View.VISIBLE);
+        }
+        android.widget.ListAdapter adapter = new android.widget.ArrayAdapter<String>(
+                requireContext(),
+                R.layout.dialog_button_color_item,
+                android.R.id.text1,
+                buttonColorLabels
+        ) {
+            @NonNull
+            @Override
+            public View getView(int position, @Nullable View convertView, @NonNull ViewGroup parent) {
+                View view = super.getView(position, convertView, parent);
+                View swatch = view.findViewById(R.id.view_color_swatch);
+                if (swatch != null) {
+                    swatch.setBackgroundColor(buttonColorValues[position]);
+                }
+                return view;
+            }
+        };
+
+        AlertDialog dialog = new AlertDialog.Builder(requireContext())
+                .setTitle(titleResId)
+                .setView(content)
+                .create();
+
+        listView.setAdapter(adapter);
+        listView.setChoiceMode(android.widget.ListView.CHOICE_MODE_SINGLE);
+        if (selectedIndex >= 0) {
+            listView.setItemChecked(selectedIndex, true);
+        }
+        listView.setOnItemClickListener((parent, view, position, id) -> {
+            pendingColor[0] = buttonColorValues[position];
+            onSelect.accept(pendingColor[0]);
+            dialog.dismiss();
+        });
+
+        customButton.setOnClickListener(v -> {
+            dialog.dismiss();
+            showCustomColorDialog(customTitleResId, pendingColor[0], onSelect);
+        });
+        cancelButton.setOnClickListener(v -> dialog.dismiss());
+
+        dialog.show();
+    }
+
+    private void showCustomColorDialog(int titleResId, int initialColor, ColorConsumer onSelect) {
+        View content = LayoutInflater.from(requireContext())
+                .inflate(R.layout.dialog_button_color_custom, null);
+        HsvColorWheelView colorWheel = content.findViewById(R.id.color_wheel);
+        View preview = content.findViewById(R.id.view_color_preview);
+        final int[] pendingColor = new int[]{initialColor};
+        preview.setBackgroundTintList(android.content.res.ColorStateList.valueOf(initialColor));
+        colorWheel.setColor(initialColor);
+        colorWheel.setOnColorChangeListener(color -> {
+            pendingColor[0] = color;
+            preview.setBackgroundTintList(android.content.res.ColorStateList.valueOf(color));
+        });
+
+        new AlertDialog.Builder(requireContext())
+                .setTitle(titleResId)
+                .setView(content)
+                .setPositiveButton(R.string.dialog_ok, (dialog, which) -> onSelect.accept(pendingColor[0]))
+                .setNegativeButton(R.string.dialog_cancel, null)
+                .show();
+    }
+
+    private void applyPrimaryButtonColor(int color) {
+        ButtonColorHelper.applyPrimaryColor(btnSetTime, color);
+        ButtonColorHelper.applyPrimaryColor(btnSetStartDate, color);
+        ButtonColorHelper.applyPrimaryColor(btnSetCycleLength, color);
+        ButtonColorHelper.applyPrimaryColor(btnSetBackground, color);
+        ButtonColorHelper.applyPrimaryColor(btnSetCalendarRange, color);
+        ButtonColorHelper.applyPrimaryColor(btnBackupManage, color);
+        ButtonColorHelper.applyPrimaryColor(btnSetNotificationTimes, color);
+        ButtonColorHelper.applyPrimaryColor(btnSetLanguage, color);
+        ButtonColorHelper.applyPrimaryColor(btnSetButtonColor, color);
+        ButtonColorHelper.applyPrimaryColor(btnSetCircleColor, color);
+    }
+
+    private void updateButtonColorButtonText(int color) {
+        btnSetButtonColor.setText(R.string.settings_button_color_format);
+    }
+
+    private void updateCircleColorButtonText(int color) {
+        btnSetCircleColor.setText(R.string.settings_circle_color_format);
+    }
+
+    private void ensureButtonColorOptionsLoaded() {
+        if (buttonColorValues == null || buttonColorLabels == null) {
+            buttonColorValues = getResources().getIntArray(R.array.settings_button_color_values);
+            buttonColorLabels = getResources().getStringArray(R.array.settings_button_color_labels);
+        }
+    }
+
+    private int getButtonColorIndex(int color) {
+        ensureButtonColorOptionsLoaded();
+        for (int i = 0; i < buttonColorValues.length; i++) {
+            if (buttonColorValues[i] == color) {
+                return i;
+            }
+        }
+        return 0;
+    }
+
+    private String getButtonColorLabel(int color) {
+        int index = getButtonColorIndex(color);
+        if (index >= 0 && index < buttonColorLabels.length) {
+            return buttonColorLabels[index];
+        }
+        return getString(R.string.settings_button_color_custom);
+    }
+
     private String unitLabel(String unit) {
         if ("years".equals(unit)) {
             return getString(R.string.settings_unit_year_short);
@@ -515,6 +699,11 @@ public class SettingsFragment extends Fragment {
         TextView appGithub = content.findViewById(R.id.tv_app_github);
         com.google.android.material.button.MaterialButton openEmail = content.findViewById(R.id.btn_open_email);
         com.google.android.material.button.MaterialButton openGithub = content.findViewById(R.id.btn_open_github);
+        Integer buttonColor = viewModel.getButtonColor().getValue();
+        if (buttonColor != null) {
+            ButtonColorHelper.applyPrimaryColor(openEmail, buttonColor);
+            ButtonColorHelper.applyPrimaryColor(openGithub, buttonColor);
+        }
 
         appName.setText(R.string.app_info_name);
         appVersion.setText(getString(R.string.app_info_version, versionName));
@@ -578,6 +767,8 @@ public class SettingsFragment extends Fragment {
         viewModel.setCalendarFutureRange(2, "years");
         viewModel.setRemovalReminderHours(6);
         viewModel.setInsertionReminderHours(6);
+        viewModel.setButtonColor(SettingsRepository.DEFAULT_BUTTON_COLOR);
+        viewModel.setHomeCircleColor(SettingsRepository.DEFAULT_HOME_CIRCLE_COLOR);
 
         WidgetUpdater.updateAllWidgets(requireContext());
         Toast.makeText(requireContext(), R.string.settings_reset_done, Toast.LENGTH_SHORT).show();

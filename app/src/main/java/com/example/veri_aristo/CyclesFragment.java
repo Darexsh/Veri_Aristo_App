@@ -7,11 +7,11 @@ import androidx.fragment.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Button;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 import androidx.cardview.widget.CardView;
 import androidx.lifecycle.ViewModelProvider;
+import com.google.android.material.button.MaterialButton;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -37,10 +37,16 @@ public class CyclesFragment extends Fragment {
 
         // Initialize UI components
         cycleContainer = view.findViewById(R.id.cycle_container);
-        Button clearHistoryButton = view.findViewById(R.id.btn_clear_history);
+        MaterialButton clearHistoryButton = view.findViewById(R.id.btn_clear_history);
 
         SharedViewModelFactory factory = new SharedViewModelFactory(requireActivity().getApplication());
         viewModel = new ViewModelProvider(requireActivity(), factory).get(SharedViewModel.class);
+
+        viewModel.getButtonColor().observe(getViewLifecycleOwner(), color -> {
+            if (color != null) {
+                ButtonColorHelper.applyPrimaryColor(clearHistoryButton, color);
+            }
+        });
 
         // Load and display cycle history
         displayCycleHistory(cycleContainer);

@@ -148,6 +148,7 @@
                         app:cornerRadius="12dp"
                         app:backgroundTint="#6200EE"
                         android:textColor="#FFFFFF" />
+
                 </LinearLayout>
             </com.google.android.material.card.MaterialCardView>
 
@@ -220,6 +221,30 @@
                         app:cornerRadius="12dp"
                         app:backgroundTint="#6200EE"
                         android:textColor="#FFFFFF" />
+
+                    <com.google.android.material.button.MaterialButton
+                        android:id="@+id/btn_set_button_color"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="@string/settings_button_color_label"
+                        android:textAllCaps="false"
+                        android:textSize="15sp"
+                        app:cornerRadius="12dp"
+                        app:backgroundTint="#6200EE"
+                        android:textColor="#FFFFFF"
+                        android:layout_marginTop="10dp" />
+
+                    <com.google.android.material.button.MaterialButton
+                        android:id="@+id/btn_set_circle_color"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="@string/settings_circle_color_label"
+                        android:textAllCaps="false"
+                        android:textSize="15sp"
+                        app:cornerRadius="12dp"
+                        app:backgroundTint="#6200EE"
+                        android:textColor="#FFFFFF"
+                        android:layout_marginTop="10dp" />
 
                     <com.google.android.material.button.MaterialButton
                         android:id="@+id/btn_set_language"

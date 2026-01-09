@@ -9,6 +9,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
+import android.content.res.ColorStateList;
 import android.os.Build;
 import android.os.Bundle;
 import android.widget.Toast;
@@ -19,6 +20,7 @@ import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
+import androidx.lifecycle.ViewModelProvider;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.jakewharton.threetenabp.AndroidThreeTen;
 
@@ -38,6 +40,7 @@ public class MainActivity extends AppCompatActivity {
     private ImageButton btnNotes;
     private BottomNavigationView bottomNavigationView;
     private long lastBackPressedAt = 0L;
+    private SharedViewModel viewModel;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -63,6 +66,13 @@ public class MainActivity extends AppCompatActivity {
         fragmentManager = getSupportFragmentManager();
         btnNotes = findViewById(R.id.btn_notes);
         bottomNavigationView = findViewById(R.id.bottom_navigation);
+        SharedViewModelFactory factory = new SharedViewModelFactory(getApplication());
+        viewModel = new ViewModelProvider(this, factory).get(SharedViewModel.class);
+        viewModel.getButtonColor().observe(this, color -> {
+            if (color != null) {
+                applyBottomNavColors(color);
+            }
+        });
 
         // Standardmäßig Home-Fragment laden
         if (savedInstanceState == null) {
@@ -143,6 +153,18 @@ public class MainActivity extends AppCompatActivity {
         // Create notification channel and request permission
         createNotificationChannel();
         requestNotificationPermission();
+    }
+
+    private void applyBottomNavColors(int selectedColor) {
+        int unselectedColor = ContextCompat.getColor(this, android.R.color.darker_gray);
+        int[][] states = new int[][]{
+                new int[]{android.R.attr.state_checked},
+                new int[]{-android.R.attr.state_checked}
+        };
+        int[] colors = new int[]{selectedColor, unselectedColor};
+        ColorStateList tintList = new ColorStateList(states, colors);
+        bottomNavigationView.setItemIconTintList(tintList);
+        bottomNavigationView.setItemTextColor(tintList);
     }
 
     @Override

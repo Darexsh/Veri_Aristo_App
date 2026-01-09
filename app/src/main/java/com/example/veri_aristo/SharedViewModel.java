@@ -20,6 +20,12 @@ public class SharedViewModel extends ViewModel {
     private final MutableLiveData<String> calendarFutureUnit = new MutableLiveData<>();
     private final MutableLiveData<Integer> removalReminderHours = new MutableLiveData<>();
     private final MutableLiveData<Integer> insertionReminderHours = new MutableLiveData<>();
+    private final MutableLiveData<Integer> buttonColor = new MutableLiveData<>();
+    private final MutableLiveData<Integer> homeCircleColor = new MutableLiveData<>();
+    private final MutableLiveData<Integer> calendarWearColor = new MutableLiveData<>();
+    private final MutableLiveData<Integer> calendarRingFreeColor = new MutableLiveData<>();
+    private final MutableLiveData<Integer> calendarRemovalColor = new MutableLiveData<>();
+    private final MutableLiveData<Integer> calendarInsertionColor = new MutableLiveData<>();
 
     public SharedViewModel(SettingsRepository repository) {
         this.repository = repository;
@@ -32,6 +38,12 @@ public class SharedViewModel extends ViewModel {
         calendarFutureUnit.setValue(repository.getCalendarFutureUnit());
         removalReminderHours.setValue(repository.getRemovalReminderHours());
         insertionReminderHours.setValue(repository.getInsertionReminderHours());
+        buttonColor.setValue(repository.getButtonColor());
+        homeCircleColor.setValue(repository.getHomeCircleColor());
+        calendarWearColor.setValue(repository.getCalendarWearColor());
+        calendarRingFreeColor.setValue(repository.getCalendarRingFreeColor());
+        calendarRemovalColor.setValue(repository.getCalendarRemovalColor());
+        calendarInsertionColor.setValue(repository.getCalendarInsertionColor());
     }
 
     // Getters for LiveData
@@ -69,6 +81,30 @@ public class SharedViewModel extends ViewModel {
 
     public LiveData<Integer> getInsertionReminderHours() {
         return insertionReminderHours;
+    }
+
+    public LiveData<Integer> getButtonColor() {
+        return buttonColor;
+    }
+
+    public LiveData<Integer> getHomeCircleColor() {
+        return homeCircleColor;
+    }
+
+    public LiveData<Integer> getCalendarWearColor() {
+        return calendarWearColor;
+    }
+
+    public LiveData<Integer> getCalendarRingFreeColor() {
+        return calendarRingFreeColor;
+    }
+
+    public LiveData<Integer> getCalendarRemovalColor() {
+        return calendarRemovalColor;
+    }
+
+    public LiveData<Integer> getCalendarInsertionColor() {
+        return calendarInsertionColor;
     }
 
     public SettingsRepository getRepository() {
@@ -111,5 +147,35 @@ public class SharedViewModel extends ViewModel {
     public void setInsertionReminderHours(int hours) {
         repository.setInsertionReminderHours(hours);
         insertionReminderHours.setValue(hours);
+    }
+
+    public void setButtonColor(int color) {
+        repository.saveButtonColor(color);
+        buttonColor.setValue(color);
+    }
+
+    public void setHomeCircleColor(int color) {
+        repository.saveHomeCircleColor(color);
+        homeCircleColor.setValue(color);
+    }
+
+    public void setCalendarWearColor(int color) {
+        repository.saveCalendarWearColor(color);
+        calendarWearColor.setValue(color);
+    }
+
+    public void setCalendarRingFreeColor(int color) {
+        repository.saveCalendarRingFreeColor(color);
+        calendarRingFreeColor.setValue(color);
+    }
+
+    public void setCalendarRemovalColor(int color) {
+        repository.saveCalendarRemovalColor(color);
+        calendarRemovalColor.setValue(color);
+    }
+
+    public void setCalendarInsertionColor(int color) {
+        repository.saveCalendarInsertionColor(color);
+        calendarInsertionColor.setValue(color);
     }
 }

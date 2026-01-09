@@ -21,6 +21,21 @@
 
     <string name="home_days_left">Days left</string>
     <string name="home_days_until_insertion">Days until insertion</string>
+    <string name="home_delay_info_title">Info</string>
+    <string name="home_delay_info_desc">Info about wearing the ring longer</string>
+    <string name="home_delay_info_message"><![CDATA[
+<b>You forgot to remove the ring</b><br><br>
+<b>Ring in for 3–4 weeks</b>: Contraceptive protection remains. Remove the ring, take a ring-free week (when bleeding usually occurs), then insert a new ring.<br><br>
+<b>Ring in for longer than 4 weeks</b>: Contraceptive protection may be reduced — there is a risk of pregnancy. Remove the ring immediately and contact your doctor before inserting a new one (a pregnancy test or additional contraception may be needed).<br><br>
+<b>Note</b>: If bleeding does not occur after removing the ring, seek medical advice as well.<br><br>
+<b>You want to delay your period</b><br><br>
+This is not the recommended standard use, but it is possible:<br>
+- Skip the ring-free week and insert a new ring immediately after removing the old one.<br>
+- The new ring can stay in place for up to 3 weeks.<br>
+- During this time, spotting or breakthrough bleeding may occur.<br>
+- To trigger withdrawal bleeding: remove the ring earlier, take the usual one-week ring-free break, then insert a new ring.<br><br>
+<b>Important</b>: Ask your doctor for advice before delaying your period.
+]]></string>
     <string name="home_removal_on_placeholder">Removal on --</string>
     <string name="home_removal_on">Removal on %1$s</string>
     <string name="home_insertion_on_placeholder">Insertion on --</string>
@@ -89,6 +104,34 @@
     <string name="settings_notification_times_message">Choose lead time in hours (0 = no reminder).</string>
     <string name="settings_notification_before_removal">Before removal (hours)</string>
     <string name="settings_notification_before_insertion">Before insertion (hours)</string>
+    <string name="settings_button_color_label">Button color</string>
+    <string name="settings_button_color_format">Button color</string>
+    <string name="settings_button_color_dialog_title">Choose button color</string>
+    <string name="settings_button_color_custom">Custom color</string>
+    <string name="settings_button_color_custom_action">Custom color</string>
+    <string name="settings_button_color_custom_title">Custom button color</string>
+    <string name="settings_button_color_widget_note">Also updates the widget background color.</string>
+    <string name="settings_circle_color_label">Home circle color</string>
+    <string name="settings_circle_color_format">Home circle color</string>
+    <string name="settings_circle_color_dialog_title">Choose home circle color</string>
+    <string name="settings_circle_color_custom_title">Custom home circle color</string>
+    <string name="settings_circle_color_widget_note">Also updates the widget ring color.</string>
+    <string name="settings_calendar_wear_color_label">Wear time color</string>
+    <string name="settings_calendar_wear_color_format">Wear time color: %1$s</string>
+    <string name="settings_calendar_wear_color_dialog_title">Choose wear time color</string>
+    <string name="settings_calendar_wear_color_custom_title">Custom wear time color</string>
+    <string name="settings_calendar_ring_free_color_label">Ring-free color</string>
+    <string name="settings_calendar_ring_free_color_format">Ring-free color: %1$s</string>
+    <string name="settings_calendar_ring_free_color_dialog_title">Choose ring-free color</string>
+    <string name="settings_calendar_ring_free_color_custom_title">Custom ring-free color</string>
+    <string name="settings_calendar_removal_color_label">Removal color</string>
+    <string name="settings_calendar_removal_color_format">Removal color: %1$s</string>
+    <string name="settings_calendar_removal_color_dialog_title">Choose removal color</string>
+    <string name="settings_calendar_removal_color_custom_title">Custom removal color</string>
+    <string name="settings_calendar_insertion_color_label">Insertion color</string>
+    <string name="settings_calendar_insertion_color_format">Insertion color: %1$s</string>
+    <string name="settings_calendar_insertion_color_dialog_title">Choose insertion color</string>
+    <string name="settings_calendar_insertion_color_custom_title">Custom insertion color</string>
 
     <string name="settings_unit_year">Year</string>
     <string name="settings_unit_month">Month</string>
@@ -157,7 +200,7 @@
 
     <string name="widget_small_name">Ring widget (small)</string>
     <string name="widget_large_name">Ring widget (large)</string>
-    <string name="widget_title">Next ring dates</string>
+    <string name="widget_title">Next ring dates:</string>
 
     <string name="nav_home">Home</string>
     <string name="nav_calendar">Calendar</string>

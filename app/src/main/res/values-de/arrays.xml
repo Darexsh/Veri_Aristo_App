@@ -1,0 +1,31 @@
+<resources>
+    <string-array name="settings_button_color_labels">
+        <item>Rot</item>
+        <item>Pink</item>
+        <item>Orange</item>
+        <item>Bernstein</item>
+        <item>Olive</item>
+        <item>Grün</item>
+        <item>Türkis</item>
+        <item>Blau</item>
+        <item>Indigo</item>
+        <item>Dunkelviolett</item>
+        <item>Lila</item>
+        <item>Schiefer</item>
+    </string-array>
+
+    <integer-array name="settings_button_color_values">
+        <item>0xFFC62828</item>
+        <item>0xFFD81B60</item>
+        <item>0xFFEF6C00</item>
+        <item>0xFFFFA000</item>
+        <item>0xFF7D8F3A</item>
+        <item>0xFF2E7D32</item>
+        <item>0xFF00796B</item>
+        <item>0xFF1565C0</item>
+        <item>0xFF512DA8</item>
+        <item>0xFF6A1B9A</item>
+        <item>0xFF6200EE</item>
+        <item>0xFF455A64</item>
+    </integer-array>
+</resources>

@@ -25,6 +25,8 @@ public class CycleWidgetLargeProvider extends AppWidgetProvider {
     public static void updateAppWidget(Context context, AppWidgetManager appWidgetManager, int appWidgetId) {
         RemoteViews views = new RemoteViews(context.getPackageName(), R.layout.widget_ring_large);
         CycleWidgetUtils.State state = CycleWidgetUtils.calculateState(context);
+        SettingsRepository repository = new SettingsRepository(context);
+        views.setInt(R.id.widget_bg_image, "setColorFilter", repository.getButtonColor());
 
         views.setTextViewText(R.id.tv_widget_days_number, String.valueOf(state.daysLeft));
         views.setTextViewText(R.id.tv_widget_days_label, state.label);
@@ -33,7 +35,8 @@ public class CycleWidgetLargeProvider extends AppWidgetProvider {
         float fraction = state.maxProgress > 0
                 ? (float) state.currentProgress / (float) state.maxProgress
                 : 0f;
-        views.setImageViewBitmap(R.id.img_widget_ring, CycleWidgetUtils.buildRingBitmap(context, fraction));
+        int ringColor = repository.getHomeCircleColor();
+        views.setImageViewBitmap(R.id.img_widget_ring, CycleWidgetUtils.buildRingBitmap(context, fraction, ringColor));
         views.setOnClickPendingIntent(R.id.widget_root, buildLaunchIntent(context, appWidgetId));
 
         appWidgetManager.updateAppWidget(appWidgetId, views);

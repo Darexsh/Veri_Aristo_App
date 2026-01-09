@@ -17,6 +17,8 @@ import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.TextView;
 import android.widget.Toast;
+import android.graphics.PorterDuff;
+import androidx.lifecycle.ViewModelProvider;
 import com.google.android.material.button.MaterialButton;
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -52,6 +54,17 @@ public class NotesFragment extends Fragment {
         tvLastSaved = view.findViewById(R.id.tv_last_saved);
         tvNoteDate = view.findViewById(R.id.tv_notes_date);
         ImageButton btnClose = view.findViewById(R.id.btn_close_notes);
+
+        SharedViewModelFactory factory = new SharedViewModelFactory(requireActivity().getApplication());
+        SharedViewModel viewModel = new ViewModelProvider(requireActivity(), factory).get(SharedViewModel.class);
+        viewModel.getButtonColor().observe(getViewLifecycleOwner(), color -> {
+            if (color != null) {
+                ButtonColorHelper.applyPrimaryColor(btnSave, color);
+                btnClose.setImageTintList(null);
+                btnClose.setColorFilter(color, PorterDuff.Mode.SRC_IN);
+                btnClose.setAlpha(1f);
+            }
+        });
 
         // Load saved notes when the fragment is created
         loadNotes();

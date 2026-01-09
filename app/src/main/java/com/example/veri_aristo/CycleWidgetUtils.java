@@ -94,7 +94,7 @@ public final class CycleWidgetUtils {
         return Math.max(days, 0);
     }
 
-    public static Bitmap buildRingBitmap(Context context, float progressFraction) {
+    public static Bitmap buildRingBitmap(Context context, float progressFraction, int ringColor) {
         int sizePx = context.getResources().getDimensionPixelSize(R.dimen.widget_ring_size);
         int strokePx = context.getResources().getDimensionPixelSize(R.dimen.widget_ring_stroke);
         float clamped = Math.max(0f, Math.min(1f, progressFraction));
@@ -111,7 +111,7 @@ public final class CycleWidgetUtils {
         Paint progressPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
         progressPaint.setStyle(Paint.Style.STROKE);
         progressPaint.setStrokeWidth(strokePx);
-        progressPaint.setColor(Color.WHITE);
+        progressPaint.setColor(ringColor);
 
         float radius = (sizePx - strokePx) / 2f;
         float cx = sizePx / 2f;
