@@ -16,6 +16,7 @@
     <string name="btn_set_background">Hintergrundbild auswählen</string>
     <string name="btn_set_notification_times">Erinnerungen einstellen</string>
     <string name="btn_backup">Backup</string>
+    <string name="btn_welcome_tour">Welcome-Tour</string>
     <string name="btn_reset_app">App zurücksetzen</string>
     <string name="btn_delay_cycle">Ring länger tragen</string>
 
@@ -142,6 +143,7 @@ Dies entspricht nicht der empfohlenen Standardanwendung, ist aber möglich:<br>
     <string name="settings_reset_message">Alle gespeicherten Daten, Einstellungen und Notizen werden gelöscht.</string>
     <string name="settings_reset_confirm">Zurücksetzen</string>
     <string name="settings_reset_done">App zurückgesetzt</string>
+    <string name="settings_advanced_toggle_desc">Erweiterte Einstellungen ein- oder ausklappen</string>
 
     <string name="backup_title">Backup</string>
     <string name="backup_create">Backup erstellen</string>
@@ -170,6 +172,72 @@ Dies entspricht nicht der empfohlenen Standardanwendung, ist aber möglich:<br>
     <string name="home_delay_confirm">Aktualisieren</string>
 
     <string name="main_double_back_exit">Doppelt zurück um App zu schließen</string>
+
+    <string name="welcome_title">Willkommen 👋</string>
+    <string name="welcome_subtitle">Veri Aristo Ring Reminder</string>
+    <string name="welcome_intro">Behalte deinen Verhütungsring-Zyklus mit deinen persönlichen Daten, Erinnerungen und Notizen im Blick.</string>
+    <string name="welcome_features_title">Das bietet die App</string>
+    <string name="welcome_features_body">- 📅 Kalenderansicht für Einsetzen, Entfernen und ringfreie Tage\n- 🔔 Erinnerungen, die du selbst anpassen kannst\n- 📝 Notizen und Zyklus-Historie\n- 🎨 Personalisierung von Hintergrund, Farben, Sprache und Widgets\n- 💾 Backup und Wiederherstellung</string>
+    <string name="welcome_permissions_title">Berechtigungen</string>
+    <string name="welcome_permissions_body">- 🖼️ Medienzugriff: Hintergrundbild auswählen\n- 🔔 Benachrichtigungen: Zyklus-Erinnerungen\n- ⏰ Exakte Alarme: präzise Planung</string>
+    <string name="welcome_privacy_note">Deine Daten bleiben nur auf diesem Gerät gespeichert. Stelle sicher, dass du ein Backup erstellst, sobald alle Daten und Einstellungen gesetzt sind 😊</string>
+    <string name="welcome_info_note">Die App-Info findest du jederzeit in den Einstellungen.</string>
+    <string name="welcome_start_tour">Tour starten</string>
+    <string name="welcome_skip_tour">Später</string>
+
+    <string name="tour_title_progress">Zyklus-Countdown</string>
+    <string name="tour_body_progress">Dieser Ring zeigt, wie viele Tage bis zum Entfernen oder Einsetzen bleiben.</string>
+    <string name="tour_title_delay">Zyklus verschieben</string>
+    <string name="tour_body_delay">Hier trägst du zusätzliche Tage ein, wenn der Ring länger getragen wurde. Mehr Informationen sind im Info Button hinterlegt.</string>
+    <string name="tour_title_notes">Schnelle Notizen</string>
+    <string name="tour_body_notes">Speichere Erinnerungen und persönliche Notizen zum Zyklus.</string>
+    <string name="tour_title_notes_editor">Notizen-Editor</string>
+    <string name="tour_body_notes_editor">Schreibe deine Notizen hier. Sie werden nur auf diesem Gerät gespeichert.</string>
+    <string name="tour_title_notes_save">Notizen speichern</string>
+    <string name="tour_body_notes_save">Änderungen an deinen Notizen speichern.</string>
+    <string name="tour_title_notes_delete">Notizen löschen</string>
+    <string name="tour_body_notes_delete">Aktuelle Notizen entfernen.</string>
+    <string name="tour_title_notes_close">Notizen schließen</string>
+    <string name="tour_body_notes_close">Zur Startseite zurückkehren.</string>
+    <string name="tour_title_navigation">Navigation</string>
+    <string name="tour_body_navigation">Wechsle hier zwischen Home, Kalender, Zyklen und Einstellungen.</string>
+    <string name="tour_title_calendar">Kalenderansicht</string>
+    <string name="tour_body_calendar">Sieh Einsetzen, Entfernen und ringfreie Tage auf einen Blick.</string>
+    <string name="tour_title_calendar_legend">Kalender-Legende</string>
+    <string name="tour_body_calendar_legend">Die Farben zeigen Tragezeit, ringfreie Tage, Entfernen und Einsetzen.\nDie Farben können ebenfalls geändert werden, indem du auf die einzelnen Farben in der Legende klickst.</string>
+    <string name="tour_title_cycles">Zyklus-Historie</string>
+    <string name="tour_body_cycles">Behalte vergangene Zyklen und ihre Ereignisse im Blick.</string>
+    <string name="tour_title_cycles_clear">Historie löschen</string>
+    <string name="tour_body_cycles_clear">Entferne alle gespeicherten Einträge aus der Liste.</string>
+    <string name="tour_title_settings_info">App-Info</string>
+    <string name="tour_body_settings_info">Hier werden die Version, Entwicklerinfos und Kontakt-Links dargestellt.</string>
+    <string name="tour_title_settings_cycle">Zyklus-Einstellungen</string>
+    <string name="tour_body_settings_cycle">Einlege-Datum, Uhrzeit und Zykluslänge festlegen.</string>
+    <string name="tour_title_settings_calendar">Kalenderbereich</string>
+    <string name="tour_body_settings_calendar">Lege fest, wie weit der Kalender zurück und voraus die Zyklen anzeigt.</string>
+    <string name="tour_title_settings_notifications">Erinnerungen</string>
+    <string name="tour_body_settings_notifications">Eigene Benachrichtigungen einstellen, wann du erinnert werden möchtest am Einsetzungs- bzw. Entfernungstag.</string>
+    <string name="tour_title_settings_background">Hintergrundbild</string>
+    <string name="tour_body_settings_background">Wähle ein Foto als Hintergrund der Startseite.</string>
+    <string name="tour_title_settings_button_color">Button-Farbe</string>
+    <string name="tour_body_settings_button_color">Akzentfarbe für Buttons ändern.\nDies ändert ebenfalls den Hintergrund der Widgets.</string>
+    <string name="tour_title_settings_circle_color">Home-Kreisfarbe</string>
+    <string name="tour_body_settings_circle_color">Farbe des Rings auf der Startseite festlegen.\nDies ändert ebenfalls die Farbe des Rings des großen Widgets.</string>
+    <string name="tour_title_settings_language">Sprache</string>
+    <string name="tour_body_settings_language">Zwischen Deutsch und Englisch wechseln.</string>
+    <string name="tour_title_settings_advanced">Erweitert</string>
+    <string name="tour_body_settings_advanced">Tippe, um den Bereich auf- oder zuzuklappen.</string>
+    <string name="tour_title_settings_backup">Backup</string>
+    <string name="tour_body_settings_backup">Backup erstellen oder wiederherstellen.</string>
+    <string name="tour_title_settings_reset">App zurücksetzen</string>
+    <string name="tour_body_settings_reset">Alle Daten löschen und die App zurücksetzen.</string>
+    <string name="tour_next">Weiter</string>
+    <string name="tour_finish">Fertig</string>
+    <string name="tour_skip">Überspringen</string>
+    <string name="tour_complete_title">Geschafft! 🎉</string>
+    <string name="tour_complete_subtitle">Tour abgeschlossen</string>
+    <string name="tour_complete_message">Du hast die Tour abgeschlossen. Viel Spaß mit Veri Aristo!\nWenn du die Tour noch einmal brauchst, kannst du sie in den Einstellungen im erweiterten Bereich neu starten.</string>
+    <string name="tour_complete_done">Fertig</string>
 
     <string name="debug_dialog_title">Debug: Benachrichtigungen</string>
     <string name="debug_now">Jetzt</string>

@@ -10,12 +10,17 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.content.res.ColorStateList;
+import android.graphics.Color;
+import android.graphics.drawable.ColorDrawable;
+import android.graphics.Rect;
 import android.os.Build;
 import android.os.Bundle;
 import android.widget.Toast;
 import androidx.activity.OnBackPressedCallback;
 import androidx.annotation.NonNull;
+import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.app.AppCompatDelegate;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
@@ -26,7 +31,12 @@ import com.jakewharton.threetenabp.AndroidThreeTen;
 
 import android.view.MenuItem;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.ImageButton;
+import android.widget.ScrollView;
+import com.google.android.material.button.MaterialButton;
+import java.util.ArrayList;
+import java.util.List;
 
 // MainActivity serves as the entry point for the app, managing fragments and navigation
 public class MainActivity extends AppCompatActivity {
@@ -34,6 +44,8 @@ public class MainActivity extends AppCompatActivity {
     private static final int REQUEST_NOTIFICATION_PERMISSION = 1;
     private static final String PREFS_NAME = "app_prefs";
     private static final String KEY_LAST_VERSION = "last_version";
+    private static final String KEY_TOUR_SHOWN = "tour_shown";
+    private static final String KEY_WELCOME_SHOWN = "welcome_shown";
     private static final long BACK_PRESS_WINDOW_MS = 2000;
 
     private FragmentManager fragmentManager;
@@ -41,14 +53,20 @@ public class MainActivity extends AppCompatActivity {
     private BottomNavigationView bottomNavigationView;
     private long lastBackPressedAt = 0L;
     private SharedViewModel viewModel;
+    private SharedPreferences prefs;
+    private GuidedTourOverlay tourOverlay;
+    private List<TourStep> tourSteps;
+    private int tourIndex = 0;
+    private boolean tourCompleted = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_YES);
         AndroidThreeTen.init(this);
         setContentView(R.layout.activity_main);
 
-        SharedPreferences prefs = getSharedPreferences(PREFS_NAME, MODE_PRIVATE);
+        prefs = getSharedPreferences(PREFS_NAME, MODE_PRIVATE);
         int lastVersion = prefs.getInt(KEY_LAST_VERSION, -1);
 
         try {
@@ -153,6 +171,8 @@ public class MainActivity extends AppCompatActivity {
         // Create notification channel and request permission
         createNotificationChannel();
         requestNotificationPermission();
+
+        maybeStartWelcomeFlow();
     }
 
     private void applyBottomNavColors(int selectedColor) {
@@ -195,6 +215,398 @@ public class MainActivity extends AppCompatActivity {
             transaction.addToBackStack(null);
         }
         transaction.commit();
+    }
+
+    private void maybeStartWelcomeFlow() {
+        if (prefs.getBoolean(KEY_WELCOME_SHOWN, false)) {
+            maybeStartGuidedTour();
+            return;
+        }
+
+        View content = getLayoutInflater().inflate(R.layout.dialog_welcome, null);
+        MaterialButton startButton = content.findViewById(R.id.welcome_start);
+        MaterialButton skipButton = content.findViewById(R.id.welcome_skip);
+        Integer buttonColor = viewModel.getButtonColor().getValue();
+        if (buttonColor != null) {
+            ButtonColorHelper.applyPrimaryColor(startButton, buttonColor);
+        }
+
+        AlertDialog dialog = new AlertDialog.Builder(this)
+                .setView(content)
+                .setCancelable(false)
+                .create();
+        if (dialog.getWindow() != null) {
+            dialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
+        }
+
+        startButton.setOnClickListener(v -> {
+            prefs.edit().putBoolean(KEY_WELCOME_SHOWN, true).apply();
+            dialog.dismiss();
+            maybeStartGuidedTour();
+        });
+
+        skipButton.setOnClickListener(v -> {
+            prefs.edit()
+                    .putBoolean(KEY_WELCOME_SHOWN, true)
+                    .putBoolean(KEY_TOUR_SHOWN, true)
+                    .apply();
+            dialog.dismiss();
+        });
+
+        dialog.show();
+    }
+
+    private void maybeStartGuidedTour() {
+        if (prefs.getBoolean(KEY_TOUR_SHOWN, false)) {
+            return;
+        }
+        getWindow().getDecorView().post(() -> startGuidedTourWhenReady(0));
+    }
+
+    private void startGuidedTourWhenReady(int attempt) {
+        if (attempt > 10) {
+            return;
+        }
+
+        if (tourSteps == null) {
+            tourSteps = buildTourSteps();
+        }
+
+        if (tourOverlay == null) {
+            tourOverlay = new GuidedTourOverlay(this);
+            tourOverlay.setOnNextListener(() -> {
+                if (tourSteps != null && tourIndex < tourSteps.size()) {
+                    TourStep currentStep = tourSteps.get(tourIndex);
+                    if (currentStep.openNotesAfter) {
+                        setNotesOpen(true);
+                    }
+                    if (currentStep.expandAdvancedAfter) {
+                        setAdvancedExpanded(true);
+                    }
+                    if (currentStep.collapseAdvancedAfter) {
+                        setAdvancedExpanded(false);
+                    }
+                }
+                if (tourSteps != null && tourIndex >= tourSteps.size() - 1) {
+                    tourCompleted = true;
+                }
+                showGuidedTourStep(tourIndex + 1, 0);
+            });
+            tourOverlay.setOnSkipListener(() -> {
+                tourCompleted = false;
+                finishGuidedTour();
+            });
+            tourOverlay.setOnFinishListener(() ->
+                    prefs.edit().putBoolean(KEY_TOUR_SHOWN, true).apply()
+            );
+            ViewGroup root = findViewById(android.R.id.content);
+            root.addView(tourOverlay);
+        }
+
+        showGuidedTourStep(0, attempt);
+    }
+
+    private void showGuidedTourStep(int index, int attempt) {
+        if (tourOverlay == null) {
+            return;
+        }
+        if (tourSteps == null || index >= tourSteps.size()) {
+            finishGuidedTour();
+            return;
+        }
+        if (attempt > 15) {
+            finishGuidedTour();
+            return;
+        }
+
+        TourStep step = tourSteps.get(index);
+        boolean advancedChanged = false;
+        if (step.collapseAdvancedBefore) {
+            advancedChanged = setAdvancedExpanded(false);
+        }
+        if (step.requireAdvancedExpanded) {
+            advancedChanged = setAdvancedExpanded(true) || advancedChanged;
+        }
+        if (advancedChanged) {
+            getWindow().getDecorView().postDelayed(() ->
+                    showGuidedTourStep(index, attempt + 1), 120);
+            return;
+        }
+        boolean notesChanged = false;
+        if (step.closeNotesBefore) {
+            notesChanged = setNotesOpen(false);
+        }
+        if (step.requireNotesOpen) {
+            notesChanged = setNotesOpen(true) || notesChanged;
+        }
+        if (notesChanged) {
+            getWindow().getDecorView().postDelayed(() ->
+                    showGuidedTourStep(index, attempt + 1), 150);
+            return;
+        }
+        if (step.navItemId != 0 && bottomNavigationView.getSelectedItemId() != step.navItemId) {
+            bottomNavigationView.setSelectedItemId(step.navItemId);
+        }
+
+        Fragment currentFragment = fragmentManager.findFragmentById(R.id.fragment_container);
+        View fragmentView = currentFragment != null ? currentFragment.getView() : null;
+        View target = step.inActivityView ? findViewById(step.targetViewId)
+                : (fragmentView != null ? fragmentView.findViewById(step.targetViewId) : null);
+
+        if (target == null) {
+            getWindow().getDecorView().postDelayed(() -> showGuidedTourStep(index, attempt + 1), 120);
+            return;
+        }
+
+        if (step.scrollViewId != 0 && fragmentView != null) {
+            ScrollView scrollView = fragmentView.findViewById(step.scrollViewId);
+            if (scrollView != null) {
+                if (!isTargetVisible(scrollView, target)) {
+                    scrollToView(scrollView, target);
+                    getWindow().getDecorView().postDelayed(() ->
+                            showGuidedTourStep(index, attempt + 1), 180);
+                    return;
+                }
+            }
+        }
+
+        Rect visibleRect = new Rect();
+        if (!target.getGlobalVisibleRect(visibleRect)) {
+            getWindow().getDecorView().postDelayed(() -> showGuidedTourStep(index, attempt + 1), 120);
+            return;
+        }
+
+        tourIndex = index;
+        tourOverlay.setStep(step.titleRes, step.bodyRes, index == tourSteps.size() - 1, target);
+    }
+
+    private void finishGuidedTour() {
+        if (tourOverlay != null) {
+            tourOverlay.finish();
+            tourOverlay = null;
+        }
+        if (tourCompleted) {
+            tourCompleted = false;
+            getWindow().getDecorView().post(this::showTourCompletionDialog);
+        }
+    }
+
+    private void showTourCompletionDialog() {
+        View content = getLayoutInflater().inflate(R.layout.dialog_tour_complete, null);
+        MaterialButton doneButton = content.findViewById(R.id.tour_complete_done);
+        Integer buttonColor = viewModel.getButtonColor().getValue();
+        if (buttonColor != null) {
+            ButtonColorHelper.applyPrimaryColor(doneButton, buttonColor);
+        }
+
+        AlertDialog dialog = new AlertDialog.Builder(this)
+                .setView(content)
+                .create();
+        if (dialog.getWindow() != null) {
+            dialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
+        }
+
+        doneButton.setOnClickListener(v -> dialog.dismiss());
+        dialog.show();
+    }
+
+    public void restartWelcomeTour() {
+        prefs.edit()
+                .putBoolean(KEY_WELCOME_SHOWN, false)
+                .putBoolean(KEY_TOUR_SHOWN, false)
+                .apply();
+        tourCompleted = false;
+        if (tourOverlay != null) {
+            finishGuidedTour();
+        }
+        maybeStartWelcomeFlow();
+    }
+
+    private void scrollToView(ScrollView scrollView, View target) {
+        scrollView.post(() -> {
+            Rect rect = new Rect();
+            target.getDrawingRect(rect);
+            scrollView.offsetDescendantRectToMyCoords(target, rect);
+            int targetHeight = rect.height();
+            int desiredTop = rect.top - (scrollView.getHeight() - targetHeight) / 2;
+            int maxScroll = 0;
+            View content = scrollView.getChildAt(0);
+            if (content != null) {
+                maxScroll = Math.max(0, content.getHeight() - scrollView.getHeight());
+            }
+            if (desiredTop < 0) {
+                desiredTop = 0;
+            } else if (desiredTop > maxScroll) {
+                desiredTop = maxScroll;
+            }
+            scrollView.scrollTo(0, desiredTop);
+        });
+    }
+
+    private boolean setAdvancedExpanded(boolean expanded) {
+        Fragment currentFragment = fragmentManager.findFragmentById(R.id.fragment_container);
+        View fragmentView = currentFragment != null ? currentFragment.getView() : null;
+        if (fragmentView == null) {
+            return false;
+        }
+        View advancedContent = fragmentView.findViewById(R.id.advanced_content);
+        View advancedToggle = fragmentView.findViewById(R.id.btn_advanced_toggle);
+        if (advancedContent == null || advancedToggle == null) {
+            return false;
+        }
+        boolean isVisible = advancedContent.getVisibility() == View.VISIBLE;
+        if (expanded == isVisible) {
+            return false;
+        }
+        advancedContent.setVisibility(expanded ? View.VISIBLE : View.GONE);
+        advancedToggle.setRotation(expanded ? 180f : 0f);
+        return true;
+    }
+
+    private boolean setNotesOpen(boolean open) {
+        Fragment currentFragment = fragmentManager.findFragmentById(R.id.fragment_container);
+        boolean isNotes = currentFragment instanceof NotesFragment;
+        if (open) {
+            if (isNotes) {
+                return false;
+            }
+            loadFragment(new NotesFragment(), true);
+            btnNotes.setVisibility(View.GONE);
+            return true;
+        }
+        if (!isNotes) {
+            return false;
+        }
+        openHomeFragment();
+        return true;
+    }
+
+    private void openHomeFragment() {
+        fragmentManager.popBackStack(null, FragmentManager.POP_BACK_STACK_INCLUSIVE);
+        loadFragment(new HomeFragment(), false);
+        bottomNavigationView.setSelectedItemId(R.id.nav_home);
+        btnNotes.setVisibility(View.VISIBLE);
+    }
+
+    private boolean isTargetVisible(ScrollView scrollView, View target) {
+        Rect rect = new Rect();
+        target.getDrawingRect(rect);
+        scrollView.offsetDescendantRectToMyCoords(target, rect);
+        int scrollTop = scrollView.getScrollY();
+        int scrollBottom = scrollTop + scrollView.getHeight();
+        return rect.top >= scrollTop && rect.bottom <= scrollBottom;
+    }
+
+    private List<TourStep> buildTourSteps() {
+        List<TourStep> steps = new ArrayList<>();
+        steps.add(new TourStep(R.id.nav_home, R.id.circularProgress,
+                R.string.tour_title_progress, R.string.tour_body_progress, 0, false));
+        steps.add(new TourStep(R.id.nav_home, R.id.home_delay_row,
+                R.string.tour_title_delay, R.string.tour_body_delay, 0, false));
+        steps.add(new TourStep(R.id.nav_home, R.id.btn_notes,
+                R.string.tour_title_notes, R.string.tour_body_notes, 0, true,
+                false, false, false, false, false, true, false));
+        steps.add(new TourStep(0, R.id.editText_notes,
+                R.string.tour_title_notes_editor, R.string.tour_body_notes_editor, 0, false,
+                false, false, false, false, true, false, false));
+        steps.add(new TourStep(0, R.id.btn_save_notes,
+                R.string.tour_title_notes_save, R.string.tour_body_notes_save, 0, false,
+                false, false, false, false, true, false, false));
+        steps.add(new TourStep(0, R.id.btn_clear_notes,
+                R.string.tour_title_notes_delete, R.string.tour_body_notes_delete, 0, false,
+                false, false, false, false, true, false, false));
+        steps.add(new TourStep(0, R.id.btn_close_notes,
+                R.string.tour_title_notes_close, R.string.tour_body_notes_close, 0, false,
+                false, false, false, false, true, false, false));
+        steps.add(new TourStep(R.id.nav_home, R.id.bottom_navigation,
+                R.string.tour_title_navigation, R.string.tour_body_navigation, 0, true,
+                false, false, false, false, false, false, true));
+
+        steps.add(new TourStep(R.id.nav_calendar, R.id.calendarView,
+                R.string.tour_title_calendar, R.string.tour_body_calendar, 0, false));
+        steps.add(new TourStep(R.id.nav_calendar, R.id.calendar_legend_row,
+                R.string.tour_title_calendar_legend, R.string.tour_body_calendar_legend, 0, false));
+
+        steps.add(new TourStep(R.id.nav_cycles, R.id.tv_history_title,
+                R.string.tour_title_cycles, R.string.tour_body_cycles, 0, false));
+        steps.add(new TourStep(R.id.nav_cycles, R.id.btn_clear_history,
+                R.string.tour_title_cycles_clear, R.string.tour_body_cycles_clear, 0, false));
+
+        steps.add(new TourStep(R.id.nav_settings, R.id.btn_settings_info,
+                R.string.tour_title_settings_info, R.string.tour_body_settings_info, 0, false));
+        steps.add(new TourStep(R.id.nav_settings, R.id.settings_cycle_container,
+                R.string.tour_title_settings_cycle, R.string.tour_body_settings_cycle,
+                R.id.settings_scroll, false));
+        steps.add(new TourStep(R.id.nav_settings, R.id.btn_set_calendar_range,
+                R.string.tour_title_settings_calendar, R.string.tour_body_settings_calendar,
+                R.id.settings_scroll, false));
+        steps.add(new TourStep(R.id.nav_settings, R.id.btn_set_notification_times,
+                R.string.tour_title_settings_notifications, R.string.tour_body_settings_notifications,
+                R.id.settings_scroll, false));
+        steps.add(new TourStep(R.id.nav_settings, R.id.btn_set_background,
+                R.string.tour_title_settings_background, R.string.tour_body_settings_background,
+                R.id.settings_scroll, false));
+        steps.add(new TourStep(R.id.nav_settings, R.id.btn_set_button_color,
+                R.string.tour_title_settings_button_color, R.string.tour_body_settings_button_color,
+                R.id.settings_scroll, false));
+        steps.add(new TourStep(R.id.nav_settings, R.id.btn_set_circle_color,
+                R.string.tour_title_settings_circle_color, R.string.tour_body_settings_circle_color,
+                R.id.settings_scroll, false));
+        steps.add(new TourStep(R.id.nav_settings, R.id.btn_set_language,
+                R.string.tour_title_settings_language, R.string.tour_body_settings_language,
+                R.id.settings_scroll, false));
+        steps.add(new TourStep(R.id.nav_settings, R.id.advanced_header,
+                R.string.tour_title_settings_advanced, R.string.tour_body_settings_advanced,
+                0, false, false, true, false, true, false, false, false));
+        steps.add(new TourStep(R.id.nav_settings, R.id.btn_backup_manage,
+                R.string.tour_title_settings_backup, R.string.tour_body_settings_backup,
+                0, false, true, false, false, false, false, false, false));
+        steps.add(new TourStep(R.id.nav_settings, R.id.btn_reset_app,
+                R.string.tour_title_settings_reset, R.string.tour_body_settings_reset,
+                0, false, true, false, true, false, false, false, false));
+        return steps;
+    }
+
+    private static class TourStep {
+        private final int navItemId;
+        private final int targetViewId;
+        private final int titleRes;
+        private final int bodyRes;
+        private final int scrollViewId;
+        private final boolean inActivityView;
+        private final boolean requireAdvancedExpanded;
+        private final boolean expandAdvancedAfter;
+        private final boolean collapseAdvancedAfter;
+        private final boolean collapseAdvancedBefore;
+        private final boolean requireNotesOpen;
+        private final boolean openNotesAfter;
+        private final boolean closeNotesBefore;
+
+        private TourStep(int navItemId, int targetViewId, int titleRes, int bodyRes,
+                         int scrollViewId, boolean inActivityView) {
+            this(navItemId, targetViewId, titleRes, bodyRes, scrollViewId, inActivityView,
+                    false, false, false, false, false, false, false);
+        }
+
+        private TourStep(int navItemId, int targetViewId, int titleRes, int bodyRes,
+                         int scrollViewId, boolean inActivityView, boolean requireAdvancedExpanded,
+                         boolean expandAdvancedAfter, boolean collapseAdvancedAfter,
+                         boolean collapseAdvancedBefore, boolean requireNotesOpen,
+                         boolean openNotesAfter, boolean closeNotesBefore) {
+            this.navItemId = navItemId;
+            this.targetViewId = targetViewId;
+            this.titleRes = titleRes;
+            this.bodyRes = bodyRes;
+            this.scrollViewId = scrollViewId;
+            this.inActivityView = inActivityView;
+            this.requireAdvancedExpanded = requireAdvancedExpanded;
+            this.expandAdvancedAfter = expandAdvancedAfter;
+            this.collapseAdvancedAfter = collapseAdvancedAfter;
+            this.collapseAdvancedBefore = collapseAdvancedBefore;
+            this.requireNotesOpen = requireNotesOpen;
+            this.openNotesAfter = openNotesAfter;
+            this.closeNotesBefore = closeNotesBefore;
+        }
     }
 
     // Create a notification channel for Android O and above

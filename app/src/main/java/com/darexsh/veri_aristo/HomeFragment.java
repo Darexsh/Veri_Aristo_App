@@ -88,17 +88,17 @@ public class HomeFragment extends Fragment {
                         backgroundImageView.setImageDrawable(drawable);
                         if (inputStream != null) inputStream.close();
                     } else {
-                        backgroundImageView.setImageDrawable(null);
+                        backgroundImageView.setImageResource(R.drawable.default_bg);
                         viewModel.setBackgroundImageUri(null);
                     }
 
                 } catch (SecurityException | IOException e) {
                     e.printStackTrace();
-                    backgroundImageView.setImageDrawable(null);
+                    backgroundImageView.setImageResource(R.drawable.default_bg);
                     viewModel.setBackgroundImageUri(null);
                 }
             } else {
-                backgroundImageView.setImageDrawable(null);
+                backgroundImageView.setImageResource(R.drawable.default_bg);
             }
         };
 
@@ -264,13 +264,6 @@ public class HomeFragment extends Fragment {
         viewModel.getCycleLength().observe(getViewLifecycleOwner(), val -> updateUi.run());
         viewModel.getRemovalReminderHours().observe(getViewLifecycleOwner(), val -> updateUi.run());
         viewModel.getInsertionReminderHours().observe(getViewLifecycleOwner(), val -> updateUi.run());
-        viewModel.getBackgroundImageUri().observe(getViewLifecycleOwner(), uri -> {
-            if (uri != null) {
-                backgroundImageView.setImageURI(Uri.parse(uri));
-            } else {
-                backgroundImageView.setImageDrawable(null);
-            }
-        });
 
         btnDelayCycle.setOnClickListener(v -> showDelayDialog(viewModel));
 

@@ -41,7 +41,13 @@
 * 📝 **Notes**: Notebook-style notes with autosave, character counter, and quick delete.
     
 * 🎨 **Customization**: Set cycle length, insertion date/time, calendar range, language, and background image. Customize button color, home ring color, and widget colors.
+
+* 🌙 **Dark Mode (Default)**: App runs in dark mode by default, independent of system theme.
+
+* 🔒 **Portrait Only**: Interface stays in vertical orientation for a consistent experience.
     
+* 🧭 **Welcome Tour**: First-run guided tour across all screens, with a restart option in Settings → Advanced.
+
 * 📊 **Cycle History**: Review past and upcoming cycles to track patterns and durations.
 
 * ⏩ **Wear Ring Longer**: Extend the current cycle once and keep history intact, with built‑in info guidance.
@@ -117,6 +123,8 @@
     * Optionally choose a background image.
 
     * Switch the app language (German/English).
+
+    * (Optional) Restart the welcome tour in **Settings → Advanced**.
         
 2. **View Calendar**:
     

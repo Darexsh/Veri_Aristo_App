@@ -87,9 +87,9 @@ public class SettingsRepository {
 
     public int getCalendarPastAmount() {
         if (sharedPreferences.contains(KEY_CALENDAR_PAST_AMOUNT)) {
-            return sharedPreferences.getInt(KEY_CALENDAR_PAST_AMOUNT, 12);
+            return sharedPreferences.getInt(KEY_CALENDAR_PAST_AMOUNT, 3);
         }
-        return sharedPreferences.getInt(KEY_CALENDAR_PAST_MONTHS, 12);
+        return sharedPreferences.getInt(KEY_CALENDAR_PAST_MONTHS, 3);
     }
 
     public String getCalendarPastUnit() {
@@ -108,12 +108,12 @@ public class SettingsRepository {
 
     public int getCalendarFutureAmount() {
         if (sharedPreferences.contains(KEY_CALENDAR_FUTURE_AMOUNT)) {
-            return sharedPreferences.getInt(KEY_CALENDAR_FUTURE_AMOUNT, 2);
+            return sharedPreferences.getInt(KEY_CALENDAR_FUTURE_AMOUNT, 1);
         }
         if (sharedPreferences.contains(KEY_CALENDAR_FUTURE_YEARS)) {
-            return sharedPreferences.getInt(KEY_CALENDAR_FUTURE_YEARS, 2);
+            return sharedPreferences.getInt(KEY_CALENDAR_FUTURE_YEARS, 1);
         }
-        return 2;
+        return 1;
     }
 
     public String getCalendarFutureUnit() {

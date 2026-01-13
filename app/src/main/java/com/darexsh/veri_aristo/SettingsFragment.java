@@ -5,9 +5,11 @@ import android.app.DatePickerDialog;
 import android.app.TimePickerDialog;
 import android.app.AlarmManager;
 import android.app.PendingIntent;
+import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
+import android.os.Build;
 import android.widget.DatePicker;
 import android.widget.EditText;
 import android.widget.TimePicker;
@@ -17,6 +19,7 @@ import android.widget.ScrollView;
 import android.graphics.Typeface;
 import android.net.Uri;
 import android.widget.Toast;
+import android.provider.MediaStore;
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
@@ -58,10 +61,14 @@ public class SettingsFragment extends Fragment {
     private MaterialButton btnSetLanguage;
     private MaterialButton btnSetButtonColor;
     private MaterialButton btnSetCircleColor;
+    private MaterialButton btnWelcomeTour;
+    private View advancedContent;
+    private View advancedHeader;
+    private android.widget.ImageButton btnAdvancedToggle;
     private android.widget.ImageButton btnSettingsInfo;
     private SharedViewModel viewModel;
     private ActivityResultLauncher<String> requestPermissionLauncher;
-    private ActivityResultLauncher<String> pickImageLauncher;
+    private ActivityResultLauncher<Intent> pickImageLauncher;
     private ActivityResultLauncher<String> createBackupLauncher;
     private ActivityResultLauncher<String[]> restoreBackupLauncher;
     private int[] buttonColorValues;
@@ -93,16 +100,27 @@ public class SettingsFragment extends Fragment {
         });
 
         // Initialize ActivityResultLauncher for picking images
-        pickImageLauncher = registerForActivityResult(new ActivityResultContracts.GetContent(), uri -> {
-            if (uri != null) {
-                // Update the ViewModel with the new background image URI
-                viewModel.setBackgroundImageUri(uri.toString());
-
-                // Persist the URI permission to allow access to the image later
-                requireContext().getContentResolver().takePersistableUriPermission(
-                        uri, Intent.FLAG_GRANT_READ_URI_PERMISSION);
-            }
-        });
+        pickImageLauncher = registerForActivityResult(
+                new ActivityResultContracts.StartActivityForResult(),
+                result -> {
+                    if (result.getResultCode() != Activity.RESULT_OK || result.getData() == null) {
+                        return;
+                    }
+                    Uri uri = result.getData().getData();
+                    if (uri == null) {
+                        return;
+                    }
+                    viewModel.setBackgroundImageUri(uri.toString());
+                    try {
+                        int flags = result.getData().getFlags()
+                                & (Intent.FLAG_GRANT_READ_URI_PERMISSION
+                                | Intent.FLAG_GRANT_WRITE_URI_PERMISSION);
+                        requireContext().getContentResolver()
+                                .takePersistableUriPermission(uri, flags);
+                    } catch (SecurityException ignored) {
+                    }
+                }
+        );
 
         createBackupLauncher = registerForActivityResult(new ActivityResultContracts.CreateDocument("application/json"), uri -> {
             if (uri != null) {
@@ -133,6 +151,10 @@ public class SettingsFragment extends Fragment {
         btnSetCalendarRange = view.findViewById(R.id.btn_set_calendar_range);
         btnResetApp = view.findViewById(R.id.btn_reset_app);
         btnBackupManage = view.findViewById(R.id.btn_backup_manage);
+        btnWelcomeTour = view.findViewById(R.id.btn_welcome_tour);
+        advancedContent = view.findViewById(R.id.advanced_content);
+        advancedHeader = view.findViewById(R.id.advanced_header);
+        btnAdvancedToggle = view.findViewById(R.id.btn_advanced_toggle);
         btnSetNotificationTimes = view.findViewById(R.id.btn_set_notification_times);
         btnSetLanguage = view.findViewById(R.id.btn_set_language);
         btnSetButtonColor = view.findViewById(R.id.btn_set_button_color);
@@ -229,6 +251,13 @@ public class SettingsFragment extends Fragment {
         btnSetLanguage.setOnClickListener(v -> showLanguageDialog());
         btnSetButtonColor.setOnClickListener(v -> showButtonColorDialog());
         btnSetCircleColor.setOnClickListener(v -> showCircleColorDialog());
+        btnWelcomeTour.setOnClickListener(v -> {
+            if (getActivity() instanceof MainActivity) {
+                ((MainActivity) getActivity()).restartWelcomeTour();
+            }
+        });
+        advancedHeader.setOnClickListener(v -> toggleAdvancedSection());
+        btnAdvancedToggle.setOnClickListener(v -> toggleAdvancedSection());
         btnSettingsInfo.setOnClickListener(v -> showAppInfoDialog());
         settingsTitle.setOnLongClickListener(v -> {
             showDebugDialog();
@@ -242,17 +271,23 @@ public class SettingsFragment extends Fragment {
 
     // Check if the app has permission to read media images, and open the gallery if granted
     private void checkStoragePermission() {
-        if (ContextCompat.checkSelfPermission(requireContext(), Manifest.permission.READ_MEDIA_IMAGES)
+        String permission = Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU
+                ? Manifest.permission.READ_MEDIA_IMAGES
+                : Manifest.permission.READ_EXTERNAL_STORAGE;
+        if (ContextCompat.checkSelfPermission(requireContext(), permission)
                 == PackageManager.PERMISSION_GRANTED) {
             openGallery();
         } else {
-            requestPermissionLauncher.launch(Manifest.permission.READ_MEDIA_IMAGES);
+            requestPermissionLauncher.launch(permission);
         }
     }
 
     // Open the gallery to select a background image
     private void openGallery() {
-        pickImageLauncher.launch("image/*");
+        Intent intent = new Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
+        intent.setType("image/*");
+        intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+        pickImageLauncher.launch(intent);
     }
 
     private void updateTimeButtonText(Calendar calendar) {
@@ -578,10 +613,20 @@ public class SettingsFragment extends Fragment {
         ButtonColorHelper.applyPrimaryColor(btnSetBackground, color);
         ButtonColorHelper.applyPrimaryColor(btnSetCalendarRange, color);
         ButtonColorHelper.applyPrimaryColor(btnBackupManage, color);
+        ButtonColorHelper.applyPrimaryColor(btnWelcomeTour, color);
         ButtonColorHelper.applyPrimaryColor(btnSetNotificationTimes, color);
         ButtonColorHelper.applyPrimaryColor(btnSetLanguage, color);
         ButtonColorHelper.applyPrimaryColor(btnSetButtonColor, color);
         ButtonColorHelper.applyPrimaryColor(btnSetCircleColor, color);
+    }
+
+    private void toggleAdvancedSection() {
+        boolean isVisible = advancedContent.getVisibility() == View.VISIBLE;
+        advancedContent.setVisibility(isVisible ? View.GONE : View.VISIBLE);
+        btnAdvancedToggle.animate()
+                .rotation(isVisible ? 0f : 180f)
+                .setDuration(150)
+                .start();
     }
 
     private void updateButtonColorButtonText(int color) {
