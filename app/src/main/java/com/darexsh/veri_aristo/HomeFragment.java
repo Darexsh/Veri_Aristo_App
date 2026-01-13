@@ -22,6 +22,8 @@ import android.widget.NumberPicker;
 import android.widget.TextView;
 import com.google.android.material.button.MaterialButton;
 import com.google.android.material.progressindicator.CircularProgressIndicator;
+import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.lang.reflect.Type;
@@ -74,22 +76,36 @@ public class HomeFragment extends Fragment {
             if (uriStr != null) {
                 try {
                     Uri uri = Uri.parse(uriStr);
-                    boolean hasPermission = false;
-                    for (UriPermission perm : requireContext().getContentResolver().getPersistedUriPermissions()) {
-                        if (perm.getUri().equals(uri) && perm.isReadPermission()) {
-                            hasPermission = true;
-                            break;
+                    String scheme = uri.getScheme();
+                    if ("file".equalsIgnoreCase(scheme)) {
+                        File file = new File(uri.getPath());
+                        if (file.exists()) {
+                            try (InputStream inputStream = new FileInputStream(file)) {
+                                Drawable drawable = Drawable.createFromStream(inputStream, uri.toString());
+                                backgroundImageView.setImageDrawable(drawable);
+                            }
+                        } else {
+                            backgroundImageView.setImageResource(R.drawable.default_bg);
+                            viewModel.setBackgroundImageUri(null);
                         }
-                    }
-
-                    if (hasPermission) {
-                        InputStream inputStream = requireContext().getContentResolver().openInputStream(uri);
-                        Drawable drawable = Drawable.createFromStream(inputStream, uri.toString());
-                        backgroundImageView.setImageDrawable(drawable);
-                        if (inputStream != null) inputStream.close();
                     } else {
-                        backgroundImageView.setImageResource(R.drawable.default_bg);
-                        viewModel.setBackgroundImageUri(null);
+                        boolean hasPermission = false;
+                        for (UriPermission perm : requireContext().getContentResolver().getPersistedUriPermissions()) {
+                            if (perm.getUri().equals(uri) && perm.isReadPermission()) {
+                                hasPermission = true;
+                                break;
+                            }
+                        }
+
+                        if (hasPermission) {
+                            try (InputStream inputStream = requireContext().getContentResolver().openInputStream(uri)) {
+                                Drawable drawable = Drawable.createFromStream(inputStream, uri.toString());
+                                backgroundImageView.setImageDrawable(drawable);
+                            }
+                        } else {
+                            backgroundImageView.setImageResource(R.drawable.default_bg);
+                            viewModel.setBackgroundImageUri(null);
+                        }
                     }
 
                 } catch (SecurityException | IOException e) {

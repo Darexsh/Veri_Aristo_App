@@ -19,7 +19,9 @@ import android.widget.ScrollView;
 import android.graphics.Typeface;
 import android.net.Uri;
 import android.widget.Toast;
-import android.provider.MediaStore;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
@@ -110,14 +112,9 @@ public class SettingsFragment extends Fragment {
                     if (uri == null) {
                         return;
                     }
-                    viewModel.setBackgroundImageUri(uri.toString());
-                    try {
-                        int flags = result.getData().getFlags()
-                                & (Intent.FLAG_GRANT_READ_URI_PERMISSION
-                                | Intent.FLAG_GRANT_WRITE_URI_PERMISSION);
-                        requireContext().getContentResolver()
-                                .takePersistableUriPermission(uri, flags);
-                    } catch (SecurityException ignored) {
+                    String savedUri = saveBackgroundImage(uri);
+                    if (savedUri != null) {
+                        viewModel.setBackgroundImageUri(savedUri);
                     }
                 }
         );
@@ -284,10 +281,33 @@ public class SettingsFragment extends Fragment {
 
     // Open the gallery to select a background image
     private void openGallery() {
-        Intent intent = new Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
+        Intent intent = new Intent(Intent.ACTION_PICK);
         intent.setType("image/*");
-        intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
         pickImageLauncher.launch(intent);
+    }
+
+    @Nullable
+    private String saveBackgroundImage(@NonNull Uri sourceUri) {
+        File directory = new File(requireContext().getFilesDir(), "backgrounds");
+        if (!directory.exists() && !directory.mkdirs()) {
+            return null;
+        }
+        File targetFile = new File(directory, "background_image");
+        try (InputStream inputStream = requireContext().getContentResolver().openInputStream(sourceUri);
+             OutputStream outputStream = new FileOutputStream(targetFile)) {
+            if (inputStream == null) {
+                return null;
+            }
+            byte[] buffer = new byte[8192];
+            int read;
+            while ((read = inputStream.read(buffer)) != -1) {
+                outputStream.write(buffer, 0, read);
+            }
+            outputStream.flush();
+            return Uri.fromFile(targetFile).toString();
+        } catch (IOException e) {
+            return null;
+        }
     }
 
     private void updateTimeButtonText(Calendar calendar) {
