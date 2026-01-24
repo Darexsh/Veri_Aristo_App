@@ -8,7 +8,7 @@
 **An Android app for tracking and managing contraceptive ring cycles**  
 📅⏰📝🎨📊
 
-![Projekt-Status](https://img.shields.io/badge/Status-Aktiv-brightgreen) ![Lizenz](https://img.shields.io/badge/Lizenz-NonCommercial%20MIT-blue) ![Version](https://img.shields.io/badge/Version-1.2.1-orange)
+![Projekt-Status](https://img.shields.io/badge/Status-Aktiv-brightgreen) ![Lizenz](https://img.shields.io/badge/Lizenz-NonCommercial%20MIT-blue) ![Version](https://img.shields.io/badge/Version-1.3.0-orange)
 
 </div>
 
