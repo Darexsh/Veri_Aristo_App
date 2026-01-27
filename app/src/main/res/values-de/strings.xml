@@ -16,6 +16,7 @@
     <string name="btn_set_background">Hintergrundbild auswählen</string>
     <string name="btn_set_notification_times">Erinnerungen einstellen</string>
     <string name="btn_backup">Backup</string>
+    <string name="btn_update_app">Nach Updates suchen</string>
     <string name="btn_welcome_tour">Welcome-Tour</string>
     <string name="btn_reset_app">App zurücksetzen</string>
     <string name="btn_delay_cycle">Ring länger tragen</string>
@@ -153,6 +154,18 @@ Dies entspricht nicht der empfohlenen Standardanwendung, ist aber möglich:<br>
     <string name="backup_read_failed_toast">Backup konnte nicht gelesen werden</string>
     <string name="backup_invalid_toast">Backup ungültig</string>
     <string name="backup_restored_toast">Backup wiederhergestellt</string>
+    <string name="update_checking_toast">Suche nach Updates...</string>
+    <string name="update_latest_toast">Du hast die neueste Version.</string>
+    <string name="update_available_toast">Update gefunden. Download läuft...</string>
+    <string name="update_no_apk_toast">Kein APK im neuesten Release gefunden.</string>
+    <string name="update_failed_toast">Update-Prüfung fehlgeschlagen.</string>
+    <string name="update_download_failed_toast">Download fehlgeschlagen.</string>
+    <string name="update_install_prompt_toast">Installationen aus dieser App erlauben.</string>
+    <string name="update_available_title">Update verfügbar</string>
+    <string name="update_available_message">Version %1$s ist verfügbar. Jetzt installieren?</string>
+    <string name="update_install">Installieren</string>
+    <string name="update_later">Später</string>
+    <string name="update_download_title">Update wird heruntergeladen</string>
 
     <string name="notifications_channel_name">Erinnerungen</string>
     <string name="notifications_channel_description">Benachrichtigungen für Ringzyklen</string>
@@ -227,6 +240,8 @@ Dies entspricht nicht der empfohlenen Standardanwendung, ist aber möglich:<br>
     <string name="tour_body_settings_language">Zwischen Deutsch und Englisch wechseln.</string>
     <string name="tour_title_settings_advanced">Erweitert</string>
     <string name="tour_body_settings_advanced">Tippe, um den Bereich auf- oder zuzuklappen.</string>
+    <string name="tour_title_settings_update">Updates</string>
+    <string name="tour_body_settings_update">Suche nach neuen App-Versionen und installiere diese.</string>
     <string name="tour_title_settings_backup">Backup</string>
     <string name="tour_body_settings_backup">Backup erstellen oder wiederherstellen.</string>
     <string name="tour_title_settings_reset">App zurücksetzen</string>

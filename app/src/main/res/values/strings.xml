@@ -16,6 +16,7 @@
     <string name="btn_set_background">Choose background image</string>
     <string name="btn_set_notification_times">Set reminders</string>
     <string name="btn_backup">Backup</string>
+    <string name="btn_update_app">Look for app updates</string>
     <string name="btn_welcome_tour">Welcome tour</string>
     <string name="btn_reset_app">Reset app</string>
     <string name="btn_delay_cycle">Wear ring longer</string>
@@ -153,6 +154,18 @@ This is not the recommended standard use, but it is possible:<br>
     <string name="backup_read_failed_toast">Backup could not be read</string>
     <string name="backup_invalid_toast">Invalid backup</string>
     <string name="backup_restored_toast">Backup restored</string>
+    <string name="update_checking_toast">Checking for updates...</string>
+    <string name="update_latest_toast">You are on the latest version.</string>
+    <string name="update_available_toast">Update found. Downloading...</string>
+    <string name="update_no_apk_toast">No APK found in the latest release.</string>
+    <string name="update_failed_toast">Update check failed.</string>
+    <string name="update_download_failed_toast">Download failed.</string>
+    <string name="update_install_prompt_toast">Allow installs from this app to continue.</string>
+    <string name="update_available_title">Update available</string>
+    <string name="update_available_message">Version %1$s is available. Install now?</string>
+    <string name="update_install">Install</string>
+    <string name="update_later">Later</string>
+    <string name="update_download_title">Downloading update</string>
 
     <string name="notifications_channel_name">Reminders</string>
     <string name="notifications_channel_description">Notifications for ring cycles</string>
@@ -227,6 +240,8 @@ This is not the recommended standard use, but it is possible:<br>
     <string name="tour_body_settings_language">Switch between German and English.</string>
     <string name="tour_title_settings_advanced">Advanced</string>
     <string name="tour_body_settings_advanced">Tap to expand or collapse the advanced section.</string>
+    <string name="tour_title_settings_update">Updates</string>
+    <string name="tour_body_settings_update">Check for new app versions and install them.</string>
     <string name="tour_title_settings_backup">Backup</string>
     <string name="tour_body_settings_backup">Create or restore a backup of your data.</string>
     <string name="tour_title_settings_reset">Reset app</string>

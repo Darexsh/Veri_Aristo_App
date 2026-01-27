@@ -18,16 +18,24 @@ import android.widget.TextView;
 import android.widget.ScrollView;
 import android.graphics.Typeface;
 import android.net.Uri;
+import android.provider.Settings;
 import android.widget.Toast;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.BufferedReader;
+import java.net.HttpURLConnection;
+import java.net.URL;
+import android.widget.ProgressBar;
+import android.widget.LinearLayout;
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatDelegate;
 import androidx.core.content.ContextCompat;
+import androidx.core.content.FileProvider;
 import androidx.core.os.LocaleListCompat;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
@@ -48,6 +56,11 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.nio.charset.StandardCharsets;
 import com.google.gson.Gson;
+import com.google.gson.JsonArray;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
+import com.prolificinteractive.materialcalendarview.BuildConfig;
 
 // SettingsFragment allows users to configure app settings such as cycle start date, time, length, and background image
 public class SettingsFragment extends Fragment {
@@ -59,6 +72,7 @@ public class SettingsFragment extends Fragment {
     private MaterialButton btnSetCalendarRange;
     private MaterialButton btnResetApp;
     private MaterialButton btnBackupManage;
+    private MaterialButton btnUpdateApp;
     private MaterialButton btnSetNotificationTimes;
     private MaterialButton btnSetLanguage;
     private MaterialButton btnSetButtonColor;
@@ -73,8 +87,14 @@ public class SettingsFragment extends Fragment {
     private ActivityResultLauncher<Intent> pickImageLauncher;
     private ActivityResultLauncher<String> createBackupLauncher;
     private ActivityResultLauncher<String[]> restoreBackupLauncher;
+    private ActivityResultLauncher<Intent> manageUnknownSourcesLauncher;
     private int[] buttonColorValues;
     private String[] buttonColorLabels;
+    private static final String RELEASES_URL = "https://api.github.com/repos/Darexsh/Veri_Aristo_App/releases";
+    private File pendingApkFile;
+    private AlertDialog downloadDialog;
+    private ProgressBar downloadProgressBar;
+    private TextView downloadProgressText;
 
     private interface ColorConsumer {
         void accept(int color);
@@ -130,6 +150,20 @@ public class SettingsFragment extends Fragment {
                 readBackup(uri);
             }
         });
+
+        manageUnknownSourcesLauncher = registerForActivityResult(
+                new ActivityResultContracts.StartActivityForResult(),
+                result -> {
+                    if (!isAdded()) {
+                        return;
+                    }
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O
+                            && requireContext().getPackageManager().canRequestPackageInstalls()
+                            && pendingApkFile != null) {
+                        promptInstall(pendingApkFile);
+                    }
+                }
+        );
     }
 
     @Nullable
@@ -148,6 +182,7 @@ public class SettingsFragment extends Fragment {
         btnSetCalendarRange = view.findViewById(R.id.btn_set_calendar_range);
         btnResetApp = view.findViewById(R.id.btn_reset_app);
         btnBackupManage = view.findViewById(R.id.btn_backup_manage);
+        btnUpdateApp = view.findViewById(R.id.btn_update_app);
         btnWelcomeTour = view.findViewById(R.id.btn_welcome_tour);
         advancedContent = view.findViewById(R.id.advanced_content);
         advancedHeader = view.findViewById(R.id.advanced_header);
@@ -253,6 +288,7 @@ public class SettingsFragment extends Fragment {
                 ((MainActivity) getActivity()).restartWelcomeTour();
             }
         });
+        btnUpdateApp.setOnClickListener(v -> checkForUpdates());
         advancedHeader.setOnClickListener(v -> toggleAdvancedSection());
         btnAdvancedToggle.setOnClickListener(v -> toggleAdvancedSection());
         btnSettingsInfo.setOnClickListener(v -> showAppInfoDialog());
@@ -633,6 +669,7 @@ public class SettingsFragment extends Fragment {
         ButtonColorHelper.applyPrimaryColor(btnSetBackground, color);
         ButtonColorHelper.applyPrimaryColor(btnSetCalendarRange, color);
         ButtonColorHelper.applyPrimaryColor(btnBackupManage, color);
+        ButtonColorHelper.applyPrimaryColor(btnUpdateApp, color);
         ButtonColorHelper.applyPrimaryColor(btnWelcomeTour, color);
         ButtonColorHelper.applyPrimaryColor(btnSetNotificationTimes, color);
         ButtonColorHelper.applyPrimaryColor(btnSetLanguage, color);
@@ -689,12 +726,342 @@ public class SettingsFragment extends Fragment {
         return getString(R.string.settings_unit_month_short);
     }
 
+    private void checkForUpdates() {
+        Toast.makeText(requireContext(), R.string.update_checking_toast, Toast.LENGTH_SHORT).show();
+        new Thread(() -> {
+            try {
+                ReleaseInfo releaseInfo = fetchLatestReleaseInfo();
+                if (releaseInfo == null) {
+                    showToast(R.string.update_failed_toast);
+                    return;
+                }
+                if (releaseInfo.downloadUrl == null) {
+                    showToast(R.string.update_no_apk_toast);
+                    return;
+                }
+                String currentVersion = getCurrentVersionName();
+                int compare = compareVersions(currentVersion, releaseInfo.versionName);
+                if (compare >= 0) {
+                    showToast(R.string.update_latest_toast);
+                    return;
+                }
+                showUpdateConfirmDialog(releaseInfo);
+            } catch (Exception e) {
+                showToast(R.string.update_failed_toast);
+            }
+        }).start();
+    }
+
+    private void showToast(int messageResId) {
+        if (!isAdded()) {
+            return;
+        }
+        requireActivity().runOnUiThread(() ->
+                Toast.makeText(requireContext(), messageResId, Toast.LENGTH_SHORT).show()
+        );
+    }
+
+    private void showUpdateConfirmDialog(ReleaseInfo releaseInfo) {
+        if (!isAdded()) {
+            return;
+        }
+        requireActivity().runOnUiThread(() -> {
+            String version = releaseInfo.versionName != null ? releaseInfo.versionName : "";
+            String message = getString(R.string.update_available_message, version);
+            new AlertDialog.Builder(requireContext())
+                    .setTitle(R.string.update_available_title)
+                    .setMessage(message)
+                    .setPositiveButton(R.string.update_install, (dialog, which) -> downloadAndInstall(releaseInfo))
+                    .setNegativeButton(R.string.update_later, null)
+                    .show();
+        });
+    }
+
+    private void downloadAndInstall(ReleaseInfo releaseInfo) {
+        showDownloadDialog();
+        new Thread(() -> {
+            File apkFile = downloadApk(releaseInfo.downloadUrl, releaseInfo.versionName, this::updateDownloadProgress);
+            dismissDownloadDialog();
+            if (apkFile == null) {
+                showToast(R.string.update_download_failed_toast);
+                return;
+            }
+            promptInstall(apkFile);
+        }).start();
+    }
+
+    private void showDownloadDialog() {
+        if (!isAdded()) {
+            return;
+        }
+        requireActivity().runOnUiThread(() -> {
+            if (downloadDialog != null && downloadDialog.isShowing()) {
+                return;
+            }
+            int padding = (int) (16 * getResources().getDisplayMetrics().density);
+            LinearLayout container = new LinearLayout(requireContext());
+            container.setOrientation(LinearLayout.VERTICAL);
+            container.setPadding(padding, padding, padding, padding);
+
+            downloadProgressBar = new ProgressBar(requireContext(), null, android.R.attr.progressBarStyleHorizontal);
+            downloadProgressBar.setIndeterminate(true);
+            downloadProgressBar.setMax(100);
+
+            downloadProgressText = new TextView(requireContext());
+            downloadProgressText.setText("0%");
+            downloadProgressText.setPadding(0, padding / 2, 0, 0);
+
+            container.addView(downloadProgressBar);
+            container.addView(downloadProgressText);
+
+            downloadDialog = new AlertDialog.Builder(requireContext())
+                    .setTitle(R.string.update_download_title)
+                    .setView(container)
+                    .setCancelable(false)
+                    .create();
+            downloadDialog.show();
+        });
+    }
+
+    private void dismissDownloadDialog() {
+        if (!isAdded()) {
+            return;
+        }
+        requireActivity().runOnUiThread(() -> {
+            if (downloadDialog != null) {
+                downloadDialog.dismiss();
+                downloadDialog = null;
+            }
+        });
+    }
+
+    private void updateDownloadProgress(int percent) {
+        if (!isAdded()) {
+            return;
+        }
+        requireActivity().runOnUiThread(() -> {
+            if (downloadProgressBar == null || downloadProgressText == null) {
+                return;
+            }
+            if (percent < 0) {
+                downloadProgressBar.setIndeterminate(true);
+                downloadProgressText.setText("");
+            } else {
+                downloadProgressBar.setIndeterminate(false);
+                downloadProgressBar.setProgress(percent);
+                downloadProgressText.setText(percent + "%");
+            }
+        });
+    }
+
+    private ReleaseInfo fetchLatestReleaseInfo() throws IOException {
+        HttpURLConnection connection = null;
+        try {
+            URL url = new URL(RELEASES_URL);
+            connection = (HttpURLConnection) url.openConnection();
+            connection.setConnectTimeout(10000);
+            connection.setReadTimeout(15000);
+            connection.setRequestProperty("Accept", "application/vnd.github+json");
+            connection.setRequestProperty("User-Agent", "Veri-Aristo-App");
+            int status = connection.getResponseCode();
+            if (status != HttpURLConnection.HTTP_OK) {
+                return null;
+            }
+            StringBuilder body = new StringBuilder();
+            try (BufferedReader reader = new BufferedReader(
+                    new InputStreamReader(connection.getInputStream(), StandardCharsets.UTF_8))) {
+                String line;
+                while ((line = reader.readLine()) != null) {
+                    body.append(line);
+                }
+            }
+
+            JsonArray releases = JsonParser.parseString(body.toString()).getAsJsonArray();
+            for (JsonElement element : releases) {
+                JsonObject release = element.getAsJsonObject();
+                boolean isDraft = release.get("draft").getAsBoolean();
+                boolean isPrerelease = release.get("prerelease").getAsBoolean();
+                if (isDraft || isPrerelease) {
+                    continue;
+                }
+                String tag = release.has("tag_name") && !release.get("tag_name").isJsonNull()
+                        ? release.get("tag_name").getAsString()
+                        : null;
+                String versionName = normalizeVersion(tag);
+                JsonArray assets = release.getAsJsonArray("assets");
+                String downloadUrl = findApkAssetUrl(assets);
+                return new ReleaseInfo(versionName, downloadUrl);
+            }
+        } finally {
+            if (connection != null) {
+                connection.disconnect();
+            }
+        }
+        return null;
+    }
+
+    private String findApkAssetUrl(JsonArray assets) {
+        if (assets == null) {
+            return null;
+        }
+        for (JsonElement assetElement : assets) {
+            JsonObject asset = assetElement.getAsJsonObject();
+            String name = asset.has("name") && !asset.get("name").isJsonNull()
+                    ? asset.get("name").getAsString()
+                    : "";
+            if (name.toLowerCase(Locale.US).endsWith(".apk")) {
+                return asset.get("browser_download_url").getAsString();
+            }
+        }
+        return null;
+    }
+
+    private interface ProgressListener {
+        void onProgress(int percent);
+    }
+
+    private File downloadApk(String downloadUrl, String versionName, ProgressListener progressListener) {
+        HttpURLConnection connection = null;
+        try {
+            URL url = new URL(downloadUrl);
+            connection = (HttpURLConnection) url.openConnection();
+            connection.setConnectTimeout(10000);
+            connection.setReadTimeout(20000);
+            connection.setRequestProperty("User-Agent", "Veri-Aristo-App");
+            if (connection.getResponseCode() != HttpURLConnection.HTTP_OK) {
+                return null;
+            }
+            int totalBytes = connection.getContentLength();
+            if (progressListener != null) {
+                progressListener.onProgress(totalBytes > 0 ? 0 : -1);
+            }
+            File target = new File(requireContext().getCacheDir(),
+                    "veri_aristo_update_" + (versionName != null ? versionName : "latest") + ".apk");
+            try (InputStream inputStream = connection.getInputStream();
+                 OutputStream outputStream = new FileOutputStream(target)) {
+                byte[] buffer = new byte[8192];
+                int read;
+                long downloaded = 0;
+                while ((read = inputStream.read(buffer)) != -1) {
+                    outputStream.write(buffer, 0, read);
+                    downloaded += read;
+                    if (progressListener != null && totalBytes > 0) {
+                        int percent = (int) ((downloaded * 100) / totalBytes);
+                        progressListener.onProgress(percent);
+                    }
+                }
+                outputStream.flush();
+            }
+            return target;
+        } catch (IOException e) {
+            return null;
+        } finally {
+            if (connection != null) {
+                connection.disconnect();
+            }
+        }
+    }
+
+    private void promptInstall(File apkFile) {
+        if (!isAdded()) {
+            return;
+        }
+        pendingApkFile = apkFile;
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            if (!requireContext().getPackageManager().canRequestPackageInstalls()) {
+                showToast(R.string.update_install_prompt_toast);
+                Intent intent = new Intent(Settings.ACTION_MANAGE_UNKNOWN_APP_SOURCES,
+                        Uri.parse("package:" + requireContext().getPackageName()));
+                manageUnknownSourcesLauncher.launch(intent);
+                return;
+            }
+        }
+        Uri apkUri = FileProvider.getUriForFile(requireContext(),
+                requireContext().getPackageName() + ".fileprovider", apkFile);
+        Intent intent = new Intent(Intent.ACTION_VIEW);
+        intent.setDataAndType(apkUri, "application/vnd.android.package-archive");
+        intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+        startActivity(intent);
+        pendingApkFile = null;
+    }
+
+    private String normalizeVersion(String tag) {
+        if (tag == null) {
+            return null;
+        }
+        String trimmed = tag.trim();
+        if (trimmed.startsWith("v") || trimmed.startsWith("V")) {
+            return trimmed.substring(1);
+        }
+        return trimmed;
+    }
+
+    private int compareVersions(String current, String latest) {
+        if (latest == null) {
+            return 0;
+        }
+        int[] currentParts = parseVersionParts(current);
+        int[] latestParts = parseVersionParts(latest);
+        int max = Math.max(currentParts.length, latestParts.length);
+        for (int i = 0; i < max; i++) {
+            int c = i < currentParts.length ? currentParts[i] : 0;
+            int l = i < latestParts.length ? latestParts[i] : 0;
+            if (c != l) {
+                return Integer.compare(c, l);
+            }
+        }
+        return 0;
+    }
+
+    private int[] parseVersionParts(String version) {
+        if (version == null || version.isEmpty()) {
+            return new int[]{0};
+        }
+        String[] parts = version.split("\\.");
+        int[] result = new int[parts.length];
+        for (int i = 0; i < parts.length; i++) {
+            try {
+                result[i] = Integer.parseInt(parts[i].replaceAll("[^0-9]", ""));
+            } catch (NumberFormatException e) {
+                result[i] = 0;
+            }
+        }
+        return result;
+    }
+
+    private static class ReleaseInfo {
+        final String versionName;
+        final String downloadUrl;
+
+        ReleaseInfo(String versionName, String downloadUrl) {
+            this.versionName = versionName;
+            this.downloadUrl = downloadUrl;
+        }
+    }
+
     private void configureValuePicker(NumberPicker picker, int unitIndex, Integer currentValue) {
         int max = unitIndex == 1 ? 10 : 60;
         picker.setMinValue(0);
         picker.setMaxValue(max);
         int value = currentValue != null ? Math.min(currentValue, max) : 0;
         picker.setValue(value);
+    }
+
+    private String getCurrentVersionName() {
+        try {
+            android.content.pm.PackageManager packageManager = requireContext().getPackageManager();
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                android.content.pm.PackageInfo info = packageManager.getPackageInfo(
+                        requireContext().getPackageName(),
+                        android.content.pm.PackageManager.PackageInfoFlags.of(0));
+                return info.versionName;
+            }
+            android.content.pm.PackageInfo info = packageManager.getPackageInfo(
+                    requireContext().getPackageName(), 0);
+            return info.versionName;
+        } catch (android.content.pm.PackageManager.NameNotFoundException e) {
+            return null;
+        }
     }
 
     private android.widget.LinearLayout buildPickerRow(String labelText, NumberPicker valuePicker, NumberPicker unitPicker) {

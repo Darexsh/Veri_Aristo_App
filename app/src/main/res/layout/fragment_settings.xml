@@ -306,6 +306,18 @@
             android:visibility="gone">
 
             <com.google.android.material.button.MaterialButton
+                android:id="@+id/btn_update_app"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/btn_update_app"
+                android:textAllCaps="false"
+                android:textSize="15sp"
+                app:cornerRadius="12dp"
+                app:backgroundTint="#6200EE"
+                android:textColor="#FFFFFF"
+                android:layout_marginBottom="10dp" />
+
+            <com.google.android.material.button.MaterialButton
                 android:id="@+id/btn_backup_manage"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"

@@ -558,6 +558,9 @@ public class MainActivity extends AppCompatActivity {
         steps.add(new TourStep(R.id.nav_settings, R.id.advanced_header,
                 R.string.tour_title_settings_advanced, R.string.tour_body_settings_advanced,
                 0, false, false, true, false, true, false, false, false));
+        steps.add(new TourStep(R.id.nav_settings, R.id.btn_update_app,
+                R.string.tour_title_settings_update, R.string.tour_body_settings_update,
+                0, false, true, false, false, false, false, false, false));
         steps.add(new TourStep(R.id.nav_settings, R.id.btn_backup_manage,
                 R.string.tour_title_settings_backup, R.string.tour_body_settings_backup,
                 0, false, true, false, false, false, false, false, false));
