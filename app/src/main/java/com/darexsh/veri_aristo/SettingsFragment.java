@@ -17,6 +17,10 @@ import android.widget.NumberPicker;
 import android.widget.TextView;
 import android.widget.ScrollView;
 import android.graphics.Typeface;
+import android.text.SpannableString;
+import android.text.Spanned;
+import android.text.style.ForegroundColorSpan;
+import android.text.style.StyleSpan;
 import android.net.Uri;
 import android.provider.Settings;
 import android.widget.Toast;
@@ -45,6 +49,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import com.google.android.material.button.MaterialButton;
+import com.google.android.material.color.MaterialColors;
 import java.util.Calendar;
 import java.text.SimpleDateFormat;
 import java.util.Locale;
@@ -1127,28 +1132,32 @@ public class SettingsFragment extends Fragment {
         TextView appVersion = content.findViewById(R.id.tv_app_version);
         TextView appDescription = content.findViewById(R.id.tv_app_description);
         TextView appDeveloper = content.findViewById(R.id.tv_app_developer);
-        TextView appEmail = content.findViewById(R.id.tv_app_email);
-        TextView appGithub = content.findViewById(R.id.tv_app_github);
         com.google.android.material.button.MaterialButton openEmail = content.findViewById(R.id.btn_open_email);
         com.google.android.material.button.MaterialButton openGithub = content.findViewById(R.id.btn_open_github);
+        com.google.android.material.button.MaterialButton openCoffee = content.findViewById(R.id.btn_open_coffee);
         Integer buttonColor = viewModel.getButtonColor().getValue();
         if (buttonColor != null) {
             ButtonColorHelper.applyPrimaryColor(openEmail, buttonColor);
             ButtonColorHelper.applyPrimaryColor(openGithub, buttonColor);
+            ButtonColorHelper.applyPrimaryColor(openCoffee, buttonColor);
         }
 
         appName.setText(R.string.app_info_name);
         appVersion.setText(getString(R.string.app_info_version, versionName));
         appDescription.setText(R.string.app_info_description);
-        appDeveloper.setText(getString(R.string.app_info_developer, "Darexsh by Daniel Sichler"));
-        appEmail.setText(getString(R.string.app_info_email, "sichler.daniel@gmail.com"));
-        appGithub.setText(getString(R.string.app_info_github, "https://github.com/Darexsh"));
-
-        appEmail.setOnClickListener(v -> {
-            Intent intent = new Intent(Intent.ACTION_SENDTO);
-            intent.setData(Uri.parse("mailto:sichler.daniel@gmail.com"));
-            startActivity(intent);
-        });
+        String developerLabel = getString(R.string.app_info_developer_label);
+        String developerName = getString(R.string.app_info_developer_name);
+        SpannableString developerText = new SpannableString(
+                String.format(Locale.getDefault(), "%s %s", developerLabel, developerName));
+        int labelEnd = developerLabel.length();
+        int labelColor = buttonColor != null
+                ? buttonColor
+                : MaterialColors.getColor(appDeveloper, com.google.android.material.R.attr.colorPrimary);
+        developerText.setSpan(new ForegroundColorSpan(labelColor), 0, labelEnd,
+                Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+        developerText.setSpan(new StyleSpan(Typeface.BOLD), 0, labelEnd,
+                Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+        appDeveloper.setText(developerText);
 
         openEmail.setOnClickListener(v -> {
             Intent intent = new Intent(Intent.ACTION_SENDTO);
@@ -1157,15 +1166,23 @@ public class SettingsFragment extends Fragment {
         });
 
         openGithub.setOnClickListener(v -> {
-            Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse("https://github.com/Darexsh"));
+            Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse("https://linktr.ee/darexsh"));
             startActivity(intent);
         });
 
-        new AlertDialog.Builder(requireContext())
+        openCoffee.setOnClickListener(v -> {
+            Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse("https://buymeacoffee.com/darexsh"));
+            startActivity(intent);
+        });
+
+        AlertDialog dialog = new AlertDialog.Builder(requireContext())
                 .setTitle(R.string.app_info_title)
                 .setView(content)
                 .setPositiveButton(R.string.dialog_ok, null)
                 .show();
+        if (buttonColor != null) {
+            dialog.getButton(AlertDialog.BUTTON_POSITIVE).setTextColor(buttonColor);
+        }
     }
 
     private void resetAppData() {

@@ -76,12 +76,16 @@ This is not the recommended standard use, but it is possible:<br>
     <string name="app_info_version_label">Version</string>
     <string name="app_info_name">Veri Aristo Ring Reminder</string>
     <string name="app_info_version">Version %1$s</string>
-    <string name="app_info_description">Veri Aristo is an Android app for tracking contraceptive ring cycles. It provides a calendar view for insertion, removal, and ring-free days, customizable reminders, personal notes, and cycle history. The app is built with Java using MVVM, stores data locally, and supports notifications.</string>
+    <string name="app_info_description">Veri Aristo is an Android app for tracking contraceptive ring cycles. It offers a color-coded calendar for insertion, removal, and ring-free days, customizable reminders, notes, widgets, and backup/restore. The app includes a welcome tour, cycle history, and guidance for extending a cycle (“wear ring longer”). It runs in dark mode by default, stays in portrait orientation, and supports personalization like background images and color settings. Built with Java and MVVM, it stores data locally and supports notifications.</string>
     <string name="app_info_developer">Developer: %1$s</string>
+    <string name="app_info_developer_label">Developer:</string>
+    <string name="app_info_developer_name">Darexsh by Daniel Sichler</string>
     <string name="app_info_email">Email: %1$s</string>
     <string name="app_info_github">GitHub: %1$s</string>
-    <string name="app_info_open_email">Write email</string>
-    <string name="app_info_open_github">Open GitHub</string>
+    <string name="app_info_open_email">✉️ Write email</string>
+    <string name="app_info_open_github">🌐 Open social media</string>
+    <string name="app_info_open_coffee">☕ Buy me a coffee</string>
+    <string name="app_info_actions_title">Actions</string>
 
     <string name="dialog_ok">OK</string>
     <string name="dialog_cancel">Cancel</string>

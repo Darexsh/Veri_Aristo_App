@@ -76,12 +76,16 @@ Dies entspricht nicht der empfohlenen Standardanwendung, ist aber möglich:<br>
     <string name="app_info_version_label">Version</string>
     <string name="app_info_name">Veri Aristo Ring Reminder</string>
     <string name="app_info_version">Version %1$s</string>
-    <string name="app_info_description">Veri Aristo ist eine Android-App zur Verfolgung von Verhütungsring-Zyklen. Sie bietet eine Kalenderansicht für Einlage-, Entnahme- und ringfreie Tage, anpassbare Erinnerungen, persönliche Notizen sowie eine Zyklus-Historie. Die App wurde mit Java unter Verwendung der MVVM-Architektur entwickelt, speichert Daten lokal und unterstützt Benachrichtigungen.</string>
+    <string name="app_info_description">Veri Aristo ist eine Android-App zur Verfolgung von Verhütungsring-Zyklen. Sie bietet einen farbcodierten Kalender für Einlage-, Entnahme- und ringfreie Tage, anpassbare Erinnerungen, Notizen, Widgets sowie Backup/Restore. Die App enthält eine Welcome-Tour, eine Zyklus-Historie und Hinweise zum Verlängern eines Zyklus („Ring länger tragen“). Sie läuft standardmäßig im Dark Mode, bleibt im Hochformat und unterstützt Personalisierung wie Hintergrundbilder und Farben. Entwickelt mit Java und MVVM, speichert die App Daten lokal und unterstützt Benachrichtigungen.</string>
     <string name="app_info_developer">Entwickler: %1$s</string>
+    <string name="app_info_developer_label">Entwickler:</string>
+    <string name="app_info_developer_name">Darexsh by Daniel Sichler</string>
     <string name="app_info_email">E-Mail: %1$s</string>
     <string name="app_info_github">GitHub: %1$s</string>
-    <string name="app_info_open_email">E-Mail schreiben</string>
-    <string name="app_info_open_github">GitHub öffnen</string>
+    <string name="app_info_open_email">✉️ E-Mail schreiben</string>
+    <string name="app_info_open_github">🌐 Soziale Medien öffnen</string>
+    <string name="app_info_open_coffee">☕ Kaffee spendieren</string>
+    <string name="app_info_actions_title">Aktionen</string>
 
     <string name="dialog_ok">OK</string>
     <string name="dialog_cancel">Abbrechen</string>
