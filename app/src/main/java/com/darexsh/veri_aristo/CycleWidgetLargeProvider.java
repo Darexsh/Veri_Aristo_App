@@ -28,6 +28,8 @@ public class CycleWidgetLargeProvider extends AppWidgetProvider {
         SettingsRepository repository = new SettingsRepository(context);
         views.setInt(R.id.widget_bg_image, "setColorFilter", repository.getButtonColor());
 
+        views.setTextViewText(R.id.tv_widget_title, context.getString(R.string.app_name));
+        views.setTextViewText(R.id.tv_widget_subtitle, context.getString(R.string.widget_title));
         views.setTextViewText(R.id.tv_widget_days_number, String.valueOf(state.daysLeft));
         views.setTextViewText(R.id.tv_widget_days_label, state.label);
         views.setTextViewText(R.id.tv_widget_removal, state.removalText);

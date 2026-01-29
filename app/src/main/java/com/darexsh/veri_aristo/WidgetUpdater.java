@@ -3,6 +3,12 @@ package com.darexsh.veri_aristo;
 import android.appwidget.AppWidgetManager;
 import android.content.ComponentName;
 import android.content.Context;
+import android.content.res.Configuration;
+import android.os.Build;
+import android.os.LocaleList;
+import androidx.appcompat.app.AppCompatDelegate;
+import androidx.core.os.LocaleListCompat;
+import java.util.Locale;
 
 public final class WidgetUpdater {
 
@@ -10,9 +16,10 @@ public final class WidgetUpdater {
     }
 
     public static void updateAllWidgets(Context context) {
-        AppWidgetManager manager = AppWidgetManager.getInstance(context);
-        updateSmallWidgets(context, manager);
-        updateLargeWidgets(context, manager);
+        Context localized = getLocalizedContext(context);
+        AppWidgetManager manager = AppWidgetManager.getInstance(localized);
+        updateSmallWidgets(localized, manager);
+        updateLargeWidgets(localized, manager);
     }
 
     private static void updateSmallWidgets(Context context, AppWidgetManager manager) {
@@ -27,5 +34,23 @@ public final class WidgetUpdater {
         for (int appWidgetId : widgetIds) {
             CycleWidgetLargeProvider.updateAppWidget(context, manager, appWidgetId);
         }
+    }
+
+    private static Context getLocalizedContext(Context context) {
+        LocaleListCompat locales = AppCompatDelegate.getApplicationLocales();
+        if (locales.isEmpty()) {
+            return context;
+        }
+        Locale locale = locales.get(0);
+        if (locale == null) {
+            return context;
+        }
+        Configuration config = new Configuration(context.getResources().getConfiguration());
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+            config.setLocales(new LocaleList(locale));
+        } else {
+            config.setLocale(locale);
+        }
+        return context.createConfigurationContext(config);
     }
 }
