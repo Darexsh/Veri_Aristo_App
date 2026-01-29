@@ -36,7 +36,9 @@ public class CycleWidgetLargeProvider extends AppWidgetProvider {
                 ? (float) state.currentProgress / (float) state.maxProgress
                 : 0f;
         int ringColor = repository.getHomeCircleColor();
-        views.setImageViewBitmap(R.id.img_widget_ring, CycleWidgetUtils.buildRingBitmap(context, fraction, ringColor));
+        int ringStyle = repository.getHomeCircleStyle();
+        views.setImageViewBitmap(R.id.img_widget_ring,
+                CycleWidgetUtils.buildRingBitmap(context, fraction, ringColor, ringStyle));
         views.setOnClickPendingIntent(R.id.widget_root, buildLaunchIntent(context, appWidgetId));
 
         appWidgetManager.updateAppWidget(appWidgetId, views);

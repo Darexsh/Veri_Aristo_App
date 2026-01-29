@@ -813,6 +813,7 @@ public class SettingsFragment extends Fragment {
                 .show();
         listView.setOnItemClickListener((parent, view, position, id) -> {
             viewModel.setHomeCircleStyle(position);
+            WidgetUpdater.updateAllWidgets(requireContext());
             dialog.dismiss();
         });
         applyDialogButtonColors(dialog);
