@@ -563,6 +563,9 @@ public class MainActivity extends AppCompatActivity {
         steps.add(new TourStep(R.id.nav_settings, R.id.btn_set_circle_color,
                 R.string.tour_title_settings_circle_color, R.string.tour_body_settings_circle_color,
                 R.id.settings_scroll, false));
+        steps.add(new TourStep(R.id.nav_settings, R.id.btn_set_circle_style,
+                R.string.tour_title_settings_circle_style, R.string.tour_body_settings_circle_style,
+                R.id.settings_scroll, false));
         steps.add(new TourStep(R.id.nav_settings, R.id.btn_set_language,
                 R.string.tour_title_settings_language, R.string.tour_body_settings_language,
                 R.id.settings_scroll, false));

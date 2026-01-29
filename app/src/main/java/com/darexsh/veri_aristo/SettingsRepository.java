@@ -31,12 +31,15 @@ public class SettingsRepository {
     private static final String KEY_INSERTION_REMINDER_HOURS = "insertion_reminder_hours";
     private static final String KEY_BUTTON_COLOR = "button_color";
     private static final String KEY_HOME_CIRCLE_COLOR = "home_circle_color";
+    private static final String KEY_HOME_CIRCLE_STYLE = "home_circle_style";
+    private static final String KEY_HOME_CIRCLE_STYLE_VERSION = "home_circle_style_version";
     private static final String KEY_CALENDAR_WEAR_COLOR = "calendar_wear_color";
     private static final String KEY_CALENDAR_RING_FREE_COLOR = "calendar_ring_free_color";
     private static final String KEY_CALENDAR_REMOVAL_COLOR = "calendar_removal_color";
     private static final String KEY_CALENDAR_INSERTION_COLOR = "calendar_insertion_color";
     public static final int DEFAULT_BUTTON_COLOR = 0xFF6200EE;
     public static final int DEFAULT_HOME_CIRCLE_COLOR = 0xFFBB86FC;
+    public static final int DEFAULT_HOME_CIRCLE_STYLE = 0;
     public static final int DEFAULT_CALENDAR_WEAR_COLOR = 0xFF00FF00;
     public static final int DEFAULT_CALENDAR_RING_FREE_COLOR = 0xFFFF0000;
     public static final int DEFAULT_CALENDAR_REMOVAL_COLOR = 0xFFFFFF00;
@@ -189,6 +192,57 @@ public class SettingsRepository {
 
     public void saveHomeCircleColor(int color) {
         sharedPreferences.edit().putInt(KEY_HOME_CIRCLE_COLOR, color).apply();
+    }
+
+    public int getHomeCircleStyle() {
+        int style = sharedPreferences.getInt(KEY_HOME_CIRCLE_STYLE, DEFAULT_HOME_CIRCLE_STYLE);
+        int version = sharedPreferences.getInt(KEY_HOME_CIRCLE_STYLE_VERSION, 0);
+        if (version == 0) {
+            style = remapHomeCircleStyleV1(style);
+            sharedPreferences.edit()
+                    .putInt(KEY_HOME_CIRCLE_STYLE, style)
+                    .putInt(KEY_HOME_CIRCLE_STYLE_VERSION, 1)
+                    .apply();
+        }
+        if (style < 0 || style > 11) {
+            return DEFAULT_HOME_CIRCLE_STYLE;
+        }
+        return style;
+    }
+
+    public void saveHomeCircleStyle(int style) {
+        sharedPreferences.edit().putInt(KEY_HOME_CIRCLE_STYLE, style).apply();
+    }
+
+    private int remapHomeCircleStyleV1(int style) {
+        switch (style) {
+            case 0: // Classic
+                return 0;
+            case 1: // Thin
+                return 1;
+            case 2: // Halo -> moved to end
+                return 11;
+            case 3: // Segmented
+                return 2;
+            case 4: // Gradient
+                return 5;
+            case 5: // Marker
+                return 4;
+            case 6: // Arc Only
+                return 3;
+            case 7: // Glow
+                return 6;
+            case 8: // Gradient Glow
+                return 7;
+            case 9: // Pulse Light
+                return 8;
+            case 10: // Pulse Medium
+                return 9;
+            case 11: // Pulse Strong
+                return 10;
+            default:
+                return DEFAULT_HOME_CIRCLE_STYLE;
+        }
     }
 
     public int getCalendarWearColor() {

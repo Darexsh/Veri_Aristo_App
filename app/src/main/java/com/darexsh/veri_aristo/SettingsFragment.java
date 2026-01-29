@@ -18,6 +18,14 @@ import android.widget.TextView;
 import android.widget.ScrollView;
 import android.widget.Button;
 import android.graphics.Color;
+import android.graphics.Bitmap;
+import android.graphics.Canvas;
+import android.graphics.Paint;
+import android.graphics.RectF;
+import android.graphics.Shader;
+import android.graphics.SweepGradient;
+import android.graphics.drawable.BitmapDrawable;
+import android.graphics.drawable.Drawable;
 import android.graphics.Typeface;
 import android.text.SpannableString;
 import android.text.Spanned;
@@ -98,6 +106,8 @@ public class SettingsFragment extends Fragment {
     private ActivityResultLauncher<Intent> manageUnknownSourcesLauncher;
     private int[] buttonColorValues;
     private String[] buttonColorLabels;
+    private String[] circleStyleLabels;
+    private Drawable[] circleStylePreviews;
     private static final String RELEASES_URL = "https://api.github.com/repos/Darexsh/Veri_Aristo_App/releases";
     private File pendingApkFile;
     private AlertDialog downloadDialog;
@@ -277,6 +287,13 @@ public class SettingsFragment extends Fragment {
         viewModel.getHomeCircleColor().observe(getViewLifecycleOwner(), color -> {
             if (color != null) {
                 updateCircleColorButtonText(color);
+                circleStylePreviews = null;
+            }
+        });
+
+        viewModel.getHomeCircleStyle().observe(getViewLifecycleOwner(), style -> {
+            if (style != null) {
+                updateCircleStyleButtonText(style);
             }
         });
 
@@ -293,6 +310,7 @@ public class SettingsFragment extends Fragment {
         btnSetLanguage.setOnClickListener(v -> showLanguageDialog());
         btnSetButtonColor.setOnClickListener(v -> showButtonColorDialog());
         btnSetCircleColor.setOnClickListener(v -> showCircleColorDialog());
+        btnSetCircleStyle.setOnClickListener(v -> showCircleStyleDialog());
         btnWelcomeTour.setOnClickListener(v -> {
             if (getActivity() instanceof MainActivity) {
                 ((MainActivity) getActivity()).restartWelcomeTour();
@@ -740,6 +758,171 @@ public class SettingsFragment extends Fragment {
 
     private void updateCircleColorButtonText(int color) {
         btnSetCircleColor.setText(R.string.settings_circle_color_format);
+    }
+
+    private void updateCircleStyleButtonText(int style) {
+        ensureCircleStyleOptionsLoaded();
+        String label = style >= 0 && style < circleStyleLabels.length
+                ? circleStyleLabels[style]
+                : circleStyleLabels[0];
+        btnSetCircleStyle.setText(getString(R.string.settings_circle_style_format, label));
+    }
+
+    private void ensureCircleStyleOptionsLoaded() {
+        if (circleStyleLabels == null) {
+            circleStyleLabels = getResources().getStringArray(R.array.settings_circle_style_labels);
+            circleStylePreviews = new Drawable[circleStyleLabels.length];
+        }
+    }
+
+    private void showCircleStyleDialog() {
+        ensureCircleStyleOptionsLoaded();
+        Integer currentStyle = viewModel.getHomeCircleStyle().getValue();
+        int selected = currentStyle != null ? currentStyle : SettingsRepository.DEFAULT_HOME_CIRCLE_STYLE;
+        if (selected >= circleStyleLabels.length) {
+            selected = 0;
+        }
+        android.widget.ListAdapter adapter = new android.widget.ArrayAdapter<String>(
+                requireContext(),
+                R.layout.item_circle_style_preview,
+                android.R.id.text1,
+                circleStyleLabels
+        ) {
+            @NonNull
+            @Override
+            public View getView(int position, @Nullable View convertView, @NonNull ViewGroup parent) {
+                View view = super.getView(position, convertView, parent);
+                android.widget.ImageView preview = view.findViewById(R.id.img_style_preview);
+                if (preview != null) {
+                    preview.setImageDrawable(getCircleStylePreview(position));
+                }
+                return view;
+            }
+        };
+        View content = LayoutInflater.from(requireContext())
+                .inflate(R.layout.dialog_circle_style_list, null);
+        android.widget.ListView listView = content.findViewById(R.id.list_circle_styles);
+        listView.setChoiceMode(android.widget.ListView.CHOICE_MODE_SINGLE);
+        listView.setAdapter(adapter);
+        listView.setItemChecked(selected, true);
+
+        AlertDialog dialog = new AlertDialog.Builder(requireContext())
+                .setTitle(R.string.settings_circle_style_dialog_title)
+                .setView(content)
+                .setNegativeButton(R.string.dialog_cancel, null)
+                .show();
+        listView.setOnItemClickListener((parent, view, position, id) -> {
+            viewModel.setHomeCircleStyle(position);
+            dialog.dismiss();
+        });
+        applyDialogButtonColors(dialog);
+    }
+
+    private Drawable getCircleStylePreview(int style) {
+        if (circleStylePreviews != null && style >= 0 && style < circleStylePreviews.length) {
+            if (circleStylePreviews[style] != null) {
+                return circleStylePreviews[style];
+            }
+            int color = viewModel != null && viewModel.getHomeCircleColor().getValue() != null
+                    ? viewModel.getHomeCircleColor().getValue()
+                    : SettingsRepository.DEFAULT_HOME_CIRCLE_COLOR;
+            circleStylePreviews[style] = buildCircleStylePreview(style, color);
+            return circleStylePreviews[style];
+        }
+        return null;
+    }
+
+    private Drawable buildCircleStylePreview(int style, int color) {
+        int size = dpToPx(36);
+        int padding = dpToPx(4);
+        int stroke = dpToPx(3);
+        Bitmap bitmap = Bitmap.createBitmap(size, size, Bitmap.Config.ARGB_8888);
+        Canvas canvas = new Canvas(bitmap);
+
+        Paint track = new Paint(Paint.ANTI_ALIAS_FLAG);
+        Paint prog = new Paint(Paint.ANTI_ALIAS_FLAG);
+        track.setStyle(Paint.Style.STROKE);
+        prog.setStyle(Paint.Style.STROKE);
+        track.setStrokeWidth(stroke);
+        prog.setStrokeWidth(stroke);
+        track.setColor(withAlpha(color, 80));
+        prog.setColor(color);
+        track.setStrokeCap(Paint.Cap.ROUND);
+        prog.setStrokeCap(Paint.Cap.ROUND);
+
+        RectF rect = new RectF(padding, padding, size - padding, size - padding);
+        float sweep = 270f;
+
+        if (style == HomeCircleView.STYLE_ARC) {
+            canvas.drawArc(rect, -90f, sweep, false, prog);
+            return new BitmapDrawable(getResources(), bitmap);
+        }
+
+        if (style == HomeCircleView.STYLE_SEGMENTED) {
+            int segments = 10;
+            float gap = 360f / segments * 0.55f;
+            float segSweep = 360f / segments - gap;
+            float start = -90f;
+            for (int i = 0; i < segments; i++) {
+                float segStart = start + i * (segSweep + gap);
+                canvas.drawArc(rect, segStart, segSweep, false, track);
+            }
+            int filled = 6;
+            for (int i = 0; i < filled; i++) {
+                float segStart = start + i * (segSweep + gap);
+                canvas.drawArc(rect, segStart, segSweep, false, prog);
+            }
+            return new BitmapDrawable(getResources(), bitmap);
+        }
+
+        if (style == HomeCircleView.STYLE_GRADIENT || style == HomeCircleView.STYLE_GRADIENT_GLOW) {
+            Shader shader = new SweepGradient(size / 2f, size / 2f,
+                    new int[]{withAlpha(color, 90), color, withAlpha(color, 90)},
+                    new float[]{0f, 0.7f, 1f});
+            prog.setShader(shader);
+        }
+        if (style == HomeCircleView.STYLE_GLOW || style == HomeCircleView.STYLE_GRADIENT_GLOW) {
+            prog.setShadowLayer(dpToPx(4), 0f, 0f, withAlpha(color, 180));
+        }
+        if (style == HomeCircleView.STYLE_PULSE_LIGHT) {
+            prog.setShadowLayer(dpToPx(3), 0f, 0f, withAlpha(color, 140));
+        } else if (style == HomeCircleView.STYLE_PULSE_MEDIUM) {
+            prog.setShadowLayer(dpToPx(5), 0f, 0f, withAlpha(color, 180));
+        } else if (style == HomeCircleView.STYLE_PULSE_STRONG) {
+            prog.setShadowLayer(dpToPx(7), 0f, 0f, withAlpha(color, 220));
+        } else if (style == HomeCircleView.STYLE_HALO) {
+            track.setColor(withAlpha(color, 120));
+        } else if (style == HomeCircleView.STYLE_THIN) {
+            track.setStrokeWidth(dpToPx(2));
+            prog.setStrokeWidth(dpToPx(2));
+        }
+
+        canvas.drawArc(rect, 0f, 360f, false, track);
+        canvas.drawArc(rect, -90f, sweep, false, prog);
+
+        if (style == HomeCircleView.STYLE_MARKER) {
+            Paint dot = new Paint(Paint.ANTI_ALIAS_FLAG);
+            dot.setColor(color);
+            float angle = (float) Math.toRadians(-90 + sweep);
+            float cx = rect.centerX();
+            float cy = rect.centerY();
+            float r = rect.width() / 2f;
+            float x = cx + (float) Math.cos(angle) * r;
+            float y = cy + (float) Math.sin(angle) * r;
+            canvas.drawCircle(x, y, dpToPx(3), dot);
+        }
+
+        return new BitmapDrawable(getResources(), bitmap);
+    }
+
+    private int dpToPx(int dp) {
+        float density = getResources().getDisplayMetrics().density;
+        return Math.round(dp * density);
+    }
+
+    private int withAlpha(int color, int alpha) {
+        int clamped = Math.max(0, Math.min(255, alpha));
+        return (color & 0x00FFFFFF) | (clamped << 24);
     }
 
     private void ensureButtonColorOptionsLoaded() {
@@ -1262,6 +1445,7 @@ public class SettingsFragment extends Fragment {
         viewModel.setInsertionReminderHours(6);
         viewModel.setButtonColor(SettingsRepository.DEFAULT_BUTTON_COLOR);
         viewModel.setHomeCircleColor(SettingsRepository.DEFAULT_HOME_CIRCLE_COLOR);
+        viewModel.setHomeCircleStyle(SettingsRepository.DEFAULT_HOME_CIRCLE_STYLE);
 
         WidgetUpdater.updateAllWidgets(requireContext());
         Toast.makeText(requireContext(), R.string.settings_reset_done, Toast.LENGTH_SHORT).show();

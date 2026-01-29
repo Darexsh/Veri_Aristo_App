@@ -21,7 +21,6 @@ import android.widget.ImageView;
 import android.widget.NumberPicker;
 import android.widget.TextView;
 import com.google.android.material.button.MaterialButton;
-import com.google.android.material.progressindicator.CircularProgressIndicator;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -37,6 +36,10 @@ public class HomeFragment extends Fragment {
     // Number of days after removal before the ring can be reinserted
     private static final int RING_FREE_DAYS = Constants.RING_FREE_DAYS;
     private SharedViewModel viewModel;
+    private int currentCircleStyle = SettingsRepository.DEFAULT_HOME_CIRCLE_STYLE;
+    private int currentCircleColor = SettingsRepository.DEFAULT_HOME_CIRCLE_COLOR;
+    private float pulsePhase = 0f;
+    private boolean pulseUp = true;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -44,7 +47,7 @@ public class HomeFragment extends Fragment {
 
         View view = inflater.inflate(R.layout.fragment_home, container, false);
 
-        final CircularProgressIndicator circularProgress = view.findViewById(R.id.circularProgress); // Circular progress indicator for cycle status
+        final HomeCircleView circularProgress = view.findViewById(R.id.circularProgress); // Home circle for cycle status
         final TextView tvRemovalDate = view.findViewById(R.id.tv_removal_date); // TextView to display the removal date
         final TextView tvSecondaryDate = view.findViewById(R.id.tv_secondary_date);
         final TextView tvDaysNumber = view.findViewById(R.id.tv_days_number);   // TextView to display the number of days left
@@ -65,7 +68,16 @@ public class HomeFragment extends Fragment {
         btnDelayInfo.setOnClickListener(v -> showDelayInfoDialog());
         viewModel.getHomeCircleColor().observe(getViewLifecycleOwner(), color -> {
             if (color != null) {
+                currentCircleColor = color;
                 circularProgress.setIndicatorColor(color);
+                applyHomeCircleStyle(circularProgress, currentCircleStyle, currentCircleColor);
+            }
+        });
+
+        viewModel.getHomeCircleStyle().observe(getViewLifecycleOwner(), style -> {
+            if (style != null) {
+                currentCircleStyle = style;
+                applyHomeCircleStyle(circularProgress, currentCircleStyle, currentCircleColor);
             }
         });
 
@@ -186,8 +198,8 @@ public class HomeFragment extends Fragment {
             String labelText;
             String primaryTextDate;
             String secondaryTextDate;
-            int maxProgress;
-            int currentProgress;
+            int progressMax;
+            int progressValue;
 
             // Calculate remaining days and progress based on the current date and cycle dates
             if (now.before(removalDate)) {
@@ -196,8 +208,8 @@ public class HomeFragment extends Fragment {
                 remainingDays = Math.max(remainingDays, 0);
 
                 labelText = getString(R.string.home_days_left);
-                maxProgress = cycleLength;
-                currentProgress = maxProgress - remainingDays;
+                progressMax = cycleLength;
+                progressValue = progressMax - remainingDays;
 
                 String removalDateText = String.format("%02d.%02d.%d",
                         removalDate.get(Calendar.DAY_OF_MONTH),
@@ -215,8 +227,8 @@ public class HomeFragment extends Fragment {
                 remainingDays = Math.max(remainingDays, 0);
 
                 labelText = getString(R.string.home_days_until_insertion);
-                maxProgress = RING_FREE_DAYS;
-                currentProgress = maxProgress - remainingDays;
+                progressMax = RING_FREE_DAYS;
+                progressValue = progressMax - remainingDays;
 
                 String reinsertionDateText = String.format("%02d.%02d.%d",
                         reinsertionDate.get(Calendar.DAY_OF_MONTH),
@@ -231,8 +243,8 @@ public class HomeFragment extends Fragment {
             } else {
                 remainingDays = cycleLength;
                 labelText = getString(R.string.home_days_left);
-                maxProgress = cycleLength;
-                currentProgress = 0;
+                progressMax = cycleLength;
+                progressValue = 0;
 
                 String removalDateText = String.format("%02d.%02d.%d",
                         removalDate.get(Calendar.DAY_OF_MONTH),
@@ -246,8 +258,8 @@ public class HomeFragment extends Fragment {
                 secondaryTextDate = getString(R.string.home_insertion_on, reinsertionDateText);
             }
 
-            circularProgress.setMax(maxProgress);
-            circularProgress.setProgress(currentProgress);
+            circularProgress.setMax(progressMax);
+            circularProgress.setProgress(progressValue);
             tvDaysNumber.setText(String.valueOf(remainingDays));
             tvDaysLabel.setText(labelText);
             String timeText = String.format("%02d:%02d", startDate.get(Calendar.HOUR_OF_DAY), startDate.get(Calendar.MINUTE));
@@ -561,5 +573,55 @@ public class HomeFragment extends Fragment {
                 .setNegativeButton(R.string.dialog_cancel, null)
                 .show();
     }
+
+    private void applyHomeCircleStyle(HomeCircleView progress, int style, int color) {
+        if (progress == null) {
+            return;
+        }
+        progress.setStyle(style);
+        progress.setIndicatorColor(color);
+        if (style == HomeCircleView.STYLE_PULSE_LIGHT
+                || style == HomeCircleView.STYLE_PULSE_MEDIUM
+                || style == HomeCircleView.STYLE_PULSE_STRONG) {
+            startPulse(progress);
+        } else {
+            stopPulse();
+        }
+    }
+
+    private void startPulse(HomeCircleView progress) {
+        progress.removeCallbacks(pulseRunnable);
+        progress.post(pulseRunnable);
+    }
+
+    private void stopPulse() {
+        if (getView() != null) {
+            getView().removeCallbacks(pulseRunnable);
+        }
+    }
+
+    private final Runnable pulseRunnable = new Runnable() {
+        @Override
+        public void run() {
+            if (currentCircleStyle != HomeCircleView.STYLE_PULSE_LIGHT
+                    && currentCircleStyle != HomeCircleView.STYLE_PULSE_MEDIUM
+                    && currentCircleStyle != HomeCircleView.STYLE_PULSE_STRONG) {
+                return;
+            }
+            pulsePhase += pulseUp ? 0.06f : -0.06f;
+            if (pulsePhase >= 1f) {
+                pulsePhase = 1f;
+                pulseUp = false;
+            } else if (pulsePhase <= 0f) {
+                pulsePhase = 0f;
+                pulseUp = true;
+            }
+            HomeCircleView circle = getView() != null ? getView().findViewById(R.id.circularProgress) : null;
+            if (circle != null) {
+                circle.setPulsePhase(pulsePhase);
+                circle.postDelayed(this, 40);
+            }
+        }
+    };
 
 }

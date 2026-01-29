@@ -22,6 +22,7 @@ public class SharedViewModel extends ViewModel {
     private final MutableLiveData<Integer> insertionReminderHours = new MutableLiveData<>();
     private final MutableLiveData<Integer> buttonColor = new MutableLiveData<>();
     private final MutableLiveData<Integer> homeCircleColor = new MutableLiveData<>();
+    private final MutableLiveData<Integer> homeCircleStyle = new MutableLiveData<>();
     private final MutableLiveData<Integer> calendarWearColor = new MutableLiveData<>();
     private final MutableLiveData<Integer> calendarRingFreeColor = new MutableLiveData<>();
     private final MutableLiveData<Integer> calendarRemovalColor = new MutableLiveData<>();
@@ -40,6 +41,7 @@ public class SharedViewModel extends ViewModel {
         insertionReminderHours.setValue(repository.getInsertionReminderHours());
         buttonColor.setValue(repository.getButtonColor());
         homeCircleColor.setValue(repository.getHomeCircleColor());
+        homeCircleStyle.setValue(repository.getHomeCircleStyle());
         calendarWearColor.setValue(repository.getCalendarWearColor());
         calendarRingFreeColor.setValue(repository.getCalendarRingFreeColor());
         calendarRemovalColor.setValue(repository.getCalendarRemovalColor());
@@ -89,6 +91,10 @@ public class SharedViewModel extends ViewModel {
 
     public LiveData<Integer> getHomeCircleColor() {
         return homeCircleColor;
+    }
+
+    public LiveData<Integer> getHomeCircleStyle() {
+        return homeCircleStyle;
     }
 
     public LiveData<Integer> getCalendarWearColor() {
@@ -157,6 +163,11 @@ public class SharedViewModel extends ViewModel {
     public void setHomeCircleColor(int color) {
         repository.saveHomeCircleColor(color);
         homeCircleColor.setValue(color);
+    }
+
+    public void setHomeCircleStyle(int style) {
+        repository.saveHomeCircleStyle(style);
+        homeCircleStyle.setValue(style);
     }
 
     public void setCalendarWearColor(int color) {

@@ -28,4 +28,19 @@
         <item>0xFF6200EE</item>
         <item>0xFF455A64</item>
     </integer-array>
+
+    <string-array name="settings_circle_style_labels">
+        <item>Klassisch</item>
+        <item>Dünn</item>
+        <item>Segmentiert</item>
+        <item>Nur Bogen</item>
+        <item>Marker</item>
+        <item>Farbverlauf</item>
+        <item>Glow</item>
+        <item>Farbverlauf + Glow</item>
+        <item>Puls Leicht</item>
+        <item>Puls Mittel</item>
+        <item>Puls Stark</item>
+        <item>Halo</item>
+    </string-array>
 </resources>

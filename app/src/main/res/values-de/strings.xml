@@ -121,6 +121,8 @@ Dies entspricht nicht der empfohlenen Standardanwendung, ist aber möglich:<br>
     <string name="settings_circle_color_label">Home-Kreisfarbe</string>
     <string name="settings_circle_color_format">Home-Kreisfarbe</string>
     <string name="settings_circle_style_label">Home-Kreis-Stil</string>
+    <string name="settings_circle_style_format">Home-Kreis-Stil: %1$s</string>
+    <string name="settings_circle_style_dialog_title">Home-Kreis-Stil wählen</string>
     <string name="settings_circle_color_dialog_title">Home-Kreisfarbe wählen</string>
     <string name="settings_circle_color_custom_title">Eigene Home-Kreisfarbe</string>
     <string name="settings_circle_color_widget_note">Aktualisiert auch die Widget Kreisfarbe</string>
@@ -242,6 +244,8 @@ Dies entspricht nicht der empfohlenen Standardanwendung, ist aber möglich:<br>
     <string name="tour_body_settings_button_color">Akzentfarbe für Buttons ändern.\nDies ändert ebenfalls den Hintergrund der Widgets.</string>
     <string name="tour_title_settings_circle_color">Home-Kreisfarbe</string>
     <string name="tour_body_settings_circle_color">Farbe des Rings auf der Startseite festlegen.\nDies ändert ebenfalls die Farbe des Rings des großen Widgets.</string>
+    <string name="tour_title_settings_circle_style">Home-Kreis-Stil</string>
+    <string name="tour_body_settings_circle_style">Stil des Home-Rings auswählen.</string>
     <string name="tour_title_settings_language">Sprache</string>
     <string name="tour_body_settings_language">Zwischen Deutsch und Englisch wechseln.</string>
     <string name="tour_title_settings_advanced">Erweitert</string>

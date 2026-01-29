@@ -121,6 +121,8 @@ This is not the recommended standard use, but it is possible:<br>
     <string name="settings_circle_color_label">Home circle color</string>
     <string name="settings_circle_color_format">Home circle color</string>
     <string name="settings_circle_style_label">Home circle style</string>
+    <string name="settings_circle_style_format">Home circle style: %1$s</string>
+    <string name="settings_circle_style_dialog_title">Choose home circle style</string>
     <string name="settings_circle_color_dialog_title">Choose home circle color</string>
     <string name="settings_circle_color_custom_title">Custom home circle color</string>
     <string name="settings_circle_color_widget_note">Also updates the widget ring color.</string>
@@ -242,6 +244,8 @@ This is not the recommended standard use, but it is possible:<br>
     <string name="tour_body_settings_button_color">Change the accent color for buttons.\nThis also changes the widget background.</string>
     <string name="tour_title_settings_circle_color">Home ring color</string>
     <string name="tour_body_settings_circle_color">Set the ring color on the Home screen.\nThis also changes the ring color on the large widget.</string>
+    <string name="tour_title_settings_circle_style">Home ring style</string>
+    <string name="tour_body_settings_circle_style">Choose a style for the Home ring.</string>
     <string name="tour_title_settings_language">Language</string>
     <string name="tour_body_settings_language">Switch between German and English.</string>
     <string name="tour_title_settings_advanced">Advanced</string>

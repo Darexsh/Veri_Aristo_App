@@ -18,21 +18,23 @@
         android:orientation="vertical"
         android:gravity="center"
         android:padding="16dp"
+        android:clipChildren="false"
+        android:clipToPadding="false"
         android:background="#80000000">
 
         <FrameLayout
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
+            android:layout_width="280dp"
+            android:layout_height="280dp"
+            android:clipChildren="false"
+            android:clipToPadding="false"
             android:layout_marginBottom="16dp">
 
-            <com.google.android.material.progressindicator.CircularProgressIndicator
+            <com.darexsh.veri_aristo.HomeCircleView
                 android:id="@+id/circularProgress"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                app:indicatorColor="#FFBB86FC"
-                app:indicatorSize="280dp"
-                app:trackColor="#E0E0E0"
-                app:trackThickness="16dp" />
+                android:layout_width="400dp"
+                android:layout_height="400dp"
+                android:padding="60dp"
+                android:layout_gravity="center" />
 
             <LinearLayout
                 android:layout_width="wrap_content"
