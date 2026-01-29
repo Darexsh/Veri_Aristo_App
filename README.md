@@ -203,7 +203,7 @@
 
 This project is licensed under the **Non-Commercial MIT License** and was developed as an educational project. You are free to use, modify, and distribute the code for **non-commercial purposes only**, and must credit the author:
 
-**Copyright (c) 2025 Daniel Sichler aka Darexsh**
+**Copyright (c) 2025 Darexsh by Daniel Sichler**
 
 Please include the following notice with any use or distribution:
 
