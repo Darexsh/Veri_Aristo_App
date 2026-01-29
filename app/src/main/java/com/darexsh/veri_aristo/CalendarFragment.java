@@ -18,6 +18,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Button;
 import android.content.res.ColorStateList;
 import androidx.core.graphics.ColorUtils;
 import com.prolificinteractive.materialcalendarview.CalendarDay;
@@ -281,6 +282,13 @@ public class CalendarFragment extends Fragment {
         if (widgetNote != null) {
             widgetNote.setVisibility(View.GONE);
         }
+        Integer buttonColor = viewModel != null ? viewModel.getButtonColor().getValue() : null;
+        if (buttonColor != null) {
+            ButtonColorHelper.applyPrimaryColor(customButton, buttonColor);
+            ButtonColorHelper.applyPrimaryColor(cancelButton, buttonColor);
+            customButton.setTextColor(Color.WHITE);
+            cancelButton.setTextColor(Color.WHITE);
+        }
 
         android.widget.ListAdapter adapter = new android.widget.ArrayAdapter<String>(
                 requireContext(),
@@ -323,6 +331,7 @@ public class CalendarFragment extends Fragment {
         cancelButton.setOnClickListener(v -> dialog.dismiss());
 
         dialog.show();
+        applyDialogButtonColors(dialog);
     }
 
     private void showCustomLegendColorDialog(int titleResId, int initialColor, ColorConsumer onSelect) {
@@ -338,12 +347,35 @@ public class CalendarFragment extends Fragment {
             preview.setBackgroundTintList(ColorStateList.valueOf(color));
         });
 
-        new AlertDialog.Builder(requireContext())
+        AlertDialog dialog = new AlertDialog.Builder(requireContext())
                 .setTitle(titleResId)
                 .setView(content)
-                .setPositiveButton(R.string.dialog_ok, (dialog, which) -> onSelect.accept(pendingColor[0]))
+                .setPositiveButton(R.string.dialog_ok, (dlg, which) -> onSelect.accept(pendingColor[0]))
                 .setNegativeButton(R.string.dialog_cancel, null)
                 .show();
+        applyDialogButtonColors(dialog);
+    }
+
+    private void applyDialogButtonColors(@Nullable AlertDialog dialog) {
+        if (dialog == null || viewModel == null) {
+            return;
+        }
+        Integer color = viewModel.getButtonColor().getValue();
+        if (color == null) {
+            return;
+        }
+        Button positive = dialog.getButton(AlertDialog.BUTTON_POSITIVE);
+        if (positive != null) {
+            positive.setTextColor(color);
+        }
+        Button negative = dialog.getButton(AlertDialog.BUTTON_NEGATIVE);
+        if (negative != null) {
+            negative.setTextColor(color);
+        }
+        Button neutral = dialog.getButton(AlertDialog.BUTTON_NEUTRAL);
+        if (neutral != null) {
+            neutral.setTextColor(color);
+        }
     }
 
     private void ensureColorOptionsLoaded() {

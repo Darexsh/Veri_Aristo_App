@@ -7,6 +7,7 @@
     <string name="section_calendar">Calendar</string>
     <string name="section_notifications">Notifications</string>
     <string name="section_design">Design</string>
+    <string name="section_language">Language</string>
     <string name="section_advanced">Advanced</string>
 
     <string name="btn_set_start_date">Set insertion date</string>
@@ -119,6 +120,7 @@ This is not the recommended standard use, but it is possible:<br>
     <string name="settings_button_color_widget_note">Also updates the widget background color.</string>
     <string name="settings_circle_color_label">Home circle color</string>
     <string name="settings_circle_color_format">Home circle color</string>
+    <string name="settings_circle_style_label">Home circle style</string>
     <string name="settings_circle_color_dialog_title">Choose home circle color</string>
     <string name="settings_circle_color_custom_title">Custom home circle color</string>
     <string name="settings_circle_color_widget_note">Also updates the widget ring color.</string>
@@ -280,7 +282,7 @@ This is not the recommended standard use, but it is possible:<br>
     <string name="debug_past_suffix"> [past]</string>
     <string name="debug_future_suffix"> [future]</string>
 
-    <string name="language_button">Language: %1$s</string>
+    <string name="language_button">Selected: %1$s</string>
     <string name="language_title">App language</string>
     <string name="language_german">Deutsch</string>
     <string name="language_english">English</string>

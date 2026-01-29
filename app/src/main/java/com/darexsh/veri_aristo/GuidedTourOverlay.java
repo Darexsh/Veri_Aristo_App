@@ -1,6 +1,7 @@
 package com.darexsh.veri_aristo;
 
 import android.content.Context;
+import android.graphics.Color;
 import android.graphics.Rect;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -64,6 +65,13 @@ public class GuidedTourOverlay extends FrameLayout {
         nextButton.setText(isLast ? R.string.tour_finish : R.string.tour_next);
         highlightView.setTarget(target);
         positionCardNearTarget(target);
+    }
+
+    public void setButtonColor(int color) {
+        ButtonColorHelper.applyPrimaryColor(nextButton, color);
+        ButtonColorHelper.applyPrimaryColor(skipButton, color);
+        nextButton.setTextColor(Color.WHITE);
+        skipButton.setTextColor(Color.WHITE);
     }
 
     public void setOnFinishListener(Runnable listener) {

@@ -89,6 +89,9 @@ public class MainActivity extends AppCompatActivity {
         viewModel.getButtonColor().observe(this, color -> {
             if (color != null) {
                 applyBottomNavColors(color);
+                if (tourOverlay != null) {
+                    tourOverlay.setButtonColor(color);
+                }
             }
         });
 
@@ -229,6 +232,9 @@ public class MainActivity extends AppCompatActivity {
         Integer buttonColor = viewModel.getButtonColor().getValue();
         if (buttonColor != null) {
             ButtonColorHelper.applyPrimaryColor(startButton, buttonColor);
+            ButtonColorHelper.applyPrimaryColor(skipButton, buttonColor);
+            startButton.setTextColor(Color.WHITE);
+            skipButton.setTextColor(Color.WHITE);
         }
 
         AlertDialog dialog = new AlertDialog.Builder(this)
@@ -274,6 +280,10 @@ public class MainActivity extends AppCompatActivity {
 
         if (tourOverlay == null) {
             tourOverlay = new GuidedTourOverlay(this);
+            Integer buttonColor = viewModel.getButtonColor().getValue();
+            if (buttonColor != null) {
+                tourOverlay.setButtonColor(buttonColor);
+            }
             tourOverlay.setOnNextListener(() -> {
                 if (tourSteps != null && tourIndex < tourSteps.size()) {
                     TourStep currentStep = tourSteps.get(tourIndex);
@@ -397,6 +407,7 @@ public class MainActivity extends AppCompatActivity {
         Integer buttonColor = viewModel.getButtonColor().getValue();
         if (buttonColor != null) {
             ButtonColorHelper.applyPrimaryColor(doneButton, buttonColor);
+            doneButton.setTextColor(Color.WHITE);
         }
 
         AlertDialog dialog = new AlertDialog.Builder(this)

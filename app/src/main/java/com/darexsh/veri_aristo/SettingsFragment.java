@@ -16,6 +16,8 @@ import android.widget.TimePicker;
 import android.widget.NumberPicker;
 import android.widget.TextView;
 import android.widget.ScrollView;
+import android.widget.Button;
+import android.graphics.Color;
 import android.graphics.Typeface;
 import android.text.SpannableString;
 import android.text.Spanned;
@@ -82,6 +84,7 @@ public class SettingsFragment extends Fragment {
     private MaterialButton btnSetLanguage;
     private MaterialButton btnSetButtonColor;
     private MaterialButton btnSetCircleColor;
+    private MaterialButton btnSetCircleStyle;
     private MaterialButton btnWelcomeTour;
     private View advancedContent;
     private View advancedHeader;
@@ -118,11 +121,12 @@ public class SettingsFragment extends Fragment {
             if (isGranted) {
                 openGallery();
             } else {
-                new AlertDialog.Builder(requireContext())
+                AlertDialog dialog = new AlertDialog.Builder(requireContext())
                         .setTitle(R.string.settings_permission_title)
                         .setMessage(R.string.settings_permission_message)
                         .setPositiveButton(R.string.dialog_ok, null)
                         .show();
+                applyDialogButtonColors(dialog);
             }
         });
 
@@ -196,6 +200,7 @@ public class SettingsFragment extends Fragment {
         btnSetLanguage = view.findViewById(R.id.btn_set_language);
         btnSetButtonColor = view.findViewById(R.id.btn_set_button_color);
         btnSetCircleColor = view.findViewById(R.id.btn_set_circle_color);
+        btnSetCircleStyle = view.findViewById(R.id.btn_set_circle_style);
 
         SharedViewModelFactory factory = new SharedViewModelFactory(requireActivity().getApplication());
         viewModel = new ViewModelProvider(requireActivity(), factory).get(SharedViewModel.class);
@@ -400,6 +405,7 @@ public class SettingsFragment extends Fragment {
         }, currentCalendar.get(Calendar.HOUR_OF_DAY), currentCalendar.get(Calendar.MINUTE), true);
 
         dialog.show();
+        applyDialogButtonColors(dialog);
     }
 
     // Show a DatePickerDialog to select the start date
@@ -416,6 +422,7 @@ public class SettingsFragment extends Fragment {
                 }, currentCalendar.get(Calendar.YEAR), currentCalendar.get(Calendar.MONTH), currentCalendar.get(Calendar.DAY_OF_MONTH));
 
         dialog.show();
+        applyDialogButtonColors(dialog);
     }
 
     // Show a dialog to set the cycle length
@@ -438,16 +445,17 @@ public class SettingsFragment extends Fragment {
         layout.setPadding(padding, padding, padding, padding);
         layout.addView(picker);
 
-        new AlertDialog.Builder(requireContext())
+        AlertDialog dialog = new AlertDialog.Builder(requireContext())
                 .setTitle(R.string.settings_cycle_length_title)
                 .setMessage(R.string.settings_cycle_length_message)
                 .setView(layout)
-                .setPositiveButton(R.string.dialog_ok, (dialog, which) -> {
+                .setPositiveButton(R.string.dialog_ok, (dlg, which) -> {
                     viewModel.setCycleLength(picker.getValue());
                     WidgetUpdater.updateAllWidgets(requireContext());
                 })
                 .setNegativeButton(R.string.dialog_cancel, null)
                 .show();
+        applyDialogButtonColors(dialog);
     }
 
     private void showCalendarRangeDialog() {
@@ -488,11 +496,11 @@ public class SettingsFragment extends Fragment {
         layout.addView(buildPickerRow(getString(R.string.settings_calendar_range_back), pastValuePicker, pastUnitPicker));
         layout.addView(buildPickerRow(getString(R.string.settings_calendar_range_forward), futureValuePicker, futureUnitPicker));
 
-        new AlertDialog.Builder(requireContext())
+        AlertDialog dialog = new AlertDialog.Builder(requireContext())
                 .setTitle(R.string.settings_calendar_range_title)
                 .setMessage(R.string.settings_calendar_range_message)
                 .setView(layout)
-                .setPositiveButton(R.string.dialog_ok, (dialog, which) -> {
+                .setPositiveButton(R.string.dialog_ok, (dlg, which) -> {
                     int pastAmount = pastValuePicker.getValue();
                     String pastUnit = pastUnitPicker.getValue() == 1 ? "years" : "months";
                     int futureAmount = futureValuePicker.getValue();
@@ -502,6 +510,7 @@ public class SettingsFragment extends Fragment {
                 })
                 .setNegativeButton(R.string.dialog_cancel, null)
                 .show();
+        applyDialogButtonColors(dialog);
     }
 
     private void showNotificationTimesDialog() {
@@ -524,23 +533,24 @@ public class SettingsFragment extends Fragment {
         layout.addView(buildPickerRow(getString(R.string.settings_notification_before_removal), removalPicker, null));
         layout.addView(buildPickerRow(getString(R.string.settings_notification_before_insertion), insertionPicker, null));
 
-        new AlertDialog.Builder(requireContext())
+        AlertDialog dialog = new AlertDialog.Builder(requireContext())
                 .setTitle(R.string.settings_notification_times_title)
                 .setMessage(R.string.settings_notification_times_message)
                 .setView(layout)
-                .setPositiveButton(R.string.dialog_ok, (dialog, which) -> {
+                .setPositiveButton(R.string.dialog_ok, (dlg, which) -> {
                     viewModel.setRemovalReminderHours(removalPicker.getValue());
                     viewModel.setInsertionReminderHours(insertionPicker.getValue());
                 })
                 .setNegativeButton(R.string.dialog_cancel, null)
                 .show();
+        applyDialogButtonColors(dialog);
     }
 
     private void showLanguageDialog() {
         String[] options = {getString(R.string.language_german), getString(R.string.language_english)};
-        new AlertDialog.Builder(requireContext())
+        AlertDialog dialog = new AlertDialog.Builder(requireContext())
                 .setTitle(R.string.language_title)
-                .setItems(options, (dialog, which) -> {
+                .setItems(options, (dlg, which) -> {
                     String tag = which == 0 ? "de" : "en";
                     AppCompatDelegate.setApplicationLocales(LocaleListCompat.forLanguageTags(tag));
                     WidgetUpdater.updateAllWidgets(requireContext());
@@ -549,6 +559,7 @@ public class SettingsFragment extends Fragment {
                 })
                 .setNegativeButton(R.string.dialog_cancel, null)
                 .show();
+        applyDialogButtonColors(dialog);
     }
 
     private void updateLanguageButtonText() {
@@ -603,6 +614,13 @@ public class SettingsFragment extends Fragment {
             widgetNote.setText(noteResId);
             widgetNote.setVisibility(View.VISIBLE);
         }
+        Integer buttonColor = viewModel != null ? viewModel.getButtonColor().getValue() : null;
+        if (buttonColor != null) {
+            ButtonColorHelper.applyPrimaryColor(customButton, buttonColor);
+            ButtonColorHelper.applyPrimaryColor(cancelButton, buttonColor);
+            customButton.setTextColor(Color.WHITE);
+            cancelButton.setTextColor(Color.WHITE);
+        }
         android.widget.ListAdapter adapter = new android.widget.ArrayAdapter<String>(
                 requireContext(),
                 R.layout.dialog_button_color_item,
@@ -644,6 +662,7 @@ public class SettingsFragment extends Fragment {
         cancelButton.setOnClickListener(v -> dialog.dismiss());
 
         dialog.show();
+        applyDialogButtonColors(dialog);
     }
 
     private void showCustomColorDialog(int titleResId, int initialColor, ColorConsumer onSelect) {
@@ -659,12 +678,13 @@ public class SettingsFragment extends Fragment {
             preview.setBackgroundTintList(android.content.res.ColorStateList.valueOf(color));
         });
 
-        new AlertDialog.Builder(requireContext())
+        AlertDialog dialog = new AlertDialog.Builder(requireContext())
                 .setTitle(titleResId)
                 .setView(content)
-                .setPositiveButton(R.string.dialog_ok, (dialog, which) -> onSelect.accept(pendingColor[0]))
+                .setPositiveButton(R.string.dialog_ok, (dlg, which) -> onSelect.accept(pendingColor[0]))
                 .setNegativeButton(R.string.dialog_cancel, null)
                 .show();
+        applyDialogButtonColors(dialog);
     }
 
     private void applyPrimaryButtonColor(int color) {
@@ -680,6 +700,29 @@ public class SettingsFragment extends Fragment {
         ButtonColorHelper.applyPrimaryColor(btnSetLanguage, color);
         ButtonColorHelper.applyPrimaryColor(btnSetButtonColor, color);
         ButtonColorHelper.applyPrimaryColor(btnSetCircleColor, color);
+        ButtonColorHelper.applyPrimaryColor(btnSetCircleStyle, color);
+    }
+
+    private void applyDialogButtonColors(@Nullable AlertDialog dialog) {
+        if (dialog == null || viewModel == null) {
+            return;
+        }
+        Integer color = viewModel.getButtonColor().getValue();
+        if (color == null) {
+            return;
+        }
+        Button positive = dialog.getButton(AlertDialog.BUTTON_POSITIVE);
+        if (positive != null) {
+            positive.setTextColor(color);
+        }
+        Button negative = dialog.getButton(AlertDialog.BUTTON_NEGATIVE);
+        if (negative != null) {
+            negative.setTextColor(color);
+        }
+        Button neutral = dialog.getButton(AlertDialog.BUTTON_NEUTRAL);
+        if (neutral != null) {
+            neutral.setTextColor(color);
+        }
     }
 
     private void toggleAdvancedSection() {
@@ -773,12 +816,13 @@ public class SettingsFragment extends Fragment {
         requireActivity().runOnUiThread(() -> {
             String version = releaseInfo.versionName != null ? releaseInfo.versionName : "";
             String message = getString(R.string.update_available_message, version);
-            new AlertDialog.Builder(requireContext())
+            AlertDialog dialog = new AlertDialog.Builder(requireContext())
                     .setTitle(R.string.update_available_title)
                     .setMessage(message)
-                    .setPositiveButton(R.string.update_install, (dialog, which) -> downloadAndInstall(releaseInfo))
+                    .setPositiveButton(R.string.update_install, (dlg, which) -> downloadAndInstall(releaseInfo))
                     .setNegativeButton(R.string.update_later, null)
                     .show();
+            applyDialogButtonColors(dialog);
         });
     }
 
@@ -1095,19 +1139,20 @@ public class SettingsFragment extends Fragment {
     }
 
     private void showResetDialog() {
-        new AlertDialog.Builder(requireContext())
+        AlertDialog dialog = new AlertDialog.Builder(requireContext())
                 .setTitle(R.string.settings_reset_title)
                 .setMessage(R.string.settings_reset_message)
-                .setPositiveButton(R.string.settings_reset_confirm, (dialog, which) -> resetAppData())
+                .setPositiveButton(R.string.settings_reset_confirm, (dlg, which) -> resetAppData())
                 .setNegativeButton(R.string.dialog_cancel, null)
                 .show();
+        applyDialogButtonColors(dialog);
     }
 
     private void showBackupDialog() {
         String[] options = {getString(R.string.backup_create), getString(R.string.backup_restore)};
-        new AlertDialog.Builder(requireContext())
+        AlertDialog dialog = new AlertDialog.Builder(requireContext())
                 .setTitle(R.string.backup_title)
-                .setItems(options, (dialog, which) -> {
+                .setItems(options, (dlg, which) -> {
                     if (which == 0) {
                         createBackupLauncher.launch("veri_aristo_backup.json");
                     } else {
@@ -1116,6 +1161,7 @@ public class SettingsFragment extends Fragment {
                 })
                 .setNegativeButton(R.string.dialog_cancel, null)
                 .show();
+        applyDialogButtonColors(dialog);
     }
 
     private void showAppInfoDialog() {
@@ -1180,9 +1226,7 @@ public class SettingsFragment extends Fragment {
                 .setView(content)
                 .setPositiveButton(R.string.dialog_ok, null)
                 .show();
-        if (buttonColor != null) {
-            dialog.getButton(AlertDialog.BUTTON_POSITIVE).setTextColor(buttonColor);
-        }
+        applyDialogButtonColors(dialog);
     }
 
     private void resetAppData() {
@@ -1418,11 +1462,12 @@ public class SettingsFragment extends Fragment {
         ScrollView scrollView = new ScrollView(requireContext());
         scrollView.addView(content);
 
-        new AlertDialog.Builder(requireContext())
+        AlertDialog dialog = new AlertDialog.Builder(requireContext())
                 .setTitle(R.string.debug_dialog_title)
                 .setView(scrollView)
                 .setPositiveButton(R.string.dialog_ok, null)
                 .show();
+        applyDialogButtonColors(dialog);
     }
 
     private String buildDebugInfo() {
