@@ -37,7 +37,7 @@ public final class CycleWidgetUtils {
     public static State calculateState(Context context) {
         SettingsRepository repository = new SettingsRepository(context);
         Calendar baseStart = repository.getStartDate();
-        Calendar now = Calendar.getInstance();
+        Calendar now = DebugTimeProvider.now(context);
         int cycleLength = repository.getCycleLength();
 
         Calendar currentStart = (Calendar) baseStart.clone();
@@ -50,14 +50,18 @@ public final class CycleWidgetUtils {
         Calendar reinsertionDate = (Calendar) removalDate.clone();
         reinsertionDate.add(Calendar.DAY_OF_MONTH, Constants.RING_FREE_DAYS);
 
+        Calendar nowDay = startOfDay(now);
+        Calendar reinsertionDay = startOfDay(reinsertionDate);
+
         int guard = 0;
-        while (now.after(reinsertionDate) && guard < 200) {
+        while (nowDay.after(reinsertionDay) && guard < 200) {
             currentStart.add(Calendar.DAY_OF_MONTH, cycleLength + Constants.RING_FREE_DAYS + delayDays);
             delayDays = repository.getCycleDelayDays(currentStart.getTimeInMillis());
             removalDate = (Calendar) currentStart.clone();
             removalDate.add(Calendar.DAY_OF_MONTH, cycleLength + delayDays);
             reinsertionDate = (Calendar) removalDate.clone();
             reinsertionDate.add(Calendar.DAY_OF_MONTH, Constants.RING_FREE_DAYS);
+            reinsertionDay = startOfDay(reinsertionDate);
             guard++;
         }
 
@@ -67,12 +71,12 @@ public final class CycleWidgetUtils {
         String label;
 
         if (now.before(removalDate)) {
-            remainingDays = daysUntil(now, removalDate);
+            remainingDays = daysBetweenDays(now, removalDate);
             maxProgress = cycleLength;
             currentProgress = maxProgress - remainingDays;
             label = context.getString(R.string.home_days_left);
         } else if (now.before(reinsertionDate)) {
-            remainingDays = daysUntil(now, reinsertionDate);
+            remainingDays = daysBetweenDays(now, reinsertionDate);
             maxProgress = Constants.RING_FREE_DAYS;
             currentProgress = maxProgress - remainingDays;
             label = context.getString(R.string.home_days_until_insertion);
@@ -90,9 +94,20 @@ public final class CycleWidgetUtils {
         return new State(remainingDays, maxProgress, currentProgress, label, removalText, insertionText);
     }
 
-    private static int daysUntil(Calendar from, Calendar to) {
-        long millisLeft = to.getTimeInMillis() - from.getTimeInMillis();
-        int days = (int) (millisLeft / (24 * 60 * 60 * 1000));
+    private static Calendar startOfDay(Calendar source) {
+        Calendar day = (Calendar) source.clone();
+        day.set(Calendar.HOUR_OF_DAY, 0);
+        day.set(Calendar.MINUTE, 0);
+        day.set(Calendar.SECOND, 0);
+        day.set(Calendar.MILLISECOND, 0);
+        return day;
+    }
+
+    private static int daysBetweenDays(Calendar from, Calendar to) {
+        Calendar fromDay = startOfDay(from);
+        Calendar toDay = startOfDay(to);
+        long millisLeft = toDay.getTimeInMillis() - fromDay.getTimeInMillis();
+        int days = (int) (millisLeft / (24L * 60L * 60L * 1000L));
         return Math.max(days, 0);
     }
 

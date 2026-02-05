@@ -37,6 +37,9 @@ public class SettingsRepository {
     private static final String KEY_CALENDAR_RING_FREE_COLOR = "calendar_ring_free_color";
     private static final String KEY_CALENDAR_REMOVAL_COLOR = "calendar_removal_color";
     private static final String KEY_CALENDAR_INSERTION_COLOR = "calendar_insertion_color";
+    private static final String KEY_DEBUG_TOOLS_ENABLED = "debug_tools_enabled";
+    private static final String KEY_DEBUG_TIME_ENABLED = "debug_time_enabled";
+    private static final String KEY_DEBUG_TIME_MILLIS = "debug_time_millis";
     public static final int DEFAULT_BUTTON_COLOR = 0xFF6200EE;
     public static final int DEFAULT_HOME_CIRCLE_COLOR = 0xFFBB86FC;
     public static final int DEFAULT_HOME_CIRCLE_STYLE = 0;
@@ -212,6 +215,34 @@ public class SettingsRepository {
 
     public void saveHomeCircleStyle(int style) {
         sharedPreferences.edit().putInt(KEY_HOME_CIRCLE_STYLE, style).apply();
+    }
+
+    public boolean isDebugToolsEnabled() {
+        return sharedPreferences.getBoolean(KEY_DEBUG_TOOLS_ENABLED, false);
+    }
+
+    public void setDebugToolsEnabled(boolean enabled) {
+        sharedPreferences.edit().putBoolean(KEY_DEBUG_TOOLS_ENABLED, enabled).apply();
+    }
+
+    public boolean isDebugTimeEnabled() {
+        return sharedPreferences.getBoolean(KEY_DEBUG_TIME_ENABLED, false);
+    }
+
+    public void setDebugTimeEnabled(boolean enabled) {
+        sharedPreferences.edit().putBoolean(KEY_DEBUG_TIME_ENABLED, enabled).apply();
+    }
+
+    public long getDebugTimeMillis() {
+        return sharedPreferences.getLong(KEY_DEBUG_TIME_MILLIS, 0L);
+    }
+
+    public void setDebugTimeMillis(long millis) {
+        sharedPreferences.edit().putLong(KEY_DEBUG_TIME_MILLIS, millis).apply();
+    }
+
+    public void clearDebugTimeMillis() {
+        sharedPreferences.edit().remove(KEY_DEBUG_TIME_MILLIS).apply();
     }
 
     private int remapHomeCircleStyleV1(int style) {

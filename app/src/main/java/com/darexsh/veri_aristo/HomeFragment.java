@@ -144,7 +144,8 @@ public class HomeFragment extends Fragment {
             }
 
             // Initialize calendar instances for cycle calculations
-            Calendar now = Calendar.getInstance();
+            Calendar displayNow = DebugTimeProvider.now(viewModel.getRepository());
+            Calendar systemNow = Calendar.getInstance();
             Calendar startDate = (Calendar) vmStartDate.clone();
             startDate.set(Calendar.SECOND, 0);
             startDate.set(Calendar.MILLISECOND, 0);
@@ -169,7 +170,7 @@ public class HomeFragment extends Fragment {
             int count = 0;
 
             // Calculate cycles until today if last reinsertion date is in the past
-            while (tempReinsertionDate.getTimeInMillis() <= now.getTimeInMillis() && count < maxCycles) {
+            while (tempReinsertionDate.getTimeInMillis() <= systemNow.getTimeInMillis() && count < maxCycles) {
                 if (tempReinsertionDate.getTimeInMillis() > lastSavedReinsertionMillis) {
                     saveCycleToHistory(viewModel, tempStartDate.getTimeInMillis(), tempRemovalDate.getTimeInMillis(), CycleType.INSERTION);
                     saveCycleToHistory(viewModel, tempRemovalDate.getTimeInMillis(), tempReinsertionDate.getTimeInMillis(), CycleType.REMOVAL);
@@ -184,14 +185,18 @@ public class HomeFragment extends Fragment {
                 count++;
             }
 
-            // Adjust start date to the current cycle window
-            while (now.after(reinsertionDate)) {
+            Calendar nowDay = startOfDay(displayNow);
+            Calendar reinsertionDay = startOfDay(reinsertionDate);
+
+            // Adjust start date to the current cycle window (day-based to avoid skipping the current day)
+            while (nowDay.after(reinsertionDay)) {
                 startDate.add(Calendar.DAY_OF_MONTH, cycleLength + RING_FREE_DAYS + delayDays);
                 delayDays = viewModel.getRepository().getCycleDelayDays(startDate.getTimeInMillis());
                 removalDate = (Calendar) startDate.clone();
                 removalDate.add(Calendar.DAY_OF_MONTH, cycleLength + delayDays);
                 reinsertionDate = (Calendar) removalDate.clone();
                 reinsertionDate.add(Calendar.DAY_OF_MONTH, RING_FREE_DAYS);
+                reinsertionDay = startOfDay(reinsertionDate);
             }
 
             int remainingDays;
@@ -201,11 +206,9 @@ public class HomeFragment extends Fragment {
             int progressMax;
             int progressValue;
 
-            // Calculate remaining days and progress based on the current date and cycle dates
-            if (now.before(removalDate)) {
-                long millisLeft = removalDate.getTimeInMillis() - now.getTimeInMillis();
-                remainingDays = (int) (millisLeft / (24 * 60 * 60 * 1000));
-                remainingDays = Math.max(remainingDays, 0);
+            // Calculate remaining days and progress based on day changes (midnight), except at removal/insertion time
+            if (displayNow.before(removalDate)) {
+                remainingDays = daysBetweenDays(displayNow, removalDate);
 
                 labelText = getString(R.string.home_days_left);
                 progressMax = cycleLength;
@@ -221,10 +224,8 @@ public class HomeFragment extends Fragment {
                         reinsertionDate.get(Calendar.YEAR));
                 primaryTextDate = getString(R.string.home_removal_on, removalDateText);
                 secondaryTextDate = getString(R.string.home_insertion_on, reinsertionDateText);
-            } else if (now.before(reinsertionDate)) {
-                long millisLeft = reinsertionDate.getTimeInMillis() - now.getTimeInMillis();
-                remainingDays = (int) (millisLeft / (24 * 60 * 60 * 1000));
-                remainingDays = Math.max(remainingDays, 0);
+            } else if (displayNow.before(reinsertionDate)) {
+                remainingDays = daysBetweenDays(displayNow, reinsertionDate);
 
                 labelText = getString(R.string.home_days_until_insertion);
                 progressMax = RING_FREE_DAYS;
@@ -272,7 +273,7 @@ public class HomeFragment extends Fragment {
             long cycleStartMillis = startDate.getTimeInMillis();
             int settingsHash = viewModel.getRepository().getNotificationSettingsHash();
             int scheduledHash = viewModel.getRepository().getNotificationSettingsHashForCycle(cycleStartMillis);
-            if (now.before(reinsertionDate)
+            if (systemNow.before(reinsertionDate)
                     && (!viewModel.getRepository().wasNotificationScheduledForCycle(cycleStartMillis)
                     || scheduledHash != settingsHash)) {
                 scheduleRingCycleNotifications(
@@ -572,6 +573,23 @@ public class HomeFragment extends Fragment {
                 })
                 .setNegativeButton(R.string.dialog_cancel, null)
                 .show();
+    }
+
+    private static Calendar startOfDay(Calendar source) {
+        Calendar day = (Calendar) source.clone();
+        day.set(Calendar.HOUR_OF_DAY, 0);
+        day.set(Calendar.MINUTE, 0);
+        day.set(Calendar.SECOND, 0);
+        day.set(Calendar.MILLISECOND, 0);
+        return day;
+    }
+
+    private static int daysBetweenDays(Calendar from, Calendar to) {
+        Calendar fromDay = startOfDay(from);
+        Calendar toDay = startOfDay(to);
+        long millisLeft = toDay.getTimeInMillis() - fromDay.getTimeInMillis();
+        int days = (int) (millisLeft / (24L * 60L * 60L * 1000L));
+        return Math.max(days, 0);
     }
 
     private void applyHomeCircleStyle(HomeCircleView progress, int style, int color) {

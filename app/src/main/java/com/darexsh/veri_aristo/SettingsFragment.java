@@ -43,6 +43,7 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 import android.widget.ProgressBar;
 import android.widget.LinearLayout;
+import com.google.android.material.switchmaterial.SwitchMaterial;
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
@@ -94,6 +95,22 @@ public class SettingsFragment extends Fragment {
     private MaterialButton btnSetCircleColor;
     private MaterialButton btnSetCircleStyle;
     private MaterialButton btnWelcomeTour;
+    private View debugSection;
+    private TextView tvDebugTimeStatus;
+    private SwitchMaterial switchDebugTime;
+    private MaterialButton btnDebugSetTime;
+    private MaterialButton btnDebugClearTime;
+    private MaterialButton btnDebugInfo;
+    private MaterialButton btnDebugRefresh;
+    private MaterialButton btnDebugJumpMidnight;
+    private MaterialButton btnDebugMinusDay;
+    private MaterialButton btnDebugPlusDay;
+    private MaterialButton btnDebugMinusHour;
+    private MaterialButton btnDebugPlusHour;
+    private MaterialButton btnDebugPresetRemovalBefore;
+    private MaterialButton btnDebugPresetRemovalAt;
+    private MaterialButton btnDebugPresetInsertionBefore;
+    private MaterialButton btnDebugPresetInsertionAt;
     private View advancedContent;
     private View advancedHeader;
     private android.widget.ImageButton btnAdvancedToggle;
@@ -211,9 +228,29 @@ public class SettingsFragment extends Fragment {
         btnSetButtonColor = view.findViewById(R.id.btn_set_button_color);
         btnSetCircleColor = view.findViewById(R.id.btn_set_circle_color);
         btnSetCircleStyle = view.findViewById(R.id.btn_set_circle_style);
+        debugSection = view.findViewById(R.id.debug_section);
+        tvDebugTimeStatus = view.findViewById(R.id.tv_debug_time_status);
+        switchDebugTime = view.findViewById(R.id.switch_debug_time);
+        btnDebugSetTime = view.findViewById(R.id.btn_debug_set_time);
+        btnDebugClearTime = view.findViewById(R.id.btn_debug_clear_time);
+        btnDebugInfo = view.findViewById(R.id.btn_debug_info);
+        btnDebugRefresh = view.findViewById(R.id.btn_debug_refresh);
+        btnDebugJumpMidnight = view.findViewById(R.id.btn_debug_jump_midnight);
+        btnDebugMinusDay = view.findViewById(R.id.btn_debug_minus_day);
+        btnDebugPlusDay = view.findViewById(R.id.btn_debug_plus_day);
+        btnDebugMinusHour = view.findViewById(R.id.btn_debug_minus_hour);
+        btnDebugPlusHour = view.findViewById(R.id.btn_debug_plus_hour);
+        btnDebugPresetRemovalBefore = view.findViewById(R.id.btn_debug_preset_removal_before);
+        btnDebugPresetRemovalAt = view.findViewById(R.id.btn_debug_preset_removal_at);
+        btnDebugPresetInsertionBefore = view.findViewById(R.id.btn_debug_preset_insertion_before);
+        btnDebugPresetInsertionAt = view.findViewById(R.id.btn_debug_preset_insertion_at);
 
         SharedViewModelFactory factory = new SharedViewModelFactory(requireActivity().getApplication());
         viewModel = new ViewModelProvider(requireActivity(), factory).get(SharedViewModel.class);
+
+        updateDebugSectionVisibility();
+        switchDebugTime.setChecked(viewModel.getRepository().isDebugTimeEnabled());
+        updateDebugTimeStatus();
 
         viewModel.getStartDate().observe(getViewLifecycleOwner(), calendar -> {
             if (calendar != null) {
@@ -316,12 +353,65 @@ public class SettingsFragment extends Fragment {
                 ((MainActivity) getActivity()).restartWelcomeTour();
             }
         });
+        switchDebugTime.setOnCheckedChangeListener((buttonView, isChecked) -> {
+            viewModel.getRepository().setDebugTimeEnabled(isChecked);
+            updateDebugTimeStatus();
+            Calendar current = viewModel.getStartDate().getValue();
+            if (current != null) {
+                viewModel.setStartDate((Calendar) current.clone());
+            }
+            WidgetUpdater.updateAllWidgets(requireContext());
+        });
+        btnDebugSetTime.setOnClickListener(v -> showDebugTimePicker());
+        btnDebugClearTime.setOnClickListener(v -> {
+            viewModel.getRepository().clearDebugTimeMillis();
+            viewModel.getRepository().setDebugTimeEnabled(false);
+            switchDebugTime.setChecked(false);
+            updateDebugTimeStatus();
+            WidgetUpdater.updateAllWidgets(requireContext());
+            Toast.makeText(requireContext(), getString(R.string.debug_time_cleared), Toast.LENGTH_SHORT).show();
+        });
+        btnDebugInfo.setOnClickListener(v -> showDebugDialog());
+        btnDebugRefresh.setOnClickListener(v -> {
+            updateDebugTimeStatus();
+            Calendar current = viewModel.getStartDate().getValue();
+            if (current != null) {
+                viewModel.setStartDate((Calendar) current.clone());
+            }
+            WidgetUpdater.updateAllWidgets(requireContext());
+            Toast.makeText(requireContext(), getString(R.string.debug_refreshed), Toast.LENGTH_SHORT).show();
+        });
+        btnDebugJumpMidnight.setOnClickListener(v -> adjustDebugTimeToMidnight());
+        btnDebugMinusDay.setOnClickListener(v -> shiftDebugTime(Calendar.DAY_OF_MONTH, -1));
+        btnDebugPlusDay.setOnClickListener(v -> shiftDebugTime(Calendar.DAY_OF_MONTH, 1));
+        btnDebugMinusHour.setOnClickListener(v -> shiftDebugTime(Calendar.HOUR_OF_DAY, -1));
+        btnDebugPlusHour.setOnClickListener(v -> shiftDebugTime(Calendar.HOUR_OF_DAY, 1));
+        btnDebugPresetRemovalBefore.setOnClickListener(v -> applyDebugPreset(DebugPreset.REMOVAL_BEFORE));
+        btnDebugPresetRemovalAt.setOnClickListener(v -> applyDebugPreset(DebugPreset.REMOVAL_AT));
+        btnDebugPresetInsertionBefore.setOnClickListener(v -> applyDebugPreset(DebugPreset.INSERTION_BEFORE));
+        btnDebugPresetInsertionAt.setOnClickListener(v -> applyDebugPreset(DebugPreset.INSERTION_AT));
+
+        bindDebugHint(btnDebugSetTime, R.string.debug_hint_set_time);
+        bindDebugHint(btnDebugClearTime, R.string.debug_hint_clear_time);
+        bindDebugHint(btnDebugInfo, R.string.debug_hint_info);
+        bindDebugHint(btnDebugRefresh, R.string.debug_hint_refresh);
+        bindDebugHint(btnDebugJumpMidnight, R.string.debug_hint_jump_midnight);
+        bindDebugHint(btnDebugMinusDay, R.string.debug_hint_minus_day);
+        bindDebugHint(btnDebugPlusDay, R.string.debug_hint_plus_day);
+        bindDebugHint(btnDebugMinusHour, R.string.debug_hint_minus_hour);
+        bindDebugHint(btnDebugPlusHour, R.string.debug_hint_plus_hour);
+        bindDebugHint(btnDebugPresetRemovalBefore, R.string.debug_hint_preset_removal_before);
+        bindDebugHint(btnDebugPresetRemovalAt, R.string.debug_hint_preset_removal_at);
+        bindDebugHint(btnDebugPresetInsertionBefore, R.string.debug_hint_preset_insertion_before);
+        bindDebugHint(btnDebugPresetInsertionAt, R.string.debug_hint_preset_insertion_at);
         btnUpdateApp.setOnClickListener(v -> checkForUpdates());
         advancedHeader.setOnClickListener(v -> toggleAdvancedSection());
         btnAdvancedToggle.setOnClickListener(v -> toggleAdvancedSection());
         btnSettingsInfo.setOnClickListener(v -> showAppInfoDialog());
         settingsTitle.setOnLongClickListener(v -> {
-            showDebugDialog();
+            AlertDialog dialog = DebugToolsDialog.show(requireContext(), viewModel.getRepository(),
+                    enabled -> updateDebugSectionVisibility());
+            applyDialogButtonColors(dialog);
             return true;
         });
 
@@ -1655,9 +1745,177 @@ public class SettingsFragment extends Fragment {
         applyDialogButtonColors(dialog);
     }
 
+    private void showDebugTimePicker() {
+        Calendar base = DebugTimeProvider.now(viewModel.getRepository());
+        DatePickerDialog datePicker = new DatePickerDialog(
+                requireContext(),
+                (DatePicker view, int year, int month, int dayOfMonth) -> {
+                    Calendar selected = Calendar.getInstance();
+                    selected.set(Calendar.YEAR, year);
+                    selected.set(Calendar.MONTH, month);
+                    selected.set(Calendar.DAY_OF_MONTH, dayOfMonth);
+
+                    TimePickerDialog timePicker = new TimePickerDialog(
+                            requireContext(),
+                            (TimePicker timeView, int hourOfDay, int minute) -> {
+                                selected.set(Calendar.HOUR_OF_DAY, hourOfDay);
+                                selected.set(Calendar.MINUTE, minute);
+                                selected.set(Calendar.SECOND, 0);
+                                selected.set(Calendar.MILLISECOND, 0);
+
+                                viewModel.getRepository().setDebugTimeMillis(selected.getTimeInMillis());
+                                viewModel.getRepository().setDebugTimeEnabled(true);
+                                switchDebugTime.setChecked(true);
+                                updateDebugTimeStatus();
+                                WidgetUpdater.updateAllWidgets(requireContext());
+                                Toast.makeText(requireContext(), getString(R.string.debug_time_set), Toast.LENGTH_SHORT).show();
+                            },
+                            base.get(Calendar.HOUR_OF_DAY),
+                            base.get(Calendar.MINUTE),
+                            true
+                    );
+                    timePicker.show();
+                },
+                base.get(Calendar.YEAR),
+                base.get(Calendar.MONTH),
+                base.get(Calendar.DAY_OF_MONTH)
+        );
+        datePicker.show();
+    }
+
+    private void adjustDebugTimeToMidnight() {
+        Calendar base = DebugTimeProvider.now(viewModel.getRepository());
+        base.set(Calendar.HOUR_OF_DAY, 0);
+        base.set(Calendar.MINUTE, 0);
+        base.set(Calendar.SECOND, 0);
+        base.set(Calendar.MILLISECOND, 0);
+        applyDebugTime(base, true);
+        Toast.makeText(requireContext(), getString(R.string.debug_jump_midnight), Toast.LENGTH_SHORT).show();
+    }
+
+    private void shiftDebugTime(int field, int amount) {
+        Calendar base = DebugTimeProvider.now(viewModel.getRepository());
+        base.add(field, amount);
+        applyDebugTime(base, true);
+        int message = amount >= 0 ? R.string.debug_time_shift_forward : R.string.debug_time_shift_back;
+        Toast.makeText(requireContext(), getString(message), Toast.LENGTH_SHORT).show();
+    }
+
+    private enum DebugPreset {
+        REMOVAL_BEFORE,
+        REMOVAL_AT,
+        INSERTION_BEFORE,
+        INSERTION_AT
+    }
+
+    private void applyDebugPreset(DebugPreset preset) {
+        Calendar baseStart = viewModel.getStartDate().getValue();
+        Integer cycleLength = viewModel.getCycleLength().getValue();
+        if (baseStart == null || cycleLength == null) {
+            return;
+        }
+
+        Calendar currentStart = (Calendar) baseStart.clone();
+        currentStart.set(Calendar.SECOND, 0);
+        currentStart.set(Calendar.MILLISECOND, 0);
+        int delayDays = viewModel.getRepository().getCycleDelayDays(currentStart.getTimeInMillis());
+        Calendar removalDate = (Calendar) currentStart.clone();
+        removalDate.add(Calendar.DAY_OF_MONTH, cycleLength + delayDays);
+        Calendar reinsertionDate = (Calendar) removalDate.clone();
+        reinsertionDate.add(Calendar.DAY_OF_MONTH, Constants.RING_FREE_DAYS);
+
+        int guard = 0;
+        Calendar systemNow = Calendar.getInstance();
+        while (systemNow.after(reinsertionDate) && guard < 300) {
+            currentStart.add(Calendar.DAY_OF_MONTH, cycleLength + Constants.RING_FREE_DAYS + delayDays);
+            delayDays = viewModel.getRepository().getCycleDelayDays(currentStart.getTimeInMillis());
+            removalDate = (Calendar) currentStart.clone();
+            removalDate.add(Calendar.DAY_OF_MONTH, cycleLength + delayDays);
+            reinsertionDate = (Calendar) removalDate.clone();
+            reinsertionDate.add(Calendar.DAY_OF_MONTH, Constants.RING_FREE_DAYS);
+            guard++;
+        }
+
+        Calendar selected;
+        switch (preset) {
+            case REMOVAL_BEFORE:
+                selected = (Calendar) removalDate.clone();
+                selected.add(Calendar.HOUR_OF_DAY, -1);
+                break;
+            case REMOVAL_AT:
+                selected = (Calendar) removalDate.clone();
+                break;
+            case INSERTION_BEFORE:
+                selected = (Calendar) reinsertionDate.clone();
+                selected.add(Calendar.HOUR_OF_DAY, -1);
+                break;
+            case INSERTION_AT:
+                selected = (Calendar) reinsertionDate.clone();
+                break;
+            default:
+                return;
+        }
+
+        applyDebugTime(selected, true);
+        Toast.makeText(requireContext(), getString(R.string.debug_preset_applied), Toast.LENGTH_SHORT).show();
+    }
+
+    private void applyDebugTime(Calendar calendar, boolean enable) {
+        viewModel.getRepository().setDebugTimeMillis(calendar.getTimeInMillis());
+        viewModel.getRepository().setDebugTimeEnabled(enable);
+        switchDebugTime.setChecked(enable);
+        updateDebugTimeStatus();
+        WidgetUpdater.updateAllWidgets(requireContext());
+        Calendar current = viewModel.getStartDate().getValue();
+        if (current != null) {
+            viewModel.setStartDate((Calendar) current.clone());
+        }
+    }
+
+    private void updateDebugSectionVisibility() {
+        if (debugSection == null) {
+            return;
+        }
+        boolean enabled = viewModel.getRepository().isDebugToolsEnabled();
+        debugSection.setVisibility(enabled ? View.VISIBLE : View.GONE);
+        if (enabled) {
+            switchDebugTime.setChecked(viewModel.getRepository().isDebugTimeEnabled());
+            updateDebugTimeStatus();
+        }
+    }
+
+    private void updateDebugTimeStatus() {
+        if (tvDebugTimeStatus == null) {
+            return;
+        }
+        SettingsRepository repository = viewModel.getRepository();
+        if (!repository.isDebugToolsEnabled() || !repository.isDebugTimeEnabled()) {
+            tvDebugTimeStatus.setText(R.string.debug_time_status_system);
+            return;
+        }
+        long millis = repository.getDebugTimeMillis();
+        if (millis <= 0L) {
+            tvDebugTimeStatus.setText(R.string.debug_time_status_system);
+            return;
+        }
+        SimpleDateFormat format = new SimpleDateFormat("dd.MM.yyyy HH:mm", Locale.getDefault());
+        String timeText = format.format(millis);
+        tvDebugTimeStatus.setText(getString(R.string.debug_time_status_override, timeText));
+    }
+
+    private void bindDebugHint(View view, int stringRes) {
+        if (view == null) {
+            return;
+        }
+        view.setOnLongClickListener(v -> {
+            Toast.makeText(requireContext(), getString(stringRes), Toast.LENGTH_SHORT).show();
+            return true;
+        });
+    }
+
     private String buildDebugInfo() {
         SimpleDateFormat format = new SimpleDateFormat("dd.MM.yyyy HH:mm", Locale.getDefault());
-        Calendar now = Calendar.getInstance();
+        Calendar now = DebugTimeProvider.now(viewModel.getRepository());
 
         Calendar baseStart = viewModel.getStartDate().getValue();
         if (baseStart == null) {

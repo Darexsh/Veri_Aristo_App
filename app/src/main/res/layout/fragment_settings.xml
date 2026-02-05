@@ -296,6 +296,296 @@
                         android:textColor="#FFFFFF" />
                 </LinearLayout>
             </com.google.android.material.card.MaterialCardView>
+
+            <LinearLayout
+                android:id="@+id/debug_section"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:visibility="gone">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/section_debug"
+                    android:textStyle="bold"
+                    android:textSize="13sp"
+                    android:textColor="?attr/colorOnBackground"
+                    android:layout_marginBottom="8dp" />
+
+                <com.google.android.material.card.MaterialCardView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="16dp"
+                    app:cardBackgroundColor="?attr/colorSurface"
+                    app:cardElevation="0dp"
+                    app:cardCornerRadius="14dp">
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="vertical"
+                        android:padding="12dp">
+
+                        <TextView
+                            android:id="@+id/tv_debug_time_status"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:text="@string/debug_time_status_system"
+                            android:textSize="13sp"
+                            android:textColor="?attr/colorOnBackground"
+                            android:layout_marginBottom="8dp" />
+
+                        <com.google.android.material.switchmaterial.SwitchMaterial
+                            android:id="@+id/switch_debug_time"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:text="@string/debug_time_switch_label"
+                            android:layout_marginBottom="10dp" />
+
+                        <LinearLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="56dp"
+                            android:orientation="horizontal"
+                            android:layout_marginBottom="12dp">
+
+                            <com.google.android.material.button.MaterialButton
+                                android:id="@+id/btn_debug_set_time"
+                                style="?attr/materialButtonOutlinedStyle"
+                                android:layout_width="0dp"
+                                android:layout_height="match_parent"
+                                android:layout_weight="1"
+                                android:text="@string/btn_debug_set_time"
+                                android:textAllCaps="false"
+                                android:textSize="14sp"
+                                android:gravity="center"
+                                app:cornerRadius="12dp"
+                                app:strokeColor="#6200EE"
+                                app:strokeWidth="2dp"
+                                android:textColor="#6200EE"
+                                android:layout_marginEnd="8dp" />
+
+                            <com.google.android.material.button.MaterialButton
+                                android:id="@+id/btn_debug_clear_time"
+                                style="?attr/materialButtonOutlinedStyle"
+                                android:layout_width="0dp"
+                                android:layout_height="match_parent"
+                                android:layout_weight="1"
+                                android:text="@string/btn_debug_clear_time"
+                                android:textAllCaps="false"
+                                android:textSize="14sp"
+                                android:gravity="center"
+                                app:cornerRadius="12dp"
+                                app:strokeColor="#6200EE"
+                                app:strokeWidth="2dp"
+                                android:textColor="#6200EE" />
+                        </LinearLayout>
+
+                        <LinearLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="56dp"
+                            android:orientation="horizontal"
+                            android:layout_marginBottom="12dp">
+
+                            <com.google.android.material.button.MaterialButton
+                                android:id="@+id/btn_debug_info"
+                                style="?attr/materialButtonOutlinedStyle"
+                                android:layout_width="0dp"
+                                android:layout_height="match_parent"
+                                android:layout_weight="1"
+                                android:text="@string/btn_debug_info"
+                                android:textAllCaps="false"
+                                android:textSize="14sp"
+                                android:gravity="center"
+                                app:cornerRadius="12dp"
+                                app:strokeColor="#6200EE"
+                                app:strokeWidth="2dp"
+                                android:textColor="#6200EE"
+                                android:layout_marginEnd="8dp" />
+
+                            <com.google.android.material.button.MaterialButton
+                                android:id="@+id/btn_debug_refresh"
+                                style="?attr/materialButtonOutlinedStyle"
+                                android:layout_width="0dp"
+                                android:layout_height="match_parent"
+                                android:layout_weight="1"
+                                android:text="@string/btn_debug_refresh"
+                                android:textAllCaps="false"
+                                android:textSize="14sp"
+                                android:gravity="center"
+                                app:cornerRadius="12dp"
+                                app:strokeColor="#6200EE"
+                                app:strokeWidth="2dp"
+                                android:textColor="#6200EE" />
+                        </LinearLayout>
+
+                        <com.google.android.material.button.MaterialButton
+                            android:id="@+id/btn_debug_jump_midnight"
+                            style="?attr/materialButtonOutlinedStyle"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:text="@string/btn_debug_jump_midnight"
+                            android:textAllCaps="false"
+                            android:textSize="14sp"
+                            app:cornerRadius="12dp"
+                            app:strokeColor="#6200EE"
+                            app:strokeWidth="2dp"
+                            android:textColor="#6200EE"
+                            android:layout_marginBottom="10dp" />
+
+                        <LinearLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="56dp"
+                            android:orientation="horizontal"
+                            android:layout_marginBottom="12dp">
+
+                            <com.google.android.material.button.MaterialButton
+                                android:id="@+id/btn_debug_minus_day"
+                                style="?attr/materialButtonOutlinedStyle"
+                                android:layout_width="0dp"
+                                android:layout_height="match_parent"
+                                android:layout_weight="1"
+                                android:text="@string/btn_debug_minus_day"
+                                android:textAllCaps="false"
+                                android:textSize="14sp"
+                                android:gravity="center"
+                                app:cornerRadius="12dp"
+                                app:strokeColor="#6200EE"
+                                app:strokeWidth="2dp"
+                                android:textColor="#6200EE"
+                                android:layout_marginEnd="8dp" />
+
+                            <com.google.android.material.button.MaterialButton
+                                android:id="@+id/btn_debug_plus_day"
+                                style="?attr/materialButtonOutlinedStyle"
+                                android:layout_width="0dp"
+                                android:layout_height="match_parent"
+                                android:layout_weight="1"
+                                android:text="@string/btn_debug_plus_day"
+                                android:textAllCaps="false"
+                                android:textSize="14sp"
+                                android:gravity="center"
+                                app:cornerRadius="12dp"
+                                app:strokeColor="#6200EE"
+                                app:strokeWidth="2dp"
+                                android:textColor="#6200EE" />
+                        </LinearLayout>
+
+                        <LinearLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="56dp"
+                            android:orientation="horizontal"
+                            android:layout_marginBottom="12dp">
+
+                            <com.google.android.material.button.MaterialButton
+                                android:id="@+id/btn_debug_minus_hour"
+                                style="?attr/materialButtonOutlinedStyle"
+                                android:layout_width="0dp"
+                                android:layout_height="match_parent"
+                                android:layout_weight="1"
+                                android:text="@string/btn_debug_minus_hour"
+                                android:textAllCaps="false"
+                                android:textSize="14sp"
+                                android:gravity="center"
+                                app:cornerRadius="12dp"
+                                app:strokeColor="#6200EE"
+                                app:strokeWidth="2dp"
+                                android:textColor="#6200EE"
+                                android:layout_marginEnd="8dp" />
+
+                            <com.google.android.material.button.MaterialButton
+                                android:id="@+id/btn_debug_plus_hour"
+                                style="?attr/materialButtonOutlinedStyle"
+                                android:layout_width="0dp"
+                                android:layout_height="match_parent"
+                                android:layout_weight="1"
+                                android:text="@string/btn_debug_plus_hour"
+                                android:textAllCaps="false"
+                                android:textSize="14sp"
+                                android:gravity="center"
+                                app:cornerRadius="12dp"
+                                app:strokeColor="#6200EE"
+                                app:strokeWidth="2dp"
+                                android:textColor="#6200EE" />
+                        </LinearLayout>
+
+                        <LinearLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="56dp"
+                            android:orientation="horizontal"
+                            android:layout_marginBottom="12dp">
+
+                            <com.google.android.material.button.MaterialButton
+                                android:id="@+id/btn_debug_preset_removal_before"
+                                style="?attr/materialButtonOutlinedStyle"
+                                android:layout_width="0dp"
+                                android:layout_height="match_parent"
+                                android:layout_weight="1"
+                                android:text="@string/btn_debug_preset_removal_before"
+                                android:textAllCaps="false"
+                                android:textSize="14sp"
+                                android:gravity="center"
+                                app:cornerRadius="12dp"
+                                app:strokeColor="#6200EE"
+                                app:strokeWidth="2dp"
+                                android:textColor="#6200EE"
+                                android:layout_marginEnd="8dp" />
+
+                            <com.google.android.material.button.MaterialButton
+                                android:id="@+id/btn_debug_preset_removal_at"
+                                style="?attr/materialButtonOutlinedStyle"
+                                android:layout_width="0dp"
+                                android:layout_height="match_parent"
+                                android:layout_weight="1"
+                                android:text="@string/btn_debug_preset_removal_at"
+                                android:textAllCaps="false"
+                                android:textSize="14sp"
+                                android:gravity="center"
+                                app:cornerRadius="12dp"
+                                app:strokeColor="#6200EE"
+                                app:strokeWidth="2dp"
+                                android:textColor="#6200EE" />
+                        </LinearLayout>
+
+                        <LinearLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="56dp"
+                            android:orientation="horizontal">
+
+                            <com.google.android.material.button.MaterialButton
+                                android:id="@+id/btn_debug_preset_insertion_before"
+                                style="?attr/materialButtonOutlinedStyle"
+                                android:layout_width="0dp"
+                                android:layout_height="match_parent"
+                                android:layout_weight="1"
+                                android:text="@string/btn_debug_preset_insertion_before"
+                                android:textAllCaps="false"
+                                android:textSize="14sp"
+                                android:gravity="center"
+                                app:cornerRadius="12dp"
+                                app:strokeColor="#6200EE"
+                                app:strokeWidth="2dp"
+                                android:textColor="#6200EE"
+                                android:layout_marginEnd="8dp" />
+
+                            <com.google.android.material.button.MaterialButton
+                                android:id="@+id/btn_debug_preset_insertion_at"
+                                style="?attr/materialButtonOutlinedStyle"
+                                android:layout_width="0dp"
+                                android:layout_height="match_parent"
+                                android:layout_weight="1"
+                                android:text="@string/btn_debug_preset_insertion_at"
+                                android:textAllCaps="false"
+                                android:textSize="14sp"
+                                android:gravity="center"
+                                app:cornerRadius="12dp"
+                                app:strokeColor="#6200EE"
+                                app:strokeWidth="2dp"
+                                android:textColor="#6200EE" />
+                        </LinearLayout>
+                    </LinearLayout>
+                </com.google.android.material.card.MaterialCardView>
+            </LinearLayout>
         </LinearLayout>
     </ScrollView>
 
