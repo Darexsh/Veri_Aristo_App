@@ -61,6 +61,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import com.google.android.material.button.MaterialButton;
 import com.google.android.material.color.MaterialColors;
+import android.content.res.ColorStateList;
 import java.util.Calendar;
 import java.text.SimpleDateFormat;
 import java.util.Locale;
@@ -89,7 +90,7 @@ public class SettingsFragment extends Fragment {
     private MaterialButton btnResetApp;
     private MaterialButton btnBackupManage;
     private MaterialButton btnUpdateApp;
-    private MaterialButton btnSetNotificationTimes;
+    private MaterialButton btnNotificationGroup;
     private MaterialButton btnSetLanguage;
     private MaterialButton btnSetButtonColor;
     private MaterialButton btnSetCircleColor;
@@ -114,7 +115,7 @@ public class SettingsFragment extends Fragment {
     private View advancedContent;
     private View advancedHeader;
     private android.widget.ImageButton btnAdvancedToggle;
-    private android.widget.ImageButton btnSettingsInfo;
+    private TextView btnSettingsInfo;
     private SharedViewModel viewModel;
     private ActivityResultLauncher<String> requestPermissionLauncher;
     private ActivityResultLauncher<Intent> pickImageLauncher;
@@ -130,6 +131,7 @@ public class SettingsFragment extends Fragment {
     private AlertDialog downloadDialog;
     private ProgressBar downloadProgressBar;
     private TextView downloadProgressText;
+    private AlertDialog notificationToolsDialog;
 
     private interface ColorConsumer {
         void accept(int color);
@@ -223,7 +225,7 @@ public class SettingsFragment extends Fragment {
         advancedContent = view.findViewById(R.id.advanced_content);
         advancedHeader = view.findViewById(R.id.advanced_header);
         btnAdvancedToggle = view.findViewById(R.id.btn_advanced_toggle);
-        btnSetNotificationTimes = view.findViewById(R.id.btn_set_notification_times);
+        btnNotificationGroup = view.findViewById(R.id.btn_notification_group);
         btnSetLanguage = view.findViewById(R.id.btn_set_language);
         btnSetButtonColor = view.findViewById(R.id.btn_set_button_color);
         btnSetCircleColor = view.findViewById(R.id.btn_set_circle_color);
@@ -293,31 +295,14 @@ public class SettingsFragment extends Fragment {
             updateCalendarRangeButtonText(pastAmount, pastUnit, futureAmount, unit);
         });
 
-        viewModel.getRemovalReminderHours().observe(getViewLifecycleOwner(), hours -> {
-            Integer insertionHours = viewModel.getInsertionReminderHours().getValue();
-            updateNotificationTimesButtonText(hours, insertionHours);
-        });
-
-        viewModel.getInsertionReminderHours().observe(getViewLifecycleOwner(), hours -> {
-            Integer removalHours = viewModel.getRemovalReminderHours().getValue();
-            updateNotificationTimesButtonText(removalHours, hours);
-        });
-
-        viewModel.getRemovalReminderHours().observe(getViewLifecycleOwner(), hours -> {
-            Integer insertionHours = viewModel.getInsertionReminderHours().getValue();
-            updateNotificationTimesButtonText(hours, insertionHours);
-        });
-
-        viewModel.getInsertionReminderHours().observe(getViewLifecycleOwner(), hours -> {
-            Integer removalHours = viewModel.getRemovalReminderHours().getValue();
-            updateNotificationTimesButtonText(removalHours, hours);
-        });
-
         viewModel.getButtonColor().observe(getViewLifecycleOwner(), color -> {
             if (color != null) {
                 applyPrimaryButtonColor(color);
                 updateButtonColorButtonText(color);
-                btnSettingsInfo.setColorFilter(color);
+                btnSettingsInfo.setTextColor(Color.WHITE);
+                if (btnSettingsInfo.getBackground() != null) {
+                    btnSettingsInfo.getBackground().setTint(color);
+                }
             }
         });
 
@@ -343,7 +328,7 @@ public class SettingsFragment extends Fragment {
         btnSetCalendarRange.setOnClickListener(v -> showCalendarRangeDialog());
         btnResetApp.setOnClickListener(v -> showResetDialog());
         btnBackupManage.setOnClickListener(v -> showBackupDialog());
-        btnSetNotificationTimes.setOnClickListener(v -> showNotificationTimesDialog());
+        btnNotificationGroup.setOnClickListener(v -> showNotificationToolsDialog());
         btnSetLanguage.setOnClickListener(v -> showLanguageDialog());
         btnSetButtonColor.setOnClickListener(v -> showButtonColorDialog());
         btnSetCircleColor.setOnClickListener(v -> showCircleColorDialog());
@@ -420,6 +405,14 @@ public class SettingsFragment extends Fragment {
         return view;
     }
 
+    @Override
+    public void onResume() {
+        super.onResume();
+        if (notificationToolsDialog != null && notificationToolsDialog.isShowing()) {
+            updateExactAlarmButtonLabel(notificationToolsDialog);
+        }
+    }
+
     // Check if the app has permission to read media images, and open the gallery if granted
     private void checkStoragePermission() {
         String permission = Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU
@@ -489,14 +482,6 @@ public class SettingsFragment extends Fragment {
         String text = getString(R.string.settings_calendar_range_button,
                 pastAmount, unitLabel(pastUnit), futureAmount, unitLabel(futureUnit));
         btnSetCalendarRange.setText(text);
-    }
-
-    private void updateNotificationTimesButtonText(Integer removalHours, Integer insertionHours) {
-        if (removalHours == null || insertionHours == null) {
-            return;
-        }
-        String text = getString(R.string.settings_notification_times_button, removalHours, insertionHours);
-        btnSetNotificationTimes.setText(text);
     }
 
     // Show a TimePickerDialog to select the time
@@ -804,7 +789,7 @@ public class SettingsFragment extends Fragment {
         ButtonColorHelper.applyPrimaryColor(btnBackupManage, color);
         ButtonColorHelper.applyPrimaryColor(btnUpdateApp, color);
         ButtonColorHelper.applyPrimaryColor(btnWelcomeTour, color);
-        ButtonColorHelper.applyPrimaryColor(btnSetNotificationTimes, color);
+        ButtonColorHelper.applyPrimaryColor(btnNotificationGroup, color);
         ButtonColorHelper.applyPrimaryColor(btnSetLanguage, color);
         ButtonColorHelper.applyPrimaryColor(btnSetButtonColor, color);
         ButtonColorHelper.applyPrimaryColor(btnSetCircleColor, color);
@@ -1043,9 +1028,9 @@ public class SettingsFragment extends Fragment {
 
     private String unitLabel(String unit) {
         if ("years".equals(unit)) {
-            return getString(R.string.settings_unit_year_short);
+            return getString(R.string.settings_unit_year);
         }
-        return getString(R.string.settings_unit_month_short);
+        return getString(R.string.settings_unit_month);
     }
 
     private void checkForUpdates() {
@@ -1423,19 +1408,31 @@ public class SettingsFragment extends Fragment {
     }
 
     private void showBackupDialog() {
-        String[] options = {getString(R.string.backup_create), getString(R.string.backup_restore)};
+        View content = LayoutInflater.from(requireContext()).inflate(R.layout.dialog_backup_tools, null);
+        MaterialButton btnCreate = content.findViewById(R.id.btn_backup_create);
+        MaterialButton btnRestore = content.findViewById(R.id.btn_backup_restore);
+        Integer color = viewModel.getButtonColor().getValue();
+        if (color != null) {
+            ButtonColorHelper.applyPrimaryColor(btnCreate, color);
+            btnRestore.setStrokeColor(ColorStateList.valueOf(color));
+            btnRestore.setTextColor(color);
+        }
+
         AlertDialog dialog = new AlertDialog.Builder(requireContext())
                 .setTitle(R.string.backup_title)
-                .setItems(options, (dlg, which) -> {
-                    if (which == 0) {
-                        createBackupLauncher.launch("veri_aristo_backup.json");
-                    } else {
-                        restoreBackupLauncher.launch(new String[]{"application/json"});
-                    }
-                })
+                .setView(content)
                 .setNegativeButton(R.string.dialog_cancel, null)
                 .show();
         applyDialogButtonColors(dialog);
+
+        btnCreate.setOnClickListener(v -> {
+            dialog.dismiss();
+            createBackupLauncher.launch("veri_aristo_backup.json");
+        });
+        btnRestore.setOnClickListener(v -> {
+            dialog.dismiss();
+            restoreBackupLauncher.launch(new String[]{"application/json"});
+        });
     }
 
     private void showAppInfoDialog() {
@@ -1454,11 +1451,13 @@ public class SettingsFragment extends Fragment {
         TextView appDeveloper = content.findViewById(R.id.tv_app_developer);
         com.google.android.material.button.MaterialButton openEmail = content.findViewById(R.id.btn_open_email);
         com.google.android.material.button.MaterialButton openGithub = content.findViewById(R.id.btn_open_github);
+        com.google.android.material.button.MaterialButton openGithubProfile = content.findViewById(R.id.btn_open_github_profile);
         com.google.android.material.button.MaterialButton openCoffee = content.findViewById(R.id.btn_open_coffee);
         Integer buttonColor = viewModel.getButtonColor().getValue();
         if (buttonColor != null) {
             ButtonColorHelper.applyPrimaryColor(openEmail, buttonColor);
             ButtonColorHelper.applyPrimaryColor(openGithub, buttonColor);
+            ButtonColorHelper.applyPrimaryColor(openGithubProfile, buttonColor);
             ButtonColorHelper.applyPrimaryColor(openCoffee, buttonColor);
         }
 
@@ -1487,6 +1486,11 @@ public class SettingsFragment extends Fragment {
 
         openGithub.setOnClickListener(v -> {
             Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse("https://linktr.ee/darexsh"));
+            startActivity(intent);
+        });
+
+        openGithubProfile.setOnClickListener(v -> {
+            Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse("https://github.com/Darexsh"));
             startActivity(intent);
         });
 
@@ -1781,6 +1785,131 @@ public class SettingsFragment extends Fragment {
                 base.get(Calendar.DAY_OF_MONTH)
         );
         datePicker.show();
+    }
+
+    private void openExactAlarmSettings() {
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.S) {
+            Toast.makeText(requireContext(), getString(R.string.exact_alarm_not_supported), Toast.LENGTH_SHORT).show();
+            return;
+        }
+        Intent intent = new Intent(android.provider.Settings.ACTION_REQUEST_SCHEDULE_EXACT_ALARM);
+        if (intent.resolveActivity(requireContext().getPackageManager()) != null) {
+            startActivity(intent);
+        }
+    }
+
+    private void openBatteryOptimizationSettings() {
+        Intent intent = new Intent(android.provider.Settings.ACTION_IGNORE_BATTERY_OPTIMIZATION_SETTINGS);
+        if (intent.resolveActivity(requireContext().getPackageManager()) != null) {
+            startActivity(intent);
+        }
+    }
+
+    private void showNotificationToolsDialog() {
+        View content = LayoutInflater.from(requireContext())
+                .inflate(R.layout.dialog_notification_tools, null);
+        MaterialButton btnTimes = content.findViewById(R.id.btn_notification_times);
+        MaterialButton btnExact = content.findViewById(R.id.btn_notification_exact);
+        MaterialButton btnBattery = content.findViewById(R.id.btn_notification_battery_opt);
+
+        Integer color = viewModel.getButtonColor().getValue();
+        if (color != null) {
+            ButtonColorHelper.applyPrimaryColor(btnTimes, color);
+            btnExact.setStrokeColor(ColorStateList.valueOf(color));
+            btnExact.setTextColor(color);
+            btnBattery.setStrokeColor(ColorStateList.valueOf(color));
+            btnBattery.setTextColor(color);
+        }
+
+        updateExactAlarmButtonLabel(content);
+
+        AlertDialog dialog = new AlertDialog.Builder(requireContext())
+                .setTitle(R.string.section_notifications)
+                .setView(content)
+                .setNegativeButton(R.string.dialog_cancel, null)
+                .show();
+        notificationToolsDialog = dialog;
+        applyDialogButtonColors(dialog);
+
+        btnTimes.setOnClickListener(v -> {
+            dialog.dismiss();
+            showNotificationTimesDialog();
+        });
+        btnExact.setOnClickListener(v -> {
+            dialog.dismiss();
+            openExactAlarmSettings();
+        });
+        btnBattery.setOnClickListener(v -> {
+            dialog.dismiss();
+            openBatteryOptimizationSettings();
+        });
+    }
+
+    private void updateExactAlarmButtonLabel(View root) {
+        if (root == null) {
+            return;
+        }
+        MaterialButton btnExact = root.findViewById(R.id.btn_notification_exact);
+        if (btnExact == null) {
+            return;
+        }
+        btnExact.setText(getString(R.string.exact_alarm_button_label, getExactAlarmStatusText()));
+        MaterialButton btnBattery = root.findViewById(R.id.btn_notification_battery_opt);
+        if (btnBattery != null) {
+            btnBattery.setText(getString(R.string.battery_opt_button_label, getBatteryOptStatusText()));
+        }
+        updateNotificationTimesButtonLabel(root);
+    }
+
+    private void updateExactAlarmButtonLabel(AlertDialog dialog) {
+        if (dialog == null) {
+            return;
+        }
+        updateExactAlarmButtonLabel(dialog.getWindow() != null ? dialog.getWindow().getDecorView() : null);
+    }
+
+    private String getExactAlarmStatusText() {
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.S) {
+            return getString(R.string.exact_alarm_status_not_required);
+        }
+        AlarmManager alarmManager = (AlarmManager) requireContext().getSystemService(Context.ALARM_SERVICE);
+        if (alarmManager != null && alarmManager.canScheduleExactAlarms()) {
+            return getString(R.string.exact_alarm_status_allowed);
+        }
+        return getString(R.string.exact_alarm_status_blocked);
+    }
+
+    private String getBatteryOptStatusText() {
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.M) {
+            return getString(R.string.battery_opt_status_not_required);
+        }
+        android.os.PowerManager powerManager =
+                (android.os.PowerManager) requireContext().getSystemService(Context.POWER_SERVICE);
+        if (powerManager == null) {
+            return getString(R.string.battery_opt_status_unknown);
+        }
+        boolean ignoring = powerManager.isIgnoringBatteryOptimizations(requireContext().getPackageName());
+        return ignoring
+                ? getString(R.string.battery_opt_status_disabled)
+                : getString(R.string.battery_opt_status_enabled);
+    }
+
+    private void updateNotificationTimesButtonLabel(View root) {
+        if (root == null) {
+            return;
+        }
+        MaterialButton btnTimes = root.findViewById(R.id.btn_notification_times);
+        if (btnTimes == null) {
+            return;
+        }
+        Integer removalHours = viewModel.getRemovalReminderHours().getValue();
+        Integer insertionHours = viewModel.getInsertionReminderHours().getValue();
+        if (removalHours == null || insertionHours == null) {
+            btnTimes.setText(getString(R.string.notification_times_button_unknown));
+            return;
+        }
+        btnTimes.setText(getString(R.string.notification_times_button_label,
+                removalHours, insertionHours));
     }
 
     private void adjustDebugTimeToMidnight() {

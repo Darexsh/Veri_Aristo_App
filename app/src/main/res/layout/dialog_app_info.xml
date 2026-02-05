@@ -72,16 +72,6 @@
             android:background="?attr/colorOnBackground"
             android:alpha="0.12" />
 
-        <TextView
-            android:id="@+id/tv_app_actions_title"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="12dp"
-            android:text="@string/app_info_actions_title"
-            android:textSize="13sp"
-            android:textStyle="bold"
-            android:textColor="?attr/colorOnBackground" />
-
         <com.google.android.material.button.MaterialButton
             android:id="@+id/btn_open_email"
             android:layout_width="match_parent"
@@ -90,6 +80,11 @@
             android:text="@string/app_info_open_email"
             android:textAllCaps="false"
             android:textSize="14sp"
+            app:iconSize="18dp"
+            app:icon="@drawable/gmail_icon"
+            app:iconTint="@null"
+            app:iconGravity="textStart"
+            app:iconPadding="8dp"
             app:cornerRadius="12dp"
             app:backgroundTint="#6200EE"
             android:textColor="#FFFFFF" />
@@ -102,6 +97,28 @@
             android:text="@string/app_info_open_github"
             android:textAllCaps="false"
             android:textSize="14sp"
+            app:iconSize="18dp"
+            app:icon="@drawable/linktree_icon"
+            app:iconTint="@null"
+            app:iconGravity="textStart"
+            app:iconPadding="8dp"
+            app:cornerRadius="12dp"
+            app:backgroundTint="#6200EE"
+            android:textColor="#FFFFFF" />
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btn_open_github_profile"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:text="@string/app_info_open_github_profile"
+            android:textAllCaps="false"
+            android:textSize="14sp"
+            app:iconSize="18dp"
+            app:icon="@drawable/github_icon"
+            app:iconTint="@null"
+            app:iconGravity="textStart"
+            app:iconPadding="8dp"
             app:cornerRadius="12dp"
             app:backgroundTint="#6200EE"
             android:textColor="#FFFFFF" />
@@ -114,6 +131,11 @@
             android:text="@string/app_info_open_coffee"
             android:textAllCaps="false"
             android:textSize="14sp"
+            app:iconSize="18dp"
+            app:icon="@drawable/buy_me_coffee_icon"
+            app:iconTint="@null"
+            app:iconGravity="textStart"
+            app:iconPadding="8dp"
             app:cornerRadius="12dp"
             app:backgroundTint="#6200EE"
             android:textColor="#FFFFFF" />

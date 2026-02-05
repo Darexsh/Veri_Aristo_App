@@ -10,6 +10,7 @@ import android.content.UriPermission;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.Build;
 import android.text.Html;
 import android.text.Spanned;
 import androidx.fragment.app.Fragment;
@@ -18,6 +19,8 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
+import android.widget.Button;
+import androidx.annotation.Nullable;
 import android.widget.NumberPicker;
 import android.widget.TextView;
 import com.google.android.material.button.MaterialButton;
@@ -35,6 +38,12 @@ public class HomeFragment extends Fragment {
 
     // Number of days after removal before the ring can be reinserted
     private static final int RING_FREE_DAYS = Constants.RING_FREE_DAYS;
+    private static final int NOTIF_TWO_WEEKS = 0;
+    private static final int NOTIF_ONE_WEEK = 1;
+    private static final int NOTIF_REMOVAL_REMINDER = 2;
+    private static final int NOTIF_REMOVAL_EXACT = 3;
+    private static final int NOTIF_INSERTION_REMINDER = 4;
+    private static final int NOTIF_INSERTION_EXACT = 5;
     private SharedViewModel viewModel;
     private int currentCircleStyle = SettingsRepository.DEFAULT_HOME_CIRCLE_STYLE;
     private int currentCircleColor = SettingsRepository.DEFAULT_HOME_CIRCLE_COLOR;
@@ -349,9 +358,10 @@ public class HomeFragment extends Fragment {
                                                 Calendar reinsertionDate, int cycleLength) {
         int hour = startDate.get(Calendar.HOUR_OF_DAY);
         int minute = startDate.get(Calendar.MINUTE);
+        long cycleStartMillis = startDate.getTimeInMillis();
 
         // Cancel previous notifications for this cycle to prevent duplicates
-        cancelNotificationsForCycle(startDate, removalDate, reinsertionDate);
+        cancelNotificationsForCycle(cycleStartMillis);
 
         // ---- Cycle Progress Notifications ----
         Calendar twoWeeksRemaining = (Calendar) removalDate.clone();
@@ -362,7 +372,7 @@ public class HomeFragment extends Fragment {
             scheduleNotification(twoWeeksRemaining,
                     getString(R.string.notif_cycle_duration_title),
                     getString(R.string.notif_two_weeks_remaining),
-                    0);
+                    buildRequestCode(cycleStartMillis, NOTIF_TWO_WEEKS));
         }
 
         Calendar oneWeekRemaining = (Calendar) removalDate.clone();
@@ -373,7 +383,7 @@ public class HomeFragment extends Fragment {
             scheduleNotification(oneWeekRemaining,
                     getString(R.string.notif_cycle_duration_title),
                     getString(R.string.notif_one_week_remaining),
-                    1);
+                    buildRequestCode(cycleStartMillis, NOTIF_ONE_WEEK));
         }
 
         // ---- Ring Removal Notifications ----
@@ -384,7 +394,7 @@ public class HomeFragment extends Fragment {
             scheduleNotification(removalReminder,
                     getString(R.string.notif_remove_title),
                     getString(R.string.notif_remove_in_hours, removalReminderHours),
-                    2);
+                    buildRequestCode(cycleStartMillis, NOTIF_REMOVAL_REMINDER));
         }
 
         Calendar removalExact = (Calendar) removalDate.clone();
@@ -394,7 +404,7 @@ public class HomeFragment extends Fragment {
         scheduleNotification(removalExact,
                 getString(R.string.notif_remove_title),
                 getString(R.string.notif_remove_now, removalTimeText),
-                3);
+                buildRequestCode(cycleStartMillis, NOTIF_REMOVAL_EXACT));
 
         // ---- Ring Insertion Notifications ----
         int insertionReminderHours = viewModel.getRepository().getInsertionReminderHours();
@@ -404,7 +414,7 @@ public class HomeFragment extends Fragment {
             scheduleNotification(reinsertionReminder,
                     getString(R.string.notif_insert_title),
                     getString(R.string.notif_insert_in_hours, insertionReminderHours),
-                    4);
+                    buildRequestCode(cycleStartMillis, NOTIF_INSERTION_REMINDER));
         }
 
         Calendar reinsertionExact = (Calendar) reinsertionDate.clone();
@@ -414,20 +424,17 @@ public class HomeFragment extends Fragment {
         scheduleNotification(reinsertionExact,
                 getString(R.string.notif_insert_title),
                 getString(R.string.notif_insert_now, reinsertionTimeText),
-                5);
+                buildRequestCode(cycleStartMillis, NOTIF_INSERTION_EXACT));
     }
 
     // Schedule a single notification with a unique ID
-    private void scheduleNotification(Calendar calendar, String title, String message, int uniqueIdOffset) {
+    private void scheduleNotification(Calendar calendar, String title, String message, int requestCode) {
         if (calendar.getTimeInMillis() <= System.currentTimeMillis()) {
             return;
         }
         Intent intent = new Intent(requireContext(), NotificationReceiver.class);
         intent.putExtra("title", title);
         intent.putExtra("message", message);
-
-        // Generate a unique request code using milliseconds and an offset
-        int requestCode = (int) ((calendar.getTimeInMillis() / 1000) % Integer.MAX_VALUE) + uniqueIdOffset;
 
         PendingIntent pendingIntent = PendingIntent.getBroadcast(
                 requireContext(),
@@ -438,56 +445,89 @@ public class HomeFragment extends Fragment {
 
         // Schedule exact alarm with AlarmManager
         AlarmManager alarmManager = (AlarmManager) requireContext().getSystemService(Context.ALARM_SERVICE);
-        alarmManager.setExactAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, calendar.getTimeInMillis(), pendingIntent);
+        if (canScheduleExactAlarms(alarmManager)) {
+            alarmManager.setExactAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, calendar.getTimeInMillis(), pendingIntent);
+        } else {
+            alarmManager.setAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, calendar.getTimeInMillis(), pendingIntent);
+        }
     }
 
     // Cancel all notifications for a specific cycle to avoid duplicates
-    private void cancelNotificationsForCycle(Calendar startDate, Calendar removalDate, Calendar reinsertionDate) {
+    private void cancelNotificationsForCycle(long cycleStartMillis) {
         Intent intent = new Intent(requireContext(), NotificationReceiver.class);
-        List<Calendar> targets = new ArrayList<>();
-
-        Calendar twoWeeksRemaining = (Calendar) removalDate.clone();
-        twoWeeksRemaining.add(Calendar.DAY_OF_MONTH, -14);
-        targets.add(twoWeeksRemaining);
-
-        Calendar oneWeekRemaining = (Calendar) removalDate.clone();
-        oneWeekRemaining.add(Calendar.DAY_OF_MONTH, -7);
-        targets.add(oneWeekRemaining);
-
-        int removalReminderHours = viewModel.getRepository().getRemovalReminderHours();
-        if (removalReminderHours > 0) {
-            Calendar removalReminder = (Calendar) removalDate.clone();
-            removalReminder.add(Calendar.HOUR_OF_DAY, -removalReminderHours);
-            targets.add(removalReminder);
-        }
-
-        targets.add((Calendar) removalDate.clone());
-
-        int insertionReminderHours = viewModel.getRepository().getInsertionReminderHours();
-        if (insertionReminderHours > 0) {
-            Calendar reinsertionReminder = (Calendar) reinsertionDate.clone();
-            reinsertionReminder.add(Calendar.HOUR_OF_DAY, -insertionReminderHours);
-            targets.add(reinsertionReminder);
-        }
-
-        targets.add((Calendar) reinsertionDate.clone());
-
-        for (int i = 0; i < targets.size(); i++) {
-            long triggerTime = targets.get(i).getTimeInMillis();
-            int requestCode = (int) ((triggerTime / 1000) % Integer.MAX_VALUE) + i;
-
+        int[] types = new int[]{
+                NOTIF_TWO_WEEKS,
+                NOTIF_ONE_WEEK,
+                NOTIF_REMOVAL_REMINDER,
+                NOTIF_REMOVAL_EXACT,
+                NOTIF_INSERTION_REMINDER,
+                NOTIF_INSERTION_EXACT
+        };
+        for (int type : types) {
+            int requestCode = buildRequestCode(cycleStartMillis, type);
             PendingIntent pendingIntent = PendingIntent.getBroadcast(
                     requireContext(),
                     requestCode,
                     intent,
                     PendingIntent.FLAG_NO_CREATE | PendingIntent.FLAG_IMMUTABLE
             );
-
             if (pendingIntent != null) {
                 AlarmManager alarmManager = (AlarmManager) requireContext().getSystemService(Context.ALARM_SERVICE);
                 alarmManager.cancel(pendingIntent);
                 pendingIntent.cancel();
             }
+        }
+    }
+
+    private int buildRequestCode(long cycleStartMillis, int typeId) {
+        long hash = cycleStartMillis ^ (cycleStartMillis >>> 32);
+        int base = (int) (hash & 0x7fffffff);
+        int code = base + (typeId + 1) * 1000;
+        return code < 0 ? base : code;
+    }
+
+    private boolean canScheduleExactAlarms(AlarmManager alarmManager) {
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.S) {
+            return true;
+        }
+        if (alarmManager.canScheduleExactAlarms()) {
+            return true;
+        }
+        if (!viewModel.getRepository().wasExactAlarmPrompted()) {
+            viewModel.getRepository().setExactAlarmPrompted(true);
+            AlertDialog dialog = new AlertDialog.Builder(requireContext())
+                    .setTitle(R.string.exact_alarm_title)
+                    .setMessage(R.string.exact_alarm_message)
+                    .setPositiveButton(R.string.exact_alarm_open_settings, (d, which) -> {
+                        Intent intent = new Intent(android.provider.Settings.ACTION_REQUEST_SCHEDULE_EXACT_ALARM);
+                        startActivity(intent);
+                    })
+                    .setNegativeButton(R.string.dialog_cancel, null)
+                    .show();
+            applyDialogButtonColors(dialog);
+        }
+        return false;
+    }
+
+    private void applyDialogButtonColors(@Nullable AlertDialog dialog) {
+        if (dialog == null || viewModel == null) {
+            return;
+        }
+        Integer color = viewModel.getButtonColor().getValue();
+        if (color == null) {
+            return;
+        }
+        Button positive = dialog.getButton(AlertDialog.BUTTON_POSITIVE);
+        if (positive != null) {
+            positive.setTextColor(color);
+        }
+        Button negative = dialog.getButton(AlertDialog.BUTTON_NEGATIVE);
+        if (negative != null) {
+            negative.setTextColor(color);
+        }
+        Button neutral = dialog.getButton(AlertDialog.BUTTON_NEUTRAL);
+        if (neutral != null) {
+            neutral.setTextColor(color);
         }
     }
 
@@ -545,7 +585,7 @@ public class HomeFragment extends Fragment {
                     oldRemoval.add(Calendar.DAY_OF_MONTH, cycleLength + previousDelay);
                     Calendar oldReinsertion = (Calendar) oldRemoval.clone();
                     oldReinsertion.add(Calendar.DAY_OF_MONTH, RING_FREE_DAYS);
-                    cancelNotificationsForCycle(currentStart, oldRemoval, oldReinsertion);
+                    cancelNotificationsForCycle(cycleStartMillis);
 
                     viewModel.getRepository().setCycleDelayDays(cycleStartMillis, picker.getValue());
                     viewModel.getRepository().clearNotificationScheduledForCycle(cycleStartMillis);

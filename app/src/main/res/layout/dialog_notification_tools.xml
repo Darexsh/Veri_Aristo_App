@@ -1,0 +1,77 @@
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:padding="16dp">
+
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/btn_notification_times"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="@string/btn_set_notification_times"
+        android:textAllCaps="false"
+        android:textSize="15sp"
+        app:cornerRadius="12dp"
+        app:backgroundTint="#6200EE"
+        android:textColor="#FFFFFF" />
+
+    <TextView
+        android:id="@+id/tv_notification_times_hint"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="@string/notification_hint_set_times"
+        android:textSize="12sp"
+        android:textStyle="italic"
+        android:textColor="?attr/colorOnBackground"
+        android:layout_marginTop="4dp"
+        android:layout_marginBottom="12dp" />
+
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/btn_notification_exact"
+        style="?attr/materialButtonOutlinedStyle"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="@string/btn_notification_help"
+        android:textAllCaps="false"
+        android:textSize="15sp"
+        app:cornerRadius="12dp"
+        app:strokeColor="#6200EE"
+        app:strokeWidth="2dp"
+        android:textColor="#6200EE" />
+
+    <TextView
+        android:id="@+id/tv_notification_exact_hint"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="@string/notification_hint_exact_alarm"
+        android:textSize="12sp"
+        android:textStyle="italic"
+        android:textColor="?attr/colorOnBackground"
+        android:layout_marginTop="4dp"
+        android:layout_marginBottom="12dp" />
+
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/btn_notification_battery_opt"
+        style="?attr/materialButtonOutlinedStyle"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="@string/btn_notification_battery"
+        android:textAllCaps="false"
+        android:textSize="15sp"
+        app:cornerRadius="12dp"
+        app:strokeColor="#6200EE"
+        app:strokeWidth="2dp"
+        android:textColor="#6200EE" />
+
+    <TextView
+        android:id="@+id/tv_notification_battery_hint"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="@string/notification_hint_battery"
+        android:textSize="12sp"
+        android:textStyle="italic"
+        android:textColor="?attr/colorOnBackground"
+        android:layout_marginTop="4dp" />
+
+</LinearLayout>

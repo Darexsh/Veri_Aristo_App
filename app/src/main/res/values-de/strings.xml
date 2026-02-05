@@ -6,6 +6,7 @@
     <string name="section_cycle">Zyklus</string>
     <string name="section_calendar">Kalender</string>
     <string name="section_notifications">Benachrichtigungen</string>
+    <string name="btn_notifications_settings">Benachrichtungs-Einstellungen</string>
     <string name="section_design">Design</string>
     <string name="section_language">Sprache</string>
     <string name="section_advanced">Erweitert</string>
@@ -83,9 +84,10 @@ Dies entspricht nicht der empfohlenen Standardanwendung, ist aber möglich:<br>
     <string name="app_info_developer_name">Darexsh by Daniel Sichler</string>
     <string name="app_info_email">E-Mail: %1$s</string>
     <string name="app_info_github">GitHub: %1$s</string>
-    <string name="app_info_open_email">✉️ E-Mail schreiben</string>
-    <string name="app_info_open_github">🌐 Soziale Medien öffnen</string>
-    <string name="app_info_open_coffee">☕ Kaffee spendieren</string>
+    <string name="app_info_open_email">E-Mail schreiben</string>
+    <string name="app_info_open_github">Soziale Medien öffnen</string>
+    <string name="app_info_open_github_profile">GitHub-Profil</string>
+    <string name="app_info_open_coffee">Kaffee spendieren</string>
     <string name="app_info_actions_title">Aktionen</string>
 
     <string name="dialog_ok">OK</string>
@@ -97,7 +99,7 @@ Dies entspricht nicht der empfohlenen Standardanwendung, ist aber möglich:<br>
     <string name="settings_time_button_format">Einlege-Zeit einstellen: %1$02d:%2$02d</string>
     <string name="settings_date_button_format">Einlege-Datum einstellen: %1$02d.%2$02d.%3$d</string>
     <string name="settings_cycle_length_button">Zykluslänge einstellen: %1$d Tage</string>
-    <string name="settings_calendar_range_button">Kalenderbereich: %1$d %2$s zurück, %3$d %4$s vor</string>
+    <string name="settings_calendar_range_button">Kalenderbereich:\n%1$d %2$s zurück, %3$d %4$s vor</string>
     <string name="settings_notification_times_button">Erinnerungen: %1$dh vor Entfernen, %2$dh vor Einsetzen</string>
 
     <string name="settings_cycle_length_title">Zykluslänge einstellen</string>
@@ -111,6 +113,24 @@ Dies entspricht nicht der empfohlenen Standardanwendung, ist aber möglich:<br>
     <string name="settings_notification_times_message">Wähle die Vorlaufzeit in Stunden (0 = keine Erinnerung).</string>
     <string name="settings_notification_before_removal">Vor Entfernen (Stunden)</string>
     <string name="settings_notification_before_insertion">Vor Einsetzen (Stunden)</string>
+    <string name="btn_notification_help">Exakte Alarme erlauben</string>
+    <string name="btn_notification_battery">Akku-Optimierung deaktivieren</string>
+    <string name="exact_alarm_not_supported">Exakte Alarme sind auf dieser Android-Version nicht erforderlich.</string>
+    <string name="notification_hint_set_times">Wähle, wie viele Stunden vor Entfernen oder Einsetzen du erinnert werden möchtest.</string>
+    <string name="notification_hint_exact_alarm">Exakte Alarme erlauben, damit Erinnerungen pünktlich kommen (Android 12+).</string>
+    <string name="notification_hint_battery">Akku-Optimierung deaktivieren, damit das System Erinnerungen nicht verzögert.</string>
+    <string name="exact_alarm_button_label">Exakte Alarme: %1$s</string>
+    <string name="exact_alarm_status_unknown">unbekannt</string>
+    <string name="exact_alarm_status_allowed">erlaubt</string>
+    <string name="exact_alarm_status_blocked">blockiert</string>
+    <string name="exact_alarm_status_not_required">nicht erforderlich</string>
+    <string name="battery_opt_button_label">Akku-Optimierung: %1$s</string>
+    <string name="battery_opt_status_unknown">unbekannt</string>
+    <string name="battery_opt_status_enabled">aktiv</string>
+    <string name="battery_opt_status_disabled">deaktiviert</string>
+    <string name="battery_opt_status_not_required">nicht erforderlich</string>
+    <string name="notification_times_button_label">Erinnerungen:\n%1$dh vor Entfernen, %2$dh vor Einsetzen</string>
+    <string name="notification_times_button_unknown">Erinnerungen:\nunbekannt</string>
     <string name="settings_button_color_label">Button-Farbe</string>
     <string name="settings_button_color_format">Button-Farbe</string>
     <string name="settings_button_color_dialog_title">Button-Farbe wählen</string>
@@ -157,6 +177,8 @@ Dies entspricht nicht der empfohlenen Standardanwendung, ist aber möglich:<br>
     <string name="backup_title">Backup</string>
     <string name="backup_create">Backup erstellen</string>
     <string name="backup_restore">Backup wiederherstellen</string>
+    <string name="backup_hint_create">Deine Daten als Datei sichern.</string>
+    <string name="backup_hint_restore">Daten aus einer gespeicherten Datei wiederherstellen.</string>
     <string name="backup_created_toast">Backup erstellt</string>
     <string name="backup_failed_toast">Backup fehlgeschlagen</string>
     <string name="backup_read_failed_toast">Backup konnte nicht gelesen werden</string>
@@ -237,7 +259,7 @@ Dies entspricht nicht der empfohlenen Standardanwendung, ist aber möglich:<br>
     <string name="tour_title_settings_calendar">Kalenderbereich</string>
     <string name="tour_body_settings_calendar">Lege fest, wie weit der Kalender zurück und voraus die Zyklen anzeigt.</string>
     <string name="tour_title_settings_notifications">Erinnerungen</string>
-    <string name="tour_body_settings_notifications">Eigene Benachrichtigungen einstellen, wann du erinnert werden möchtest am Einsetzungs- bzw. Entfernungstag.</string>
+    <string name="tour_body_settings_notifications">Eigene Benachrichtigungen einstellen, wann du am Einsetzungs- bzw. Entfernungstag erinnert werden möchtest.\nWenn Erinnerungen unzuverlässig sind, deaktiviere die Akku-Optimierung und erlaube exakte Alarme in diesen Einstellungen.</string>
     <string name="tour_title_settings_background">Hintergrundbild</string>
     <string name="tour_body_settings_background">Wähle ein Foto als Hintergrund der Startseite.</string>
     <string name="tour_title_settings_button_color">Button-Farbe</string>
@@ -307,6 +329,9 @@ Dies entspricht nicht der empfohlenen Standardanwendung, ist aber möglich:<br>
     <string name="debug_time_shift_forward">Zeit vorwärts verschoben</string>
     <string name="debug_time_shift_back">Zeit zurück verschoben</string>
     <string name="debug_preset_applied">Preset angewendet</string>
+    <string name="exact_alarm_title">Exakte Alarme erlauben</string>
+    <string name="exact_alarm_message">Exakte Erinnerungen erfordern eine Berechtigung. Bitte erlaube exakte Alarme in den Systemeinstellungen, damit Benachrichtigungen pünktlich ausgelöst werden.</string>
+    <string name="exact_alarm_open_settings">Einstellungen öffnen</string>
     <string name="debug_hint_set_time">Ein konkretes Datum und eine Uhrzeit für die Debug-Zeit wählen.</string>
     <string name="debug_hint_clear_time">Debug-Zeit löschen und Systemzeit verwenden.</string>
     <string name="debug_hint_info">Detaillierte Debug-Infos zum aktuellen Zyklus anzeigen.</string>

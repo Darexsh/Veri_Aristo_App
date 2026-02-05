@@ -18,16 +18,20 @@
             android:textSize="26sp"
             android:textStyle="bold" />
 
-        <ImageButton
+        <TextView
             android:id="@+id/btn_settings_info"
-            android:layout_width="28dp"
-            android:layout_height="28dp"
+            android:layout_width="32dp"
+            android:layout_height="32dp"
             android:layout_alignParentEnd="true"
             android:layout_centerVertical="true"
-            android:background="@null"
+            android:background="@drawable/round_icon_button"
             android:contentDescription="@string/settings_info_desc"
-            android:src="@android:drawable/ic_dialog_info"
-            android:tint="#6200EE" />
+            android:gravity="center"
+            android:text="i"
+            android:textSize="18sp"
+            android:textStyle="bold|italic"
+            android:fontFamily="serif"
+            android:textColor="#FFFFFF" />
     </RelativeLayout>
 
     <TextView
@@ -177,10 +181,10 @@
                     android:padding="12dp">
 
                     <com.google.android.material.button.MaterialButton
-                        android:id="@+id/btn_set_notification_times"
+                        android:id="@+id/btn_notification_group"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:text="@string/btn_set_notification_times"
+                        android:text="@string/btn_notifications_settings"
                         android:textAllCaps="false"
                         android:textSize="15sp"
                         app:cornerRadius="12dp"
@@ -625,7 +629,7 @@
                 android:layout_height="32dp"
                 android:background="@null"
                 android:contentDescription="@string/settings_advanced_toggle_desc"
-                android:src="@android:drawable/arrow_down_float"
+                android:src="@drawable/ic_triangle_down"
                 android:tint="?attr/colorOnBackground" />
         </LinearLayout>
 
@@ -647,6 +651,7 @@
                 app:backgroundTint="#6200EE"
                 android:textColor="#FFFFFF"
                 android:layout_marginBottom="10dp" />
+
 
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/btn_backup_manage"

@@ -40,6 +40,7 @@ public class SettingsRepository {
     private static final String KEY_DEBUG_TOOLS_ENABLED = "debug_tools_enabled";
     private static final String KEY_DEBUG_TIME_ENABLED = "debug_time_enabled";
     private static final String KEY_DEBUG_TIME_MILLIS = "debug_time_millis";
+    private static final String KEY_EXACT_ALARM_PROMPTED = "exact_alarm_prompted";
     public static final int DEFAULT_BUTTON_COLOR = 0xFF6200EE;
     public static final int DEFAULT_HOME_CIRCLE_COLOR = 0xFFBB86FC;
     public static final int DEFAULT_HOME_CIRCLE_STYLE = 0;
@@ -243,6 +244,14 @@ public class SettingsRepository {
 
     public void clearDebugTimeMillis() {
         sharedPreferences.edit().remove(KEY_DEBUG_TIME_MILLIS).apply();
+    }
+
+    public boolean wasExactAlarmPrompted() {
+        return sharedPreferences.getBoolean(KEY_EXACT_ALARM_PROMPTED, false);
+    }
+
+    public void setExactAlarmPrompted(boolean prompted) {
+        sharedPreferences.edit().putBoolean(KEY_EXACT_ALARM_PROMPTED, prompted).apply();
     }
 
     private int remapHomeCircleStyleV1(int style) {

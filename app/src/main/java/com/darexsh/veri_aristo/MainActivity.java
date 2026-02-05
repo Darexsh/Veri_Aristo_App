@@ -551,7 +551,7 @@ public class MainActivity extends AppCompatActivity {
         steps.add(new TourStep(R.id.nav_settings, R.id.btn_set_calendar_range,
                 R.string.tour_title_settings_calendar, R.string.tour_body_settings_calendar,
                 R.id.settings_scroll, false));
-        steps.add(new TourStep(R.id.nav_settings, R.id.btn_set_notification_times,
+        steps.add(new TourStep(R.id.nav_settings, R.id.btn_notification_group,
                 R.string.tour_title_settings_notifications, R.string.tour_body_settings_notifications,
                 R.id.settings_scroll, false));
         steps.add(new TourStep(R.id.nav_settings, R.id.btn_set_background,
