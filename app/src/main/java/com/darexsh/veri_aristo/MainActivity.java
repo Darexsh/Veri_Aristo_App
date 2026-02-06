@@ -28,8 +28,6 @@ import androidx.fragment.app.FragmentManager;
 import androidx.lifecycle.ViewModelProvider;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.jakewharton.threetenabp.AndroidThreeTen;
-
-import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageButton;
@@ -37,6 +35,7 @@ import android.widget.ScrollView;
 import com.google.android.material.button.MaterialButton;
 import java.util.ArrayList;
 import java.util.List;
+import android.util.Log;
 
 // MainActivity serves as the entry point for the app, managing fragments and navigation
 public class MainActivity extends AppCompatActivity {
@@ -47,7 +46,7 @@ public class MainActivity extends AppCompatActivity {
     private static final String KEY_TOUR_SHOWN = "tour_shown";
     private static final String KEY_WELCOME_SHOWN = "welcome_shown";
     private static final long BACK_PRESS_WINDOW_MS = 2000;
-
+    private static final String TAG = "MainActivity";
     private FragmentManager fragmentManager;
     private ImageButton btnNotes;
     private BottomNavigationView bottomNavigationView;
@@ -78,7 +77,7 @@ public class MainActivity extends AppCompatActivity {
                 prefs.edit().putInt(KEY_LAST_VERSION, currentVersion).apply();
             }
         } catch (PackageManager.NameNotFoundException e) {
-            e.printStackTrace();
+            Log.e(TAG, "Failed to get package info", e);
         }
 
         fragmentManager = getSupportFragmentManager();
@@ -95,7 +94,7 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
-        // Standardmäßig Home-Fragment laden
+        // Load default Home-Fragment
         if (savedInstanceState == null) {
             loadFragment(new HomeFragment(), false);
             btnNotes.setVisibility(View.VISIBLE);
@@ -106,27 +105,26 @@ public class MainActivity extends AppCompatActivity {
             btnNotes.setVisibility(View.GONE);
         });
 
-        bottomNavigationView.setOnNavigationItemSelectedListener(item -> {
+        bottomNavigationView.setOnItemSelectedListener(item -> {
             Fragment selectedFragment = null;
             int id = item.getItemId();
 
             if (id == R.id.nav_home) {
-                selectedFragment = new HomeFragment(); // Load HomeFragment
+                selectedFragment = new HomeFragment();
                 btnNotes.setVisibility(View.VISIBLE);
             } else if (id == R.id.nav_calendar) {
-                selectedFragment = new CalendarFragment(); // Load CalendarFragment
+                selectedFragment = new CalendarFragment();
                 btnNotes.setVisibility(View.GONE);
             } else if (id == R.id.nav_cycles) {
-                selectedFragment = new CyclesFragment(); // Load CyclesFragment
+                selectedFragment = new CyclesFragment();
                 btnNotes.setVisibility(View.GONE);
             } else if (id == R.id.nav_settings) {
-                selectedFragment = new SettingsFragment(); // Load SettingsFragment
+                selectedFragment = new SettingsFragment();
                 btnNotes.setVisibility(View.GONE);
             } else {
-                btnNotes.setVisibility(View.GONE); // Hide notes button for other fragments
+                btnNotes.setVisibility(View.GONE);
             }
 
-            // If a valid fragment is selected, load it
             if (selectedFragment != null) {
                 loadFragment(selectedFragment, true);
                 return true;
@@ -137,13 +135,9 @@ public class MainActivity extends AppCompatActivity {
 
         // Listen for back stack changes to manage visibility of the notes button
         fragmentManager.addOnBackStackChangedListener(() -> {
-            Fragment currentFragment = fragmentManager.findFragmentById(R.id.fragment_container);
-            if (currentFragment instanceof HomeFragment) {
-                btnNotes.setVisibility(View.VISIBLE);
-            } else {
-                btnNotes.setVisibility(View.GONE);
-            }
+            updateNotesButtonVisibility();
         });
+        updateNotesButtonVisibility();
 
         // Handle back button presses to navigate through fragments
         getOnBackPressedDispatcher().addCallback(this, new OnBackPressedCallback(true) {
@@ -206,9 +200,19 @@ public class MainActivity extends AppCompatActivity {
         btnNotes.setVisibility(View.VISIBLE);
     }
 
-    // Load the specified fragment and add it to the back stack
-    private void loadFragment(Fragment fragment) {
-        loadFragment(fragment, true);
+    @Override
+    protected void onResume() {
+        super.onResume();
+        updateNotesButtonVisibility();
+    }
+
+    private void updateNotesButtonVisibility() {
+        Fragment currentFragment = fragmentManager.findFragmentById(R.id.fragment_container);
+        if (currentFragment instanceof HomeFragment) {
+            btnNotes.setVisibility(View.VISIBLE);
+        } else {
+            btnNotes.setVisibility(View.GONE);
+        }
     }
 
     private void loadFragment(Fragment fragment, boolean addToBackStack) {
@@ -266,13 +270,11 @@ public class MainActivity extends AppCompatActivity {
         if (prefs.getBoolean(KEY_TOUR_SHOWN, false)) {
             return;
         }
-        getWindow().getDecorView().post(() -> startGuidedTourWhenReady(0));
+        getWindow().getDecorView().post(this::startGuidedTourWhenReady);
     }
 
-    private void startGuidedTourWhenReady(int attempt) {
-        if (attempt > 10) {
-            return;
-        }
+
+    private void startGuidedTourWhenReady() {
 
         if (tourSteps == null) {
             tourSteps = buildTourSteps();
@@ -313,7 +315,7 @@ public class MainActivity extends AppCompatActivity {
             root.addView(tourOverlay);
         }
 
-        showGuidedTourStep(0, attempt);
+        showGuidedTourStep(0, 0);
     }
 
     private void showGuidedTourStep(int index, int attempt) {
@@ -628,16 +630,14 @@ public class MainActivity extends AppCompatActivity {
 
     // Create a notification channel for Android O and above
     private void createNotificationChannel() {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            NotificationChannel channel = new NotificationChannel(
-                    "reminder_channel",
-                    getString(R.string.notifications_channel_name),
-                    NotificationManager.IMPORTANCE_HIGH
-            );
-            channel.setDescription(getString(R.string.notifications_channel_description));
-            NotificationManager manager = getSystemService(NotificationManager.class);
-            manager.createNotificationChannel(channel);
-        }
+        NotificationChannel channel = new NotificationChannel(
+                "reminder_channel",
+                getString(R.string.notifications_channel_name),
+                NotificationManager.IMPORTANCE_HIGH
+        );
+        channel.setDescription(getString(R.string.notifications_channel_description));
+        NotificationManager manager = getSystemService(NotificationManager.class);
+        manager.createNotificationChannel(channel);
     }
 
     // Request notification permission for Android 13 and above
@@ -659,13 +659,6 @@ public class MainActivity extends AppCompatActivity {
                                            @NonNull String[] permissions,
                                            @NonNull int[] grantResults) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
-        if (requestCode == REQUEST_NOTIFICATION_PERMISSION) {
-            if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                // Permission granted → proceed with notification scheduling
-            } else {
-                // Permission denied → handle accordingly
-            }
-        }
     }
 
     private void clearAllScheduledNotifications() {

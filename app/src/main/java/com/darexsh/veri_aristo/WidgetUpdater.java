@@ -4,7 +4,6 @@ import android.appwidget.AppWidgetManager;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.res.Configuration;
-import android.os.Build;
 import android.os.LocaleList;
 import androidx.appcompat.app.AppCompatDelegate;
 import androidx.core.os.LocaleListCompat;
@@ -46,11 +45,7 @@ public final class WidgetUpdater {
             return context;
         }
         Configuration config = new Configuration(context.getResources().getConfiguration());
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
-            config.setLocales(new LocaleList(locale));
-        } else {
-            config.setLocale(locale);
-        }
+        config.setLocales(new LocaleList(locale));
         return context.createConfigurationContext(config);
     }
 }

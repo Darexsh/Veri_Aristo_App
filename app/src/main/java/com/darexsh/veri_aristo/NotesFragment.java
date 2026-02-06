@@ -15,6 +15,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.EditText;
 import android.widget.ImageButton;
+import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
 import android.graphics.PorterDuff;
@@ -29,7 +30,6 @@ public class NotesFragment extends Fragment {
 
     private EditText editTextNotes;
     private MaterialButton btnSave;
-    private MaterialButton btnClear;
     private TextView tvCharCount;
     private TextView tvLastSaved;
     private TextView tvNoteDate;
@@ -49,7 +49,7 @@ public class NotesFragment extends Fragment {
 
         editTextNotes = view.findViewById(R.id.editText_notes);
         btnSave = view.findViewById(R.id.btn_save_notes);
-        btnClear = view.findViewById(R.id.btn_clear_notes);
+        MaterialButton btnClear = view.findViewById(R.id.btn_clear_notes);
         tvCharCount = view.findViewById(R.id.tv_char_count);
         tvLastSaved = view.findViewById(R.id.tv_last_saved);
         tvNoteDate = view.findViewById(R.id.tv_notes_date);
@@ -91,7 +91,8 @@ public class NotesFragment extends Fragment {
         // Set up the save button to store notes in SharedPreferences
         btnSave.setOnClickListener(v -> saveNotes(true));
 
-        btnClear.setOnClickListener(v -> new AlertDialog.Builder(requireContext())
+        btnClear.setOnClickListener(v -> {
+            AlertDialog confirmDialog = new AlertDialog.Builder(requireContext())
                 .setTitle(R.string.notes_delete_title)
                 .setMessage(R.string.notes_delete_message)
                 .setPositiveButton(R.string.notes_delete, (dialog, which) -> {
@@ -99,7 +100,19 @@ public class NotesFragment extends Fragment {
                     saveNotes(true);
                 })
                 .setNegativeButton(R.string.dialog_cancel, null)
-                .show());
+                .show();
+            Integer buttonColor = viewModel.getButtonColor().getValue();
+            if (buttonColor != null) {
+                Button positive = confirmDialog.getButton(AlertDialog.BUTTON_POSITIVE);
+                if (positive != null) {
+                    positive.setTextColor(buttonColor);
+                }
+                Button negative = confirmDialog.getButton(AlertDialog.BUTTON_NEGATIVE);
+                if (negative != null) {
+                    negative.setTextColor(buttonColor);
+                }
+            }
+        });
 
         btnClose.setOnClickListener(v -> requireActivity().getOnBackPressedDispatcher().onBackPressed());
 

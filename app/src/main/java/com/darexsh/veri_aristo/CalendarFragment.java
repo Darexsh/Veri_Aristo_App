@@ -1,7 +1,6 @@
 package com.darexsh.veri_aristo;
 
 import android.app.AlertDialog;
-import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.PorterDuff;
@@ -28,12 +27,10 @@ import com.prolificinteractive.materialcalendarview.DayViewFacade;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
-import com.darexsh.veri_aristo.Constants;
 
 public class CalendarFragment extends Fragment {
 
     private MaterialCalendarView calendarView;
-    private final int ringFreeDays = Constants.RING_FREE_DAYS; // 6 days ring-free + 1 insertion day
     private SharedViewModel viewModel;
     private View legendWearView;
     private View legendRingFreeView;
@@ -189,6 +186,8 @@ public class CalendarFragment extends Fragment {
         Calendar futureLimit = (Calendar) today.clone();
         futureLimit.add(Calendar.MONTH, Math.max(futureMonths, 0));
 
+        // 6 days ring-free + 1 insertion day
+        int ringFreeDays = Constants.RING_FREE_DAYS;
         int baseStepDays = cycleLength + ringFreeDays;
         if (baseStepDays <= 0) {
             return;
@@ -290,7 +289,7 @@ public class CalendarFragment extends Fragment {
             cancelButton.setTextColor(Color.WHITE);
         }
 
-        android.widget.ListAdapter adapter = new android.widget.ArrayAdapter<String>(
+        android.widget.ListAdapter adapter = new android.widget.ArrayAdapter<>(
                 requireContext(),
                 R.layout.dialog_button_color_item,
                 android.R.id.text1,
@@ -436,7 +435,7 @@ public class CalendarFragment extends Fragment {
         }
     }
 
-    private int resolveThemeColor(int attr, int fallback) {
+    private int resolveThemeColor(int attr) {
         TypedValue typedValue = new TypedValue();
         if (requireContext().getTheme().resolveAttribute(attr, typedValue, true)) {
             if (typedValue.resourceId != 0) {
@@ -444,7 +443,7 @@ public class CalendarFragment extends Fragment {
             }
             return typedValue.data;
         }
-        return fallback;
+        return Color.WHITE;
     }
 
     private int resolveCalendarHeaderColor() {
@@ -452,7 +451,7 @@ public class CalendarFragment extends Fragment {
         if (header != null) {
             return header.getCurrentTextColor();
         }
-        return resolveThemeColor(com.google.android.material.R.attr.colorOnSurface, Color.WHITE);
+        return resolveThemeColor(com.google.android.material.R.attr.colorOnSurface);
     }
 
     private TextView findLargestTextView(View root) {
@@ -535,18 +534,14 @@ public class CalendarFragment extends Fragment {
 
         @Override
         public void decorate(DayViewFacade view) {
-            view.addSpan(new LineBackgroundSpan() {
-                @Override
-                public void drawBackground(Canvas canvas, Paint paint, int left, int right, int top,
-                                           int baseline, int bottom, CharSequence text, int start, int end, int lineNum) {
-                    int cx = (left + right) / 2;
-                    int cy = (top + bottom) / 2;
-                    int radius = Math.min(right - left, bottom - top) / 2 + 40; // slightly bigger than background
-                    paint.setStyle(Paint.Style.STROKE);
-                    paint.setStrokeWidth(5);
-                    paint.setColor(Color.LTGRAY);
-                    canvas.drawCircle(cx, cy, radius, paint);
-                }
+            view.addSpan((LineBackgroundSpan) (canvas, paint, left, right, top, baseline, bottom, text, start, end, lineNum) -> {
+                int cx = (left + right) / 2;
+                int cy = (top + bottom) / 2;
+                int radius = Math.min(right - left, bottom - top) / 2 + 40; // slightly bigger than background
+                paint.setStyle(Paint.Style.STROKE);
+                paint.setStrokeWidth(5);
+                paint.setColor(Color.LTGRAY);
+                canvas.drawCircle(cx, cy, radius, paint);
             });
         }
     }

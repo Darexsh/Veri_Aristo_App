@@ -48,7 +48,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:gravity="center"
-                    android:text="17"
+                    android:text="@string/home_days"
                     android:textSize="48sp"
                     android:textStyle="bold" />
 
@@ -101,7 +101,7 @@
         android:gravity="center_vertical"
         android:orientation="horizontal">
 
-        <ImageButton
+        <TextView
             android:id="@+id/btn_delay_info"
             android:layout_width="20dp"
             android:layout_height="20dp"
@@ -110,10 +110,12 @@
             android:clickable="true"
             android:contentDescription="@string/home_delay_info_desc"
             android:focusable="true"
-            android:padding="0dp"
-            android:scaleType="fitXY"
-            android:src="@android:drawable/ic_dialog_info"
-            android:tint="#FFFFFF" />
+            android:gravity="center"
+            android:text="i"
+            android:textColor="#FFFFFF"
+            android:textSize="12sp"
+            android:textStyle="bold|italic"
+            android:fontFamily="serif" />
 
         <com.google.android.material.button.MaterialButton
             android:id="@+id/btn_delay_cycle"

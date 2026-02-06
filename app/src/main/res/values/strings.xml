@@ -184,6 +184,10 @@ This is not the recommended standard use, but it is possible:<br>
     <string name="backup_read_failed_toast">Backup could not be read</string>
     <string name="backup_invalid_toast">Invalid backup</string>
     <string name="backup_restored_toast">Backup restored</string>
+    <string name="update_backup_title">Backup</string>
+    <string name="update_backup_message">The app will check for updates. Your data remains on the device, but a backup is recommended.\n\nWould you like to create a backup? If you already created one or don’t want to, tap Continue.</string>
+    <string name="update_backup_yes">Continue</string>
+    <string name="update_backup_no">Create backup</string>
     <string name="update_checking_toast">Checking for updates...</string>
     <string name="update_latest_toast">You are on the latest version.</string>
     <string name="update_available_toast">Update found. Downloading...</string>
@@ -364,4 +368,5 @@ This is not the recommended standard use, but it is possible:<br>
     <string name="nav_calendar">Calendar</string>
     <string name="nav_cycles">Cycles</string>
     <string name="nav_settings">Settings</string>
+    <string name="home_days">17</string>
 </resources>

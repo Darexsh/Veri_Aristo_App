@@ -184,6 +184,10 @@ Dies entspricht nicht der empfohlenen Standardanwendung, ist aber möglich:<br>
     <string name="backup_read_failed_toast">Backup konnte nicht gelesen werden</string>
     <string name="backup_invalid_toast">Backup ungültig</string>
     <string name="backup_restored_toast">Backup wiederhergestellt</string>
+    <string name="update_backup_title">Backup</string>
+    <string name="update_backup_message">Es wird nach einem neuen Update gesucht. Die Daten verbleiben auf dem Gerät, jedoch wird ein Backup empfohlen.\n\nMöchten Sie ein Backup erstellen? Wenn Sie bereits ein Backup erstellt haben oder dies nicht wollen, klicken Sie auf Weiter.</string>
+    <string name="update_backup_yes">Weiter</string>
+    <string name="update_backup_no">Backup erstellen</string>
     <string name="update_checking_toast">Suche nach Updates...</string>
     <string name="update_latest_toast">Du hast die neueste Version.</string>
     <string name="update_available_toast">Update gefunden. Download läuft...</string>
@@ -364,4 +368,5 @@ Dies entspricht nicht der empfohlenen Standardanwendung, ist aber möglich:<br>
     <string name="nav_calendar">Kalender</string>
     <string name="nav_cycles">Zyklen</string>
     <string name="nav_settings">Einstellungen</string>
+    <string name="home_days">17</string>
 </resources>

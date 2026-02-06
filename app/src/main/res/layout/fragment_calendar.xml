@@ -37,7 +37,7 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent">
 
-        <!-- Green (Tragezeit) -->
+        <!-- Green (Wear time) -->
         <LinearLayout
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
@@ -59,7 +59,7 @@
                 android:layout_marginTop="4dp" />
         </LinearLayout>
 
-        <!-- Red (Ringfreie Tage) -->
+        <!-- Red (Ring-free days) -->
         <LinearLayout
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
@@ -81,7 +81,7 @@
                 android:layout_marginTop="4dp" />
         </LinearLayout>
 
-        <!-- Yellow (Entfernen) -->
+        <!-- Yellow (Removal) -->
         <LinearLayout
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
@@ -103,7 +103,7 @@
                 android:layout_marginTop="4dp" />
         </LinearLayout>
 
-        <!-- Cyan (Einsetzen) -->
+        <!-- Cyan (Insertion) -->
         <LinearLayout
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"

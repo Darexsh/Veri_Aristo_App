@@ -12,6 +12,7 @@ public class SharedViewModelFactory implements ViewModelProvider.Factory {
         this.application = application;
     }
 
+    @SuppressWarnings("unchecked")
     @NonNull
     @Override
     public <T extends ViewModel> T create(@NonNull Class<T> modelClass) {

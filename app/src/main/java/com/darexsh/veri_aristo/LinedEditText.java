@@ -42,12 +42,8 @@ public class LinedEditText extends AppCompatEditText {
         int totalLines = Math.max(lineCount, height / lineHeight);
 
         int lastLineBottom;
-        if (lineCount > 0) {
-            getLineBounds(lineCount - 1, lineRect);
-            lastLineBottom = lineRect.bottom;
-        } else {
-            lastLineBottom = getPaddingTop() + lineHeight;
-        }
+        getLineBounds(lineCount - 1, lineRect);
+        lastLineBottom = lineRect.bottom;
 
         for (int i = 0; i < totalLines; i++) {
             int y;

@@ -1,12 +1,13 @@
 package com.darexsh.veri_aristo;
 
+import android.annotation.SuppressLint;
 import android.app.AlarmManager;
 import android.app.AlertDialog;
 import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.content.UriPermission;
+import android.content.res.ColorStateList;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.Bundle;
@@ -28,22 +29,22 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.lang.reflect.Type;
-import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
+import java.util.Objects;
+import android.util.Log;
 
 // HomeFragment displays the current cycle status and allows users to manage their cycle settings
 public class HomeFragment extends Fragment {
 
     // Number of days after removal before the ring can be reinserted
     private static final int RING_FREE_DAYS = Constants.RING_FREE_DAYS;
-    private static final int NOTIF_TWO_WEEKS = 0;
-    private static final int NOTIF_ONE_WEEK = 1;
-    private static final int NOTIF_REMOVAL_REMINDER = 2;
-    private static final int NOTIF_REMOVAL_EXACT = 3;
-    private static final int NOTIF_INSERTION_REMINDER = 4;
-    private static final int NOTIF_INSERTION_EXACT = 5;
+    private static final int NOTIFY_TWO_WEEKS = 0;
+    private static final int NOTIFY_ONE_WEEK = 1;
+    private static final int NOTIFY_REMOVAL_REMINDER = 2;
+    private static final int NOTIFY_REMOVAL_EXACT = 3;
+    private static final int NOTIFY_INSERTION_REMINDER = 4;
+    private static final int NOTIFY_INSERTION_EXACT = 5;
     private SharedViewModel viewModel;
     private int currentCircleStyle = SettingsRepository.DEFAULT_HOME_CIRCLE_STYLE;
     private int currentCircleColor = SettingsRepository.DEFAULT_HOME_CIRCLE_COLOR;
@@ -63,7 +64,7 @@ public class HomeFragment extends Fragment {
         final TextView tvDaysLabel = view.findViewById(R.id.tv_days_left_label);    // TextView to display the label for days left
         final ImageView backgroundImageView = view.findViewById(R.id.background_image); // ImageView for the background image
         final MaterialButton btnDelayCycle = view.findViewById(R.id.btn_delay_cycle);
-        final android.widget.ImageButton btnDelayInfo = view.findViewById(R.id.btn_delay_info);
+        final TextView btnDelayInfo = view.findViewById(R.id.btn_delay_info);
 
         SharedViewModelFactory factory = new SharedViewModelFactory(requireActivity().getApplication());
         viewModel = new ViewModelProvider(requireActivity(), factory).get(SharedViewModel.class);
@@ -71,7 +72,7 @@ public class HomeFragment extends Fragment {
         viewModel.getButtonColor().observe(getViewLifecycleOwner(), color -> {
             if (color != null) {
                 ButtonColorHelper.applyPrimaryColor(btnDelayCycle, color);
-                btnDelayInfo.setColorFilter(color);
+                applyDelayInfoIconTint(btnDelayInfo, color);
             }
         });
         btnDelayInfo.setOnClickListener(v -> showDelayInfoDialog());
@@ -99,7 +100,7 @@ public class HomeFragment extends Fragment {
                     Uri uri = Uri.parse(uriStr);
                     String scheme = uri.getScheme();
                     if ("file".equalsIgnoreCase(scheme)) {
-                        File file = new File(uri.getPath());
+                        File file = new File(Objects.requireNonNull(uri.getPath()));
                         if (file.exists()) {
                             try (InputStream inputStream = new FileInputStream(file)) {
                                 Drawable drawable = Drawable.createFromStream(inputStream, uri.toString());
@@ -130,7 +131,7 @@ public class HomeFragment extends Fragment {
                     }
 
                 } catch (SecurityException | IOException e) {
-                    e.printStackTrace();
+                    Log.e("HomeFragment", "Failed to load background image", e);
                     backgroundImageView.setImageResource(R.drawable.default_bg);
                     viewModel.setBackgroundImageUri(null);
                 }
@@ -208,6 +209,16 @@ public class HomeFragment extends Fragment {
                 reinsertionDay = startOfDay(reinsertionDate);
             }
 
+            // Add phases as soon as each phase ends, even if the app wasn't opened at the exact time.
+            if (systemNow.equals(removalDate) || systemNow.after(removalDate)) {
+                saveCycleToHistory(viewModel, startDate.getTimeInMillis(),
+                        removalDate.getTimeInMillis(), CycleType.INSERTION);
+            }
+            if (systemNow.equals(reinsertionDate) || systemNow.after(reinsertionDate)) {
+                saveCycleToHistory(viewModel, removalDate.getTimeInMillis(),
+                        reinsertionDate.getTimeInMillis(), CycleType.REMOVAL);
+            }
+
             int remainingDays;
             String labelText;
             String primaryTextDate;
@@ -223,11 +234,11 @@ public class HomeFragment extends Fragment {
                 progressMax = cycleLength;
                 progressValue = progressMax - remainingDays;
 
-                String removalDateText = String.format("%02d.%02d.%d",
+                @SuppressLint("DefaultLocale") String removalDateText = String.format("%02d.%02d.%d",
                         removalDate.get(Calendar.DAY_OF_MONTH),
                         removalDate.get(Calendar.MONTH) + 1,
                         removalDate.get(Calendar.YEAR));
-                String reinsertionDateText = String.format("%02d.%02d.%d",
+                @SuppressLint("DefaultLocale") String reinsertionDateText = String.format("%02d.%02d.%d",
                         reinsertionDate.get(Calendar.DAY_OF_MONTH),
                         reinsertionDate.get(Calendar.MONTH) + 1,
                         reinsertionDate.get(Calendar.YEAR));
@@ -240,11 +251,11 @@ public class HomeFragment extends Fragment {
                 progressMax = RING_FREE_DAYS;
                 progressValue = progressMax - remainingDays;
 
-                String reinsertionDateText = String.format("%02d.%02d.%d",
+                @SuppressLint("DefaultLocale") String reinsertionDateText = String.format("%02d.%02d.%d",
                         reinsertionDate.get(Calendar.DAY_OF_MONTH),
                         reinsertionDate.get(Calendar.MONTH) + 1,
                         reinsertionDate.get(Calendar.YEAR));
-                String removalDateText = String.format("%02d.%02d.%d",
+                @SuppressLint("DefaultLocale") String removalDateText = String.format("%02d.%02d.%d",
                         removalDate.get(Calendar.DAY_OF_MONTH),
                         removalDate.get(Calendar.MONTH) + 1,
                         removalDate.get(Calendar.YEAR));
@@ -256,11 +267,11 @@ public class HomeFragment extends Fragment {
                 progressMax = cycleLength;
                 progressValue = 0;
 
-                String removalDateText = String.format("%02d.%02d.%d",
+                @SuppressLint("DefaultLocale") String removalDateText = String.format("%02d.%02d.%d",
                         removalDate.get(Calendar.DAY_OF_MONTH),
                         removalDate.get(Calendar.MONTH) + 1,
                         removalDate.get(Calendar.YEAR));
-                String reinsertionDateText = String.format("%02d.%02d.%d",
+                @SuppressLint("DefaultLocale") String reinsertionDateText = String.format("%02d.%02d.%d",
                         reinsertionDate.get(Calendar.DAY_OF_MONTH),
                         reinsertionDate.get(Calendar.MONTH) + 1,
                         reinsertionDate.get(Calendar.YEAR));
@@ -272,7 +283,7 @@ public class HomeFragment extends Fragment {
             circularProgress.setProgress(progressValue);
             tvDaysNumber.setText(String.valueOf(remainingDays));
             tvDaysLabel.setText(labelText);
-            String timeText = String.format("%02d:%02d", startDate.get(Calendar.HOUR_OF_DAY), startDate.get(Calendar.MINUTE));
+            @SuppressLint("DefaultLocale") String timeText = String.format("%02d:%02d", startDate.get(Calendar.HOUR_OF_DAY), startDate.get(Calendar.MINUTE));
             String timeSuffix = getString(R.string.home_at_time, timeText);
             primaryTextDate = primaryTextDate + " " + timeSuffix;
             secondaryTextDate = secondaryTextDate + " " + timeSuffix;
@@ -321,6 +332,14 @@ public class HomeFragment extends Fragment {
                 .show();
     }
 
+    private void applyDelayInfoIconTint(@Nullable TextView button, int buttonColor) {
+        if (button == null) {
+            return;
+        }
+        button.setBackgroundTintList(ColorStateList.valueOf(buttonColor));
+        button.setTextColor(android.graphics.Color.WHITE);
+    }
+
     // Save a cycle event to the history
     private void saveCycleToHistory(SharedViewModel viewModel, long dateMillis, long endDateMillis, CycleType type) {
         List<Cycle> cycleHistory = viewModel.getRepository().getCycleHistory();
@@ -329,7 +348,7 @@ public class HomeFragment extends Fragment {
             if (c.getDateMillis() == dateMillis
                     && c.getEndDateMillis() == endDateMillis
                     && c.getType() == type) {
-                return; // Duplikat
+                return; // Duplicate
             }
         }
 
@@ -372,7 +391,7 @@ public class HomeFragment extends Fragment {
             scheduleNotification(twoWeeksRemaining,
                     getString(R.string.notif_cycle_duration_title),
                     getString(R.string.notif_two_weeks_remaining),
-                    buildRequestCode(cycleStartMillis, NOTIF_TWO_WEEKS));
+                    buildRequestCode(cycleStartMillis, NOTIFY_TWO_WEEKS));
         }
 
         Calendar oneWeekRemaining = (Calendar) removalDate.clone();
@@ -383,7 +402,7 @@ public class HomeFragment extends Fragment {
             scheduleNotification(oneWeekRemaining,
                     getString(R.string.notif_cycle_duration_title),
                     getString(R.string.notif_one_week_remaining),
-                    buildRequestCode(cycleStartMillis, NOTIF_ONE_WEEK));
+                    buildRequestCode(cycleStartMillis, NOTIFY_ONE_WEEK));
         }
 
         // ---- Ring Removal Notifications ----
@@ -394,17 +413,17 @@ public class HomeFragment extends Fragment {
             scheduleNotification(removalReminder,
                     getString(R.string.notif_remove_title),
                     getString(R.string.notif_remove_in_hours, removalReminderHours),
-                    buildRequestCode(cycleStartMillis, NOTIF_REMOVAL_REMINDER));
+                    buildRequestCode(cycleStartMillis, NOTIFY_REMOVAL_REMINDER));
         }
 
         Calendar removalExact = (Calendar) removalDate.clone();
         removalExact.set(Calendar.HOUR_OF_DAY, hour);
         removalExact.set(Calendar.MINUTE, minute);
-        String removalTimeText = String.format("%02d:%02d", hour, minute);
+        @SuppressLint("DefaultLocale") String removalTimeText = String.format("%02d:%02d", hour, minute);
         scheduleNotification(removalExact,
                 getString(R.string.notif_remove_title),
                 getString(R.string.notif_remove_now, removalTimeText),
-                buildRequestCode(cycleStartMillis, NOTIF_REMOVAL_EXACT));
+                buildRequestCode(cycleStartMillis, NOTIFY_REMOVAL_EXACT));
 
         // ---- Ring Insertion Notifications ----
         int insertionReminderHours = viewModel.getRepository().getInsertionReminderHours();
@@ -414,17 +433,17 @@ public class HomeFragment extends Fragment {
             scheduleNotification(reinsertionReminder,
                     getString(R.string.notif_insert_title),
                     getString(R.string.notif_insert_in_hours, insertionReminderHours),
-                    buildRequestCode(cycleStartMillis, NOTIF_INSERTION_REMINDER));
+                    buildRequestCode(cycleStartMillis, NOTIFY_INSERTION_REMINDER));
         }
 
         Calendar reinsertionExact = (Calendar) reinsertionDate.clone();
         reinsertionExact.set(Calendar.HOUR_OF_DAY, hour);
         reinsertionExact.set(Calendar.MINUTE, minute);
-        String reinsertionTimeText = String.format("%02d:%02d", hour, minute);
+        @SuppressLint("DefaultLocale") String reinsertionTimeText = String.format("%02d:%02d", hour, minute);
         scheduleNotification(reinsertionExact,
                 getString(R.string.notif_insert_title),
                 getString(R.string.notif_insert_now, reinsertionTimeText),
-                buildRequestCode(cycleStartMillis, NOTIF_INSERTION_EXACT));
+                buildRequestCode(cycleStartMillis, NOTIFY_INSERTION_EXACT));
     }
 
     // Schedule a single notification with a unique ID
@@ -456,12 +475,12 @@ public class HomeFragment extends Fragment {
     private void cancelNotificationsForCycle(long cycleStartMillis) {
         Intent intent = new Intent(requireContext(), NotificationReceiver.class);
         int[] types = new int[]{
-                NOTIF_TWO_WEEKS,
-                NOTIF_ONE_WEEK,
-                NOTIF_REMOVAL_REMINDER,
-                NOTIF_REMOVAL_EXACT,
-                NOTIF_INSERTION_REMINDER,
-                NOTIF_INSERTION_EXACT
+                NOTIFY_TWO_WEEKS,
+                NOTIFY_ONE_WEEK,
+                NOTIFY_REMOVAL_REMINDER,
+                NOTIFY_REMOVAL_EXACT,
+                NOTIFY_INSERTION_REMINDER,
+                NOTIFY_INSERTION_EXACT
         };
         for (int type : types) {
             int requestCode = buildRequestCode(cycleStartMillis, type);
@@ -536,11 +555,11 @@ public class HomeFragment extends Fragment {
         picker.setMinValue(0);
         picker.setMaxValue(21);
         int currentDelay = viewModel.getRepository()
-                .getCycleDelayDays(viewModel.getStartDate().getValue().getTimeInMillis());
+                .getCycleDelayDays(Objects.requireNonNull(viewModel.getStartDate().getValue()).getTimeInMillis());
         if (currentDelay <= 0) {
             picker.setValue(7);
         } else {
-            picker.setValue(Math.min(21, Math.max(0, currentDelay)));
+            picker.setValue(Math.min(21, currentDelay));
         }
 
         android.widget.LinearLayout layout = new android.widget.LinearLayout(requireContext());

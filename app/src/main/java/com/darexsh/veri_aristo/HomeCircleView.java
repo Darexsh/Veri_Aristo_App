@@ -1,17 +1,17 @@
 package com.darexsh.veri_aristo;
 
+import android.annotation.SuppressLint;
 import android.content.Context;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Matrix;
 import android.graphics.Paint;
-import android.graphics.Path;
-import android.graphics.PathEffect;
 import android.graphics.RectF;
 import android.graphics.SweepGradient;
 import android.util.AttributeSet;
 import android.view.View;
 
+import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
 public class HomeCircleView extends View {
@@ -36,7 +36,7 @@ public class HomeCircleView extends View {
 
     private int style = STYLE_CLASSIC;
     private int indicatorColor = SettingsRepository.DEFAULT_HOME_CIRCLE_COLOR;
-    private int trackColor = Color.parseColor("#E0E0E0");
+    private final int trackColor = Color.parseColor("#E0E0E0");
     private int max = 1;
     private int progress = 0;
     private float pulsePhase = 0f;
@@ -73,11 +73,6 @@ public class HomeCircleView extends View {
         invalidate();
     }
 
-    public void setTrackColor(int color) {
-        this.trackColor = color;
-        invalidate();
-    }
-
     public void setMax(int max) {
         this.max = Math.max(1, max);
         invalidate();
@@ -94,19 +89,19 @@ public class HomeCircleView extends View {
     }
 
     @Override
-    protected void onDraw(Canvas canvas) {
+    protected void onDraw(@NonNull Canvas canvas) {
         super.onDraw(canvas);
 
         float contentWidth = getWidth() - getPaddingLeft() - getPaddingRight();
         float contentHeight = getHeight() - getPaddingTop() - getPaddingBottom();
         float size = Math.min(contentWidth, contentHeight);
-        float baseThickness = dpToPx(16);
-        float thickness = baseThickness;
-        float glowInset = (style == STYLE_PULSE_LIGHT || style == STYLE_PULSE_MEDIUM || style == STYLE_PULSE_STRONG
-                || style == STYLE_GLOW || style == STYLE_GRADIENT_GLOW)
-                ? dpToPx(10)
-                : dpToPx(4);
-        float radius = (size / 2f) - baseThickness / 2f - glowInset;
+        float thickness = dpToPx(16);
+        if ((style == STYLE_PULSE_LIGHT || style == STYLE_PULSE_MEDIUM || style == STYLE_PULSE_STRONG
+                || style == STYLE_GLOW || style == STYLE_GRADIENT_GLOW)) {
+            dpToPx(10);
+        } else {
+            dpToPx(4);
+        }
 
         trackPaint.setColor(trackColor);
         progressPaint.setColor(indicatorColor);
@@ -127,7 +122,7 @@ public class HomeCircleView extends View {
         if (style == STYLE_SEGMENTED) {
             trackPaint.setStrokeWidth(thickness);
             progressPaint.setStrokeWidth(thickness);
-            drawSegmented(canvas, radius, thickness, progressFraction);
+            drawSegmented(canvas, thickness, progressFraction);
             return;
         }
 
@@ -139,7 +134,7 @@ public class HomeCircleView extends View {
                 trackPaint.setColor(withAlpha(indicatorColor, 70));
                 break;
             case STYLE_GRADIENT:
-                SweepGradient gradient = new SweepGradient(
+                @SuppressLint("DrawAllocation") SweepGradient gradient = new SweepGradient(
                         getWidth() / 2f,
                         getHeight() / 2f,
                         new int[]{withAlpha(indicatorColor, 60), indicatorColor, withAlpha(indicatorColor, 60)},
@@ -148,8 +143,6 @@ public class HomeCircleView extends View {
                 gradient.setLocalMatrix(gradientMatrix);
                 progressPaint.setShader(gradient);
                 break;
-            case STYLE_MARKER:
-                break;
             case STYLE_ARC:
                 trackPaint.setColor(Color.TRANSPARENT);
                 break;
@@ -157,7 +150,7 @@ public class HomeCircleView extends View {
                 progressPaint.setShadowLayer(dpToPx(10), 0f, 0f, withAlpha(indicatorColor, 220));
                 break;
             case STYLE_GRADIENT_GLOW:
-                SweepGradient gradientGlow = new SweepGradient(
+                @SuppressLint("DrawAllocation") SweepGradient gradientGlow = new SweepGradient(
                         getWidth() / 2f,
                         getHeight() / 2f,
                         new int[]{withAlpha(indicatorColor, 50), indicatorColor, withAlpha(indicatorColor, 50)},
@@ -210,7 +203,7 @@ public class HomeCircleView extends View {
             float markerRadius = arcRect.width() / 2f;
             float x = cx + (float) Math.cos(angle) * markerRadius;
             float y = cy + (float) Math.sin(angle) * markerRadius;
-            Paint ring = new Paint(Paint.ANTI_ALIAS_FLAG);
+            @SuppressLint("DrawAllocation") Paint ring = new Paint(Paint.ANTI_ALIAS_FLAG);
             ring.setStyle(Paint.Style.FILL);
             ring.setColor(Color.WHITE);
             canvas.drawCircle(x, y, outer, ring);
@@ -218,7 +211,7 @@ public class HomeCircleView extends View {
         }
     }
 
-    private void drawSegmented(Canvas canvas, float radius, float thickness, float fraction) {
+    private void drawSegmented(Canvas canvas, float thickness, float fraction) {
         int segments = Math.max(1, max);
         float gap = 360f / segments * 0.55f;
         float sweep = 360f / segments - gap;

@@ -127,9 +127,7 @@ public class SettingsRepository {
         if (sharedPreferences.contains(KEY_CALENDAR_FUTURE_UNIT)) {
             return sharedPreferences.getString(KEY_CALENDAR_FUTURE_UNIT, "years");
         }
-        if (sharedPreferences.contains(KEY_CALENDAR_FUTURE_YEARS)) {
-            return "years";
-        }
+        sharedPreferences.contains(KEY_CALENDAR_FUTURE_YEARS);
         return "years";
     }
 

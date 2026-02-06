@@ -17,6 +17,7 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
 import java.util.Locale;
+import androidx.core.content.ContextCompat;
 
 // CyclesFragment displays a history of cycle events (insertions/removals) in a card format
 public class CyclesFragment extends Fragment {
@@ -67,7 +68,7 @@ public class CyclesFragment extends Fragment {
         List<Cycle> cycleHistory = viewModel.getRepository().getCycleHistory();
         SimpleDateFormat dateFormat = new SimpleDateFormat("dd.MM.yyyy", Locale.getDefault());
 
-        // Filter out invalid cycles and dedupe by date+endDate+type
+        // Filter out invalid cycles and deduce by date+endDate+type
         List<Cycle> validCycles = new ArrayList<>();
         java.util.HashSet<String> seen = new java.util.HashSet<>();
         for (Cycle cycle : cycleHistory) {
@@ -98,7 +99,7 @@ public class CyclesFragment extends Fragment {
             cardView.setLayoutParams(cardParams);   // Set layout parameters for the card
             cardView.setCardElevation(0f);          // 4dp elevation
             cardView.setRadius(24);                 // 8dp corner radius
-            cardView.setCardBackgroundColor(requireContext().getResources().getColor(android.R.color.transparent)); // Transparent background
+            cardView.setCardBackgroundColor(ContextCompat.getColor(requireContext(), android.R.color.transparent)); // Transparent background
             cardView.setPadding(36, 36, 36, 36);    // 12dp padding
 
             // Create a LinearLayout to hold the card content

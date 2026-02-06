@@ -11,6 +11,8 @@ import android.util.AttributeSet;
 import android.util.TypedValue;
 import android.view.View;
 
+import androidx.annotation.NonNull;
+
 public class GuidedTourHighlightView extends View {
 
     private final Paint scrimPaint = new Paint();
@@ -72,7 +74,7 @@ public class GuidedTourHighlightView extends View {
     }
 
     @Override
-    protected void onDraw(Canvas canvas) {
+    protected void onDraw(@NonNull Canvas canvas) {
         super.onDraw(canvas);
         int save = canvas.saveLayer(0, 0, getWidth(), getHeight(), null);
         canvas.drawRect(0, 0, getWidth(), getHeight(), scrimPaint);

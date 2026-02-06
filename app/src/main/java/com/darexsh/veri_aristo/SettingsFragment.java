@@ -1,5 +1,6 @@
 package com.darexsh.veri_aristo;
 
+import android.annotation.SuppressLint;
 import android.app.AlertDialog;
 import android.app.DatePickerDialog;
 import android.app.TimePickerDialog;
@@ -11,7 +12,6 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.os.Build;
 import android.widget.DatePicker;
-import android.widget.EditText;
 import android.widget.TimePicker;
 import android.widget.NumberPicker;
 import android.widget.TextView;
@@ -65,19 +65,19 @@ import android.content.res.ColorStateList;
 import java.util.Calendar;
 import java.text.SimpleDateFormat;
 import java.util.Locale;
-import com.darexsh.veri_aristo.Constants;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.nio.charset.StandardCharsets;
+import java.util.Objects;
+
 import com.google.gson.Gson;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
-import com.prolificinteractive.materialcalendarview.BuildConfig;
 
 // SettingsFragment allows users to configure app settings such as cycle start date, time, length, and background image
 public class SettingsFragment extends Fragment {
@@ -87,7 +87,6 @@ public class SettingsFragment extends Fragment {
     private MaterialButton btnSetCycleLength;
     private MaterialButton btnSetBackground;
     private MaterialButton btnSetCalendarRange;
-    private MaterialButton btnResetApp;
     private MaterialButton btnBackupManage;
     private MaterialButton btnUpdateApp;
     private MaterialButton btnNotificationGroup;
@@ -99,21 +98,7 @@ public class SettingsFragment extends Fragment {
     private View debugSection;
     private TextView tvDebugTimeStatus;
     private SwitchMaterial switchDebugTime;
-    private MaterialButton btnDebugSetTime;
-    private MaterialButton btnDebugClearTime;
-    private MaterialButton btnDebugInfo;
-    private MaterialButton btnDebugRefresh;
-    private MaterialButton btnDebugJumpMidnight;
-    private MaterialButton btnDebugMinusDay;
-    private MaterialButton btnDebugPlusDay;
-    private MaterialButton btnDebugMinusHour;
-    private MaterialButton btnDebugPlusHour;
-    private MaterialButton btnDebugPresetRemovalBefore;
-    private MaterialButton btnDebugPresetRemovalAt;
-    private MaterialButton btnDebugPresetInsertionBefore;
-    private MaterialButton btnDebugPresetInsertionAt;
     private View advancedContent;
-    private View advancedHeader;
     private android.widget.ImageButton btnAdvancedToggle;
     private TextView btnSettingsInfo;
     private SharedViewModel viewModel;
@@ -195,9 +180,7 @@ public class SettingsFragment extends Fragment {
                     if (!isAdded()) {
                         return;
                     }
-                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O
-                            && requireContext().getPackageManager().canRequestPackageInstalls()
-                            && pendingApkFile != null) {
+                    if (requireContext().getPackageManager().canRequestPackageInstalls() && pendingApkFile != null) {
                         promptInstall(pendingApkFile);
                     }
                 }
@@ -218,12 +201,12 @@ public class SettingsFragment extends Fragment {
         btnSetCycleLength = view.findViewById(R.id.btn_set_cycle_length);
         btnSetBackground = view.findViewById(R.id.btn_set_background);
         btnSetCalendarRange = view.findViewById(R.id.btn_set_calendar_range);
-        btnResetApp = view.findViewById(R.id.btn_reset_app);
+        MaterialButton btnResetApp = view.findViewById(R.id.btn_reset_app);
         btnBackupManage = view.findViewById(R.id.btn_backup_manage);
         btnUpdateApp = view.findViewById(R.id.btn_update_app);
         btnWelcomeTour = view.findViewById(R.id.btn_welcome_tour);
         advancedContent = view.findViewById(R.id.advanced_content);
-        advancedHeader = view.findViewById(R.id.advanced_header);
+        View advancedHeader = view.findViewById(R.id.advanced_header);
         btnAdvancedToggle = view.findViewById(R.id.btn_advanced_toggle);
         btnNotificationGroup = view.findViewById(R.id.btn_notification_group);
         btnSetLanguage = view.findViewById(R.id.btn_set_language);
@@ -233,19 +216,19 @@ public class SettingsFragment extends Fragment {
         debugSection = view.findViewById(R.id.debug_section);
         tvDebugTimeStatus = view.findViewById(R.id.tv_debug_time_status);
         switchDebugTime = view.findViewById(R.id.switch_debug_time);
-        btnDebugSetTime = view.findViewById(R.id.btn_debug_set_time);
-        btnDebugClearTime = view.findViewById(R.id.btn_debug_clear_time);
-        btnDebugInfo = view.findViewById(R.id.btn_debug_info);
-        btnDebugRefresh = view.findViewById(R.id.btn_debug_refresh);
-        btnDebugJumpMidnight = view.findViewById(R.id.btn_debug_jump_midnight);
-        btnDebugMinusDay = view.findViewById(R.id.btn_debug_minus_day);
-        btnDebugPlusDay = view.findViewById(R.id.btn_debug_plus_day);
-        btnDebugMinusHour = view.findViewById(R.id.btn_debug_minus_hour);
-        btnDebugPlusHour = view.findViewById(R.id.btn_debug_plus_hour);
-        btnDebugPresetRemovalBefore = view.findViewById(R.id.btn_debug_preset_removal_before);
-        btnDebugPresetRemovalAt = view.findViewById(R.id.btn_debug_preset_removal_at);
-        btnDebugPresetInsertionBefore = view.findViewById(R.id.btn_debug_preset_insertion_before);
-        btnDebugPresetInsertionAt = view.findViewById(R.id.btn_debug_preset_insertion_at);
+        MaterialButton btnDebugSetTime = view.findViewById(R.id.btn_debug_set_time);
+        MaterialButton btnDebugClearTime = view.findViewById(R.id.btn_debug_clear_time);
+        MaterialButton btnDebugInfo = view.findViewById(R.id.btn_debug_info);
+        MaterialButton btnDebugRefresh = view.findViewById(R.id.btn_debug_refresh);
+        MaterialButton btnDebugJumpMidnight = view.findViewById(R.id.btn_debug_jump_midnight);
+        MaterialButton btnDebugMinusDay = view.findViewById(R.id.btn_debug_minus_day);
+        MaterialButton btnDebugPlusDay = view.findViewById(R.id.btn_debug_plus_day);
+        MaterialButton btnDebugMinusHour = view.findViewById(R.id.btn_debug_minus_hour);
+        MaterialButton btnDebugPlusHour = view.findViewById(R.id.btn_debug_plus_hour);
+        MaterialButton btnDebugPresetRemovalBefore = view.findViewById(R.id.btn_debug_preset_removal_before);
+        MaterialButton btnDebugPresetRemovalAt = view.findViewById(R.id.btn_debug_preset_removal_at);
+        MaterialButton btnDebugPresetInsertionBefore = view.findViewById(R.id.btn_debug_preset_insertion_before);
+        MaterialButton btnDebugPresetInsertionAt = view.findViewById(R.id.btn_debug_preset_insertion_at);
 
         SharedViewModelFactory factory = new SharedViewModelFactory(requireActivity().getApplication());
         viewModel = new ViewModelProvider(requireActivity(), factory).get(SharedViewModel.class);
@@ -298,7 +281,7 @@ public class SettingsFragment extends Fragment {
         viewModel.getButtonColor().observe(getViewLifecycleOwner(), color -> {
             if (color != null) {
                 applyPrimaryButtonColor(color);
-                updateButtonColorButtonText(color);
+                updateButtonColorButtonText();
                 btnSettingsInfo.setTextColor(Color.WHITE);
                 if (btnSettingsInfo.getBackground() != null) {
                     btnSettingsInfo.getBackground().setTint(color);
@@ -308,7 +291,7 @@ public class SettingsFragment extends Fragment {
 
         viewModel.getHomeCircleColor().observe(getViewLifecycleOwner(), color -> {
             if (color != null) {
-                updateCircleColorButtonText(color);
+                updateCircleColorButtonText();
                 circleStylePreviews = null;
             }
         });
@@ -389,7 +372,7 @@ public class SettingsFragment extends Fragment {
         bindDebugHint(btnDebugPresetRemovalAt, R.string.debug_hint_preset_removal_at);
         bindDebugHint(btnDebugPresetInsertionBefore, R.string.debug_hint_preset_insertion_before);
         bindDebugHint(btnDebugPresetInsertionAt, R.string.debug_hint_preset_insertion_at);
-        btnUpdateApp.setOnClickListener(v -> checkForUpdates());
+        btnUpdateApp.setOnClickListener(v -> showUpdateBackupConfirmDialog());
         advancedHeader.setOnClickListener(v -> toggleAdvancedSection());
         btnAdvancedToggle.setOnClickListener(v -> toggleAdvancedSection());
         btnSettingsInfo.setOnClickListener(v -> showAppInfoDialog());
@@ -657,7 +640,7 @@ public class SettingsFragment extends Fragment {
 
     private void updateLanguageButtonText() {
         LocaleListCompat locales = AppCompatDelegate.getApplicationLocales();
-        String language = locales.isEmpty() ? Locale.getDefault().getLanguage() : locales.get(0).getLanguage();
+        String language = locales.isEmpty() ? Locale.getDefault().getLanguage() : Objects.requireNonNull(locales.get(0)).getLanguage();
         String label = "de".equals(language) ? getString(R.string.language_german) : getString(R.string.language_english);
         btnSetLanguage.setText(getString(R.string.language_button, label));
     }
@@ -714,7 +697,7 @@ public class SettingsFragment extends Fragment {
             customButton.setTextColor(Color.WHITE);
             cancelButton.setTextColor(Color.WHITE);
         }
-        android.widget.ListAdapter adapter = new android.widget.ArrayAdapter<String>(
+        android.widget.ListAdapter adapter = new android.widget.ArrayAdapter<>(
                 requireContext(),
                 R.layout.dialog_button_color_item,
                 android.R.id.text1,
@@ -827,11 +810,11 @@ public class SettingsFragment extends Fragment {
                 .start();
     }
 
-    private void updateButtonColorButtonText(int color) {
+    private void updateButtonColorButtonText() {
         btnSetButtonColor.setText(R.string.settings_button_color_format);
     }
 
-    private void updateCircleColorButtonText(int color) {
+    private void updateCircleColorButtonText() {
         btnSetCircleColor.setText(R.string.settings_circle_color_format);
     }
 
@@ -857,7 +840,7 @@ public class SettingsFragment extends Fragment {
         if (selected >= circleStyleLabels.length) {
             selected = 0;
         }
-        android.widget.ListAdapter adapter = new android.widget.ArrayAdapter<String>(
+        android.widget.ListAdapter adapter = new android.widget.ArrayAdapter<>(
                 requireContext(),
                 R.layout.item_circle_style_preview,
                 android.R.id.text1,
@@ -1018,14 +1001,6 @@ public class SettingsFragment extends Fragment {
         return 0;
     }
 
-    private String getButtonColorLabel(int color) {
-        int index = getButtonColorIndex(color);
-        if (index >= 0 && index < buttonColorLabels.length) {
-            return buttonColorLabels[index];
-        }
-        return getString(R.string.settings_button_color_custom);
-    }
-
     private String unitLabel(String unit) {
         if ("years".equals(unit)) {
             return getString(R.string.settings_unit_year);
@@ -1066,6 +1041,16 @@ public class SettingsFragment extends Fragment {
         requireActivity().runOnUiThread(() ->
                 Toast.makeText(requireContext(), messageResId, Toast.LENGTH_SHORT).show()
         );
+    }
+
+    private void showUpdateBackupConfirmDialog() {
+        AlertDialog dialog = new AlertDialog.Builder(requireContext())
+                .setTitle(R.string.update_backup_title)
+                .setMessage(R.string.update_backup_message)
+                .setPositiveButton(R.string.update_backup_yes, (dlg, which) -> checkForUpdates())
+                .setNegativeButton(R.string.update_backup_no, (dlg, which) -> showBackupDialog())
+                .show();
+        applyDialogButtonColors(dialog);
     }
 
     private void showUpdateConfirmDialog(ReleaseInfo releaseInfo) {
@@ -1143,6 +1128,7 @@ public class SettingsFragment extends Fragment {
         });
     }
 
+    @SuppressLint("SetTextI18n")
     private void updateDownloadProgress(int percent) {
         if (!isAdded()) {
             return;
@@ -1275,14 +1261,12 @@ public class SettingsFragment extends Fragment {
             return;
         }
         pendingApkFile = apkFile;
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            if (!requireContext().getPackageManager().canRequestPackageInstalls()) {
-                showToast(R.string.update_install_prompt_toast);
-                Intent intent = new Intent(Settings.ACTION_MANAGE_UNKNOWN_APP_SOURCES,
-                        Uri.parse("package:" + requireContext().getPackageName()));
-                manageUnknownSourcesLauncher.launch(intent);
-                return;
-            }
+        if (!requireContext().getPackageManager().canRequestPackageInstalls()) {
+            showToast(R.string.update_install_prompt_toast);
+            Intent intent = new Intent(Settings.ACTION_MANAGE_UNKNOWN_APP_SOURCES,
+                    Uri.parse("package:" + requireContext().getPackageName()));
+            manageUnknownSourcesLauncher.launch(intent);
+            return;
         }
         Uri apkUri = FileProvider.getUriForFile(requireContext(),
                 requireContext().getPackageName() + ".fileprovider", apkFile);
@@ -1605,7 +1589,10 @@ public class SettingsFragment extends Fragment {
             while ((nRead = inputStream.read(bufferData, 0, bufferData.length)) != -1) {
                 buffer.write(bufferData, 0, nRead);
             }
-            String json = new String(buffer.toByteArray(), StandardCharsets.UTF_8);
+            String json = null;
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                json = buffer.toString(StandardCharsets.UTF_8);
+            }
             BackupData backupData = new Gson().fromJson(json, BackupData.class);
             if (backupData == null) {
                 Toast.makeText(requireContext(), R.string.backup_invalid_toast, Toast.LENGTH_SHORT).show();
@@ -1787,6 +1774,7 @@ public class SettingsFragment extends Fragment {
         datePicker.show();
     }
 
+    @SuppressLint("QueryPermissionsNeeded")
     private void openExactAlarmSettings() {
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.S) {
             Toast.makeText(requireContext(), getString(R.string.exact_alarm_not_supported), Toast.LENGTH_SHORT).show();
@@ -1798,6 +1786,7 @@ public class SettingsFragment extends Fragment {
         }
     }
 
+    @SuppressLint("QueryPermissionsNeeded")
     private void openBatteryOptimizationSettings() {
         Intent intent = new Intent(android.provider.Settings.ACTION_IGNORE_BATTERY_OPTIMIZATION_SETTINGS);
         if (intent.resolveActivity(requireContext().getPackageManager()) != null) {
@@ -1880,9 +1869,6 @@ public class SettingsFragment extends Fragment {
     }
 
     private String getBatteryOptStatusText() {
-        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.M) {
-            return getString(R.string.battery_opt_status_not_required);
-        }
         android.os.PowerManager powerManager =
                 (android.os.PowerManager) requireContext().getSystemService(Context.POWER_SERVICE);
         if (powerManager == null) {
@@ -1918,14 +1904,14 @@ public class SettingsFragment extends Fragment {
         base.set(Calendar.MINUTE, 0);
         base.set(Calendar.SECOND, 0);
         base.set(Calendar.MILLISECOND, 0);
-        applyDebugTime(base, true);
+        applyDebugTime(base);
         Toast.makeText(requireContext(), getString(R.string.debug_jump_midnight), Toast.LENGTH_SHORT).show();
     }
 
     private void shiftDebugTime(int field, int amount) {
         Calendar base = DebugTimeProvider.now(viewModel.getRepository());
         base.add(field, amount);
-        applyDebugTime(base, true);
+        applyDebugTime(base);
         int message = amount >= 0 ? R.string.debug_time_shift_forward : R.string.debug_time_shift_back;
         Toast.makeText(requireContext(), getString(message), Toast.LENGTH_SHORT).show();
     }
@@ -1985,14 +1971,14 @@ public class SettingsFragment extends Fragment {
                 return;
         }
 
-        applyDebugTime(selected, true);
+        applyDebugTime(selected);
         Toast.makeText(requireContext(), getString(R.string.debug_preset_applied), Toast.LENGTH_SHORT).show();
     }
 
-    private void applyDebugTime(Calendar calendar, boolean enable) {
+    private void applyDebugTime(Calendar calendar) {
         viewModel.getRepository().setDebugTimeMillis(calendar.getTimeInMillis());
-        viewModel.getRepository().setDebugTimeEnabled(enable);
-        switchDebugTime.setChecked(enable);
+        viewModel.getRepository().setDebugTimeEnabled(true);
+        switchDebugTime.setChecked(true);
         updateDebugTimeStatus();
         WidgetUpdater.updateAllWidgets(requireContext());
         Calendar current = viewModel.getStartDate().getValue();

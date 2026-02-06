@@ -1,5 +1,6 @@
 package com.darexsh.veri_aristo;
 
+import android.annotation.SuppressLint;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
@@ -9,6 +10,7 @@ import android.util.AttributeSet;
 import android.view.MotionEvent;
 import android.view.View;
 
+import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
 public class HsvColorWheelView extends View {
@@ -69,8 +71,8 @@ public class HsvColorWheelView extends View {
     }
 
     @Override
-    protected void onSizeChanged(int w, int h, int oldw, int oldh) {
-        super.onSizeChanged(w, h, oldw, oldh);
+    protected void onSizeChanged(int w, int h, int old_width, int old_height) {
+        super.onSizeChanged(w, h, old_width, old_height);
         int size = Math.min(w, h);
         centerX = w / 2f;
         centerY = h / 2f;
@@ -100,7 +102,7 @@ public class HsvColorWheelView extends View {
     }
 
     @Override
-    protected void onDraw(Canvas canvas) {
+    protected void onDraw(@NonNull Canvas canvas) {
         super.onDraw(canvas);
         if (bitmap != null) {
             canvas.drawBitmap(bitmap, 0f, 0f, bitmapPaint);
@@ -114,6 +116,7 @@ public class HsvColorWheelView extends View {
         canvas.drawCircle(x, y, 10f, selectorStrokePaint);
     }
 
+    @SuppressLint("ClickableViewAccessibility")
     @Override
     public boolean onTouchEvent(MotionEvent event) {
         if (event.getAction() != MotionEvent.ACTION_DOWN

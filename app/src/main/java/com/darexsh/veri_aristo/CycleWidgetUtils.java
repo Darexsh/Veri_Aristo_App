@@ -180,9 +180,6 @@ public final class CycleWidgetUtils {
                 canvas.drawArc(cx - radius, cy - radius, cx + radius, cy + radius,
                         segStart, segSweep, false, progressPaint);
             }
-            if (style == HomeCircleView.STYLE_MARKER) {
-                drawMarker(canvas, cx, cy, radius, 360f * clamped, ringColor, strokePx);
-            }
             return bitmap;
         }
 
