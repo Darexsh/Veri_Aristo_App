@@ -111,7 +111,8 @@ public final class CycleWidgetUtils {
         return Math.max(days, 0);
     }
 
-    public static Bitmap buildRingBitmap(Context context, float progressFraction, int ringColor, int style) {
+    public static Bitmap buildRingBitmap(Context context, float progressFraction, int ringColor, int style,
+                                         int maxSegments) {
         int sizePx = context.getResources().getDimensionPixelSize(R.dimen.widget_ring_size);
         int strokePx = context.getResources().getDimensionPixelSize(R.dimen.widget_ring_stroke);
         float clamped = Math.max(0f, Math.min(1f, progressFraction));
@@ -165,7 +166,7 @@ public final class CycleWidgetUtils {
         }
 
         if (style == HomeCircleView.STYLE_SEGMENTED) {
-            int segments = 28;
+            int segments = Math.max(1, maxSegments);
             float gap = 360f / segments * 0.55f;
             float segSweep = 360f / segments - gap;
             float start = -90f;
@@ -197,6 +198,64 @@ public final class CycleWidgetUtils {
         }
 
         return bitmap;
+    }
+
+    public static long calculateNextWidgetUpdateMillis(Context context) {
+        SettingsRepository repository = new SettingsRepository(context);
+        Calendar baseStart = repository.getStartDate();
+        Calendar now = DebugTimeProvider.now(context);
+        long nowMillis = now.getTimeInMillis();
+        int cycleLength = repository.getCycleLength();
+
+        Calendar currentStart = (Calendar) baseStart.clone();
+        currentStart.set(Calendar.SECOND, 0);
+        currentStart.set(Calendar.MILLISECOND, 0);
+
+        int delayDays = repository.getCycleDelayDays(currentStart.getTimeInMillis());
+        Calendar removalDate = (Calendar) currentStart.clone();
+        removalDate.add(Calendar.DAY_OF_MONTH, cycleLength + delayDays);
+        Calendar reinsertionDate = (Calendar) removalDate.clone();
+        reinsertionDate.add(Calendar.DAY_OF_MONTH, Constants.RING_FREE_DAYS);
+
+        Calendar nowDay = startOfDay(now);
+        Calendar reinsertionDay = startOfDay(reinsertionDate);
+
+        int guard = 0;
+        while (nowDay.after(reinsertionDay) && guard < 200) {
+            currentStart.add(Calendar.DAY_OF_MONTH, cycleLength + Constants.RING_FREE_DAYS + delayDays);
+            delayDays = repository.getCycleDelayDays(currentStart.getTimeInMillis());
+            removalDate = (Calendar) currentStart.clone();
+            removalDate.add(Calendar.DAY_OF_MONTH, cycleLength + delayDays);
+            reinsertionDate = (Calendar) removalDate.clone();
+            reinsertionDate.add(Calendar.DAY_OF_MONTH, Constants.RING_FREE_DAYS);
+            reinsertionDay = startOfDay(reinsertionDate);
+            guard++;
+        }
+
+        Calendar nextEvent = null;
+        if (now.before(removalDate)) {
+            nextEvent = removalDate;
+        } else if (now.before(reinsertionDate)) {
+            nextEvent = reinsertionDate;
+        } else {
+            currentStart.add(Calendar.DAY_OF_MONTH, cycleLength + Constants.RING_FREE_DAYS + delayDays);
+            delayDays = repository.getCycleDelayDays(currentStart.getTimeInMillis());
+            removalDate = (Calendar) currentStart.clone();
+            removalDate.add(Calendar.DAY_OF_MONTH, cycleLength + delayDays);
+            nextEvent = removalDate;
+        }
+
+        Calendar nextMidnight = startOfDay(now);
+        nextMidnight.add(Calendar.DAY_OF_MONTH, 1);
+
+        long nextEventMillis = nextEvent != null ? nextEvent.getTimeInMillis() : Long.MAX_VALUE;
+        long nextMidnightMillis = nextMidnight.getTimeInMillis();
+        long nextAt = Math.min(nextEventMillis, nextMidnightMillis);
+
+        if (nextAt <= nowMillis) {
+            return nowMillis + 60_000L;
+        }
+        return nextAt;
     }
 
     private static void drawMarker(Canvas canvas, float cx, float cy, float radius, float sweep,

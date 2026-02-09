@@ -12,6 +12,7 @@
     <uses-permission android:name="android.permission.REQUEST_INSTALL_PACKAGES" />
     <uses-permission android:name="android.permission.SCHEDULE_EXACT_ALARM" />
     <uses-permission android:name="android.permission.USE_EXACT_ALARM" />
+    <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
 
     <application
         android:allowBackup="false"
@@ -33,6 +34,18 @@
             </intent-filter>
         </activity>
         <receiver android:name=".NotificationReceiver" />
+        <receiver
+            android:name=".WidgetUpdateReceiver"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="com.darexsh.veri_aristo.ACTION_WIDGET_UPDATE" />
+                <action android:name="android.intent.action.BOOT_COMPLETED" />
+                <action android:name="android.intent.action.DATE_CHANGED" />
+                <action android:name="android.intent.action.TIME_SET" />
+                <action android:name="android.intent.action.TIMEZONE_CHANGED" />
+                <action android:name="android.intent.action.LOCALE_CHANGED" />
+            </intent-filter>
+        </receiver>
         <receiver
             android:name=".CycleWidgetSmallProvider"
             android:exported="false">

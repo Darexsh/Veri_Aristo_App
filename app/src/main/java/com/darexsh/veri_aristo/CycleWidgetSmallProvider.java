@@ -14,12 +14,24 @@ public class CycleWidgetSmallProvider extends AppWidgetProvider {
         for (int appWidgetId : appWidgetIds) {
             updateAppWidget(context, appWidgetManager, appWidgetId);
         }
+        WidgetUpdater.scheduleNextUpdate(context);
     }
 
     @Override
     public void onAppWidgetOptionsChanged(Context context, AppWidgetManager appWidgetManager,
                                           int appWidgetId, android.os.Bundle newOptions) {
         updateAppWidget(context, appWidgetManager, appWidgetId);
+        WidgetUpdater.scheduleNextUpdate(context);
+    }
+
+    @Override
+    public void onEnabled(Context context) {
+        WidgetUpdater.scheduleNextUpdate(context);
+    }
+
+    @Override
+    public void onDisabled(Context context) {
+        WidgetUpdater.cancelScheduledUpdate(context);
     }
 
     public static void updateAppWidget(Context context, AppWidgetManager appWidgetManager, int appWidgetId) {

@@ -14,12 +14,24 @@ public class CycleWidgetLargeProvider extends AppWidgetProvider {
         for (int appWidgetId : appWidgetIds) {
             updateAppWidget(context, appWidgetManager, appWidgetId);
         }
+        WidgetUpdater.scheduleNextUpdate(context);
     }
 
     @Override
     public void onAppWidgetOptionsChanged(Context context, AppWidgetManager appWidgetManager,
                                           int appWidgetId, android.os.Bundle newOptions) {
         updateAppWidget(context, appWidgetManager, appWidgetId);
+        WidgetUpdater.scheduleNextUpdate(context);
+    }
+
+    @Override
+    public void onEnabled(Context context) {
+        WidgetUpdater.scheduleNextUpdate(context);
+    }
+
+    @Override
+    public void onDisabled(Context context) {
+        WidgetUpdater.cancelScheduledUpdate(context);
     }
 
     public static void updateAppWidget(Context context, AppWidgetManager appWidgetManager, int appWidgetId) {
@@ -40,7 +52,7 @@ public class CycleWidgetLargeProvider extends AppWidgetProvider {
         int ringColor = repository.getHomeCircleColor();
         int ringStyle = repository.getHomeCircleStyle();
         views.setImageViewBitmap(R.id.img_widget_ring,
-                CycleWidgetUtils.buildRingBitmap(context, fraction, ringColor, ringStyle));
+                CycleWidgetUtils.buildRingBitmap(context, fraction, ringColor, ringStyle, state.maxProgress));
         views.setOnClickPendingIntent(R.id.widget_root, buildLaunchIntent(context, appWidgetId));
 
         appWidgetManager.updateAppWidget(appWidgetId, views);
